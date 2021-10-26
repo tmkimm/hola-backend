@@ -19,6 +19,7 @@
     "ignorePatterns": ["node_modules/"],
     "rules": {
       "prettier/prettier": "error",
+      "no-underscore-dangle": "off",
       "import/extensions": [
         "error",
         "ignorePackages",
