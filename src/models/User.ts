@@ -1,33 +1,35 @@
-import { Model, Schema, model, ObjectId } from 'mongoose';
+import { Model, Schema, model, Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import config from '../config/index';
 
-interface IUser {
+export interface IUser {
+  _id: Types.ObjectId;
   idToken: string;
   tokenType: string;
-  email: string;
+  email: string | undefined;
   name: string;
   nickName: string;
   password: string;
   image: string;
   likeLanguages: string[];
-  likeStudies: ObjectId[];
-  readList: ObjectId[];
+  likeStudies: Types.ObjectId[];
+  readList: Types.ObjectId[];
 }
 
-interface IUserDocument extends IUser, Document {
+export interface IUserDocument extends IUser, Document {
   generateAccessToken: () => Promise<string>;
   generateRefreshToken: () => Promise<string>;
 }
 
-interface IUserModel extends Model<IUserDocument> {
-  deleteUser: (id: ObjectId) => void;
-  modifyUser: (id: ObjectId, user: IUserDocument) => Promise<IUserDocument>;
+export interface IUserModel extends Model<IUserDocument> {
+  deleteUser: (id: Types.ObjectId) => void;
+  modifyUser: (id: Types.ObjectId, user: IUserDocument) => Promise<IUserDocument>;
   findByIdToken: (idToken: string) => Promise<IUserDocument>;
   findByEmail: (email: string) => Promise<IUserDocument>;
-  addLikeStudy: (studyId: ObjectId, userId: ObjectId) => Promise<IUserDocument>;
-  deleteLikeStudy: (studyId: ObjectId, userId: ObjectId) => Promise<IUserDocument>;
-  addReadList: (studyId: ObjectId, userId: ObjectId) => void;
+  findByNickName: (name: string) => Promise<IUserDocument>;
+  addLikeStudy: (studyId: Types.ObjectId, userId: Types.ObjectId) => Promise<IUserDocument>;
+  deleteLikeStudy: (studyId: Types.ObjectId, userId: Types.ObjectId) => Promise<IUserDocument>;
+  addReadList: (studyId: Types.ObjectId, userId: Types.ObjectId) => void;
 }
 
 const userSchema = new Schema<IUserDocument>(
@@ -52,8 +54,8 @@ const userSchema = new Schema<IUserDocument>(
     },
     image: String,
     likeLanguages: [String],
-    likeStudies: [{ type: Schema.Types.ObjectId, ref: 'Study' }],
-    readList: [{ type: Schema.Types.ObjectId, ref: 'Study' }],
+    likeStudies: [{ type: Types.ObjectId, ref: 'Study' }],
+    readList: [{ type: Types.ObjectId, ref: 'Study' }],
   },
   {
     timestamps: true,
@@ -160,4 +162,4 @@ userSchema.statics.addReadList = async function (studyId, userId) {
 };
 
 const User = model<IUserDocument, IUserModel>('User', userSchema);
-export default User;
+export { User };

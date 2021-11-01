@@ -1,27 +1,30 @@
-import { Model, Schema, model, ObjectId } from 'mongoose';
+import { Model, Schema, model, Types, Document } from 'mongoose';
 import CustomError from '../CustomError';
 
 // 대댓글
-interface IReply {
+export interface IReply {
   contnet: string;
-  author: ObjectId;
+  author: Types.ObjectId;
 }
 
-interface IReplyDocument extends IReply, Document {}
+export interface IReplyDocument extends IReply, Document {}
+
+export type IReplyModel = Model<IReplyDocument>;
 
 // 댓글
 interface IComment {
-  contnet: string;
-  author: ObjectId;
+  content: string;
+  author: Types.ObjectId;
   replies: IReplyDocument[];
 }
 
-interface ICommentDocument extends IComment, Document {}
+export interface ICommentDocument extends IComment, Document {}
+
+export type ICommentModel = Model<ICommentDocument>;
 
 // 글
-interface IStudy {
-  _id: ObjectId;
-  author: ObjectId; // 글 등록자 정보
+export interface IStudy {
+  author: Types.ObjectId; // 글 등록자 정보
   topic: string; // 글 주제(사용 X)
   language: string[]; // 사용 언어 리스트
   location: string; // 스터디 장소(사용 X)
@@ -31,11 +34,13 @@ interface IStudy {
   isClosed: boolean; // 글 마감 여부
   views: number; // 글 조회수
   comments: ICommentDocument[]; // 글 댓글 정보
-  likes: ObjectId[]; // 관심 등록한 사용자 리스트
+  likes: Types.ObjectId[]; // 관심 등록한 사용자 리스트
   totalLikes: number; // 관심 등록 수
 }
 
-interface IStudyModel extends Model<IStudy> {
+export interface IStudyDocument extends IStudy, Document {}
+
+export interface IStudyModel extends Model<IStudyDocument> {
   findStudy: (
     offset: number | null,
     limit: number | null,
@@ -44,13 +49,46 @@ interface IStudyModel extends Model<IStudy> {
     period: number | null,
     isClosed: string | null,
   ) => Promise<IStudy>;
+  findStudyRecommend: (
+    sort: string | null,
+    language: string | null,
+    period: number | null,
+    isClosed: string | null,
+    limit: number | null,
+  ) => Promise<IStudy>;
+  registerComment: (
+    studyId: Types.ObjectId,
+    content: string,
+    author: Types.ObjectId,
+  ) => Promise<{ study: IStudy; commentId: Types.ObjectId }>;
+  registerReply: (
+    studyId: Types.ObjectId,
+    commentId: Types.ObjectId,
+    content: string,
+    author: Types.ObjectId,
+  ) => Promise<{ study: IStudy; replyId: Types.ObjectId }>;
+  findComments: (id: Types.ObjectId) => Promise<IStudy>;
+  deleteStudy: (id: Types.ObjectId) => void;
+  modifyStudy: (id: Types.ObjectId, study: IStudy) => Promise<IStudy>;
+  modifyComment: (comment: IComment) => Promise<IStudy>;
+  modifyReply: (comment: IReply) => Promise<IStudy>;
+  deleteComment: (id: Types.ObjectId) => Promise<IStudy>;
+  deleteReply: (id: Types.ObjectId) => Promise<IStudy>;
+  addLike: (studyId: Types.ObjectId, userId: Types.ObjectId) => Promise<{ study: IStudy; isLikeExist: boolean }>;
+  deleteLike: (studyId: Types.ObjectId, userId: Types.ObjectId) => Promise<{ study: IStudy; isLikeExist: boolean }>;
+  increaseView: (studyId: Types.ObjectId) => void;
+  findAuthorByCommentId: (commentId: Types.ObjectId) => Promise<Types.ObjectId | null>;
+  findAuthorByReplyId: (replyId: Types.ObjectId) => Promise<Types.ObjectId | null>;
+  checkStudyAuthorization: (studyId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
+  checkCommentAuthorization: (commentId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
+  checkReplyAuthorization: (replyId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
 }
 
 // 대댓글 스키마
 const replySchema = new Schema<IReplyDocument>(
   {
     content: String, // 댓글 내용
-    author: { type: Schema.Types.ObjectId, ref: 'User' }, // 댓글 등록자 정보
+    author: { type: Types.ObjectId, ref: 'User' }, // 댓글 등록자 정보
   },
   {
     versionKey: false,
@@ -62,7 +100,7 @@ const replySchema = new Schema<IReplyDocument>(
 const commentSchema = new Schema<ICommentDocument>(
   {
     content: String, // 댓글 내용
-    author: { type: Schema.Types.ObjectId, ref: 'User' }, // 댓글 등록자 정보
+    author: { type: Types.ObjectId, ref: 'User' }, // 댓글 등록자 정보
     replies: [replySchema],
   },
   {
@@ -71,9 +109,9 @@ const commentSchema = new Schema<ICommentDocument>(
   },
 );
 
-const studySchema = new Schema<IStudy, IStudyModel>(
+const studySchema = new Schema<IStudyDocument>(
   {
-    author: { type: Schema.Types.ObjectId, ref: 'User' }, // 글 등록자 정보
+    author: { type: Types.ObjectId, ref: 'User' }, // 글 등록자 정보
     topic: String, // 글 주제(사용 X)
     language: [String], // 사용 언어 리스트
     location: String, // 스터디 장소(사용 X)
@@ -83,7 +121,7 @@ const studySchema = new Schema<IStudy, IStudyModel>(
     isClosed: { type: Boolean, default: false }, // 글 마감 여부
     views: { type: Number, default: 0 }, // 글 조회수
     comments: [commentSchema], // 글 댓글 정보
-    likes: [{ type: Schema.Types.ObjectId, ref: 'User' }], // 관심 등록한 사용자 리스트
+    likes: [{ type: Types.ObjectId, ref: 'User' }], // 관심 등록한 사용자 리스트
     totalLikes: { type: Number, default: 0 }, // 관심 등록 수
   },
   {
@@ -178,7 +216,7 @@ studySchema.statics.findStudyRecommend = async function (sort, language, studyId
 
   // 부족한 개수만큼 추가 조회
   if (studies.length < limit - 1) {
-    const notInStudyIdArr = studies.map((study: IStudy) => {
+    const notInStudyIdArr = studies.map((study: IStudyDocument) => {
       return study._id;
     });
     notInStudyIdArr.push(studyId);
@@ -198,7 +236,7 @@ studySchema.statics.findStudyRecommend = async function (sort, language, studyId
 };
 
 studySchema.statics.registerComment = async function (studyId, content, author) {
-  const commentId = Schema.Types.ObjectId;
+  const commentId = Types.ObjectId;
   const study = await this.findOneAndUpdate(
     { _id: studyId },
     { $push: { comments: { _id: commentId, content, author } } },
@@ -208,7 +246,7 @@ studySchema.statics.registerComment = async function (studyId, content, author) 
 };
 
 studySchema.statics.registerReply = async function (studyId, commentId, content, author) {
-  const replyId = Schema.Types.ObjectId;
+  const replyId = Types.ObjectId;
   const study = await this.findOneAndUpdate(
     { _id: studyId, comments: { $elemMatch: { _id: commentId } } },
     { $push: { 'comments.$.replies': { _id: replyId, content, author } } },
@@ -389,6 +427,6 @@ studySchema.statics.checkReplyAuthorization = async function (replyId, tokenUser
   }
 };
 
-const Study = model<IStudy, IStudyModel>('Study', studySchema);
+const Study = model<IStudyDocument, IStudyModel>('Study', studySchema);
 
-export default Study;
+export { Study };

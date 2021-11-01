@@ -1,9 +1,13 @@
-import { Model, Schema, model } from 'mongoose';
+import { Model, Schema, model, Types, Document } from 'mongoose';
 
 interface IFeedback {
   rating: number;
   content: string;
 }
+
+export interface IFeedbackDocument extends IFeedback, Document {}
+
+export type IFeedbackModel = Model<IFeedbackDocument>;
 
 const feedbackSchema = new Schema<IFeedback>(
   {
@@ -15,5 +19,5 @@ const feedbackSchema = new Schema<IFeedback>(
   },
 );
 
-const Feedback = model<IFeedback>('Feedback', feedbackSchema);
-export default Feedback;
+const Feedback = model<IFeedbackDocument, IFeedbackModel>('Feedback', feedbackSchema);
+export { Feedback };

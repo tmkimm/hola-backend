@@ -20,6 +20,8 @@
     "rules": {
       "prettier/prettier": "error",
       "no-underscore-dangle": "off",
+      "no-useless-constructor" : "off",
+      "import/prefer-default-export": "off", 
       "import/extensions": [
         "error",
         "ignorePackages",

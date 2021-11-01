@@ -1,40 +1,40 @@
-import { Model, Schema, model, ObjectId } from 'mongoose';
+import { Model, Schema, model, Types } from 'mongoose';
 
 interface INotification {
-  targetUserId: ObjectId;
-  generateUserId: ObjectId;
-  generateObjectId: ObjectId;
-  studyId: ObjectId;
+  targetUserId: Types.ObjectId;
+  generateUserId: Types.ObjectId;
+  generateObjectId: Types.ObjectId;
+  studyId: Types.ObjectId;
   readAt?: Date;
   isRead: boolean;
   noticeCode: string;
   noticeType: string;
 }
 
-interface INotificationDocument extends INotification, Document {}
+export interface INotificationDocument extends INotification, Document {}
 
-interface INotificationModel extends Model<INotificationDocument> {
-  findMyNotifications: (targetUserId: ObjectId) => Promise<INotificationDocument>;
-  findUnReadCount: (targetUserId: ObjectId) => Promise<number>;
+export interface INotificationModel extends Model<INotificationDocument> {
+  findMyNotifications: (targetUserId: Types.ObjectId) => Promise<INotificationDocument>;
+  findUnReadCount: (targetUserId: Types.ObjectId) => Promise<number>;
   registerNotification: (
-    studyId: ObjectId,
-    targetUserId: ObjectId,
-    generateUserId: ObjectId,
+    studyId: Types.ObjectId,
+    targetUserId: Types.ObjectId,
+    generateUserId: Types.ObjectId,
     noticeType: string,
-    generateObjectId: ObjectId,
+    generateObjectId: Types.ObjectId,
   ) => void;
-  deleteNotification: (generateObjectId: ObjectId) => void;
-  deleteNotificationByStudy: (studyId: ObjectId) => void;
-  deleteNotificationByUser: (userId: ObjectId) => void;
-  updateReadAt: (studyId: ObjectId, userId: ObjectId) => void;
+  deleteNotification: (generateObjectId: Types.ObjectId) => void;
+  deleteNotificationByStudy: (studyId: Types.ObjectId) => void;
+  deleteNotificationByUser: (userId: Types.ObjectId) => void;
+  updateReadAt: (studyId: Types.ObjectId, userId: Types.ObjectId) => void;
 }
 
 const notificationSchema = new Schema<INotification>(
   {
-    targetUserId: { type: Schema.Types.ObjectId, ref: 'User' }, // 대상자 정보
-    generateUserId: { type: Schema.Types.ObjectId, ref: 'User' }, // 사용자 정보
-    generateObjectId: { type: Schema.Types.ObjectId }, // 알림 대상 Object Id
-    studyId: { type: Schema.Types.ObjectId, ref: 'Study' }, // 스터디 ID
+    targetUserId: { type: Types.ObjectId, ref: 'User' }, // 대상자 정보
+    generateUserId: { type: Types.ObjectId, ref: 'User' }, // 사용자 정보
+    generateObjectId: { type: Types.ObjectId }, // 알림 대상 Object Id
+    studyId: { type: Types.ObjectId, ref: 'Study' }, // 스터디 ID
     readAt: Date, // 읽은 시간
     isRead: { type: Boolean, default: false },
     noticeCode: String,
@@ -132,4 +132,4 @@ notificationSchema.statics.updateReadAt = async function (studyId, userId) {
 
 const Notification = model<INotificationDocument, INotificationModel>('Notification', notificationSchema);
 
-export default Notification;
+export { Notification };
