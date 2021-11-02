@@ -1,10 +1,10 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
+import { IUser, User as UserModel } from '../../models/User';
 import { UserService, NotificationService } from '../../services/index';
 import { nickNameDuplicationCheck, isAccessTokenValid, isUserIdValid } from '../middlewares/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Study as StudyModel } from '../../models/Study';
-import { User as UserModel } from '../../models/User';
 import { Notification as NotificationModel } from '../../models/Notification';
 
 const route = Router();
@@ -20,7 +20,7 @@ export default (app: Router) => {
       const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
       const signedUrlPut = await UserServiceInstance.getPreSignUrl(fileName);
 
-      res.status(200).json({
+      return res.status(200).json({
         preSignUrl: signedUrlPut,
       });
     }),
@@ -35,14 +35,14 @@ export default (app: Router) => {
       if (
         !(typeof nickName !== 'undefined' && typeof nickName.valueOf() === 'string' && nickName && nickName.length > 0)
       ) {
-        res.status(400).json({
+        return res.status(400).json({
           message: `parameter is incorrect`,
         });
       }
 
       const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
       const user = await UserServiceInstance.findByNickName(nickName);
-      res.status(200).json(user);
+      return res.status(200).json(user);
     }),
   );
 
@@ -56,7 +56,7 @@ export default (app: Router) => {
       const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
       const user = await UserServiceInstance.findById(Types.ObjectId(id));
 
-      res.status(200).json(user);
+      return res.status(200).json(user);
     }),
   );
 
@@ -68,12 +68,13 @@ export default (app: Router) => {
     nickNameDuplicationCheck,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
-      const tokenUserId = req.user._id;
+      const { _id: tokenUserId } = req.user as IUser;
+
       const userDTO = req.body;
       const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
       const { userRecord, accessToken, refreshToken } = await UserServiceInstance.modifyUser(
         Types.ObjectId(id),
-        Types.ObjectId(tokenUserId),
+        tokenUserId,
         userDTO,
       );
 
@@ -84,7 +85,7 @@ export default (app: Router) => {
         maxAge: 1000 * 60 * 60 * 24 * 14, // 2 Week
       });
 
-      res.status(200).json({
+      return res.status(200).json({
         _id: userRecord._id,
         nickName: userRecord.nickName,
         image: userRecord.image,
@@ -99,7 +100,7 @@ export default (app: Router) => {
     '/:id/exists',
     nickNameDuplicationCheck,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      res.status(200).json({
+      return res.status(200).json({
         isExists: false,
       });
     }),
@@ -112,12 +113,12 @@ export default (app: Router) => {
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
-      const tokenUserId = req.user._id;
+      const { _id: tokenUserId } = req.user as IUser;
 
       const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
-      await UserServiceInstance.deleteUser(Types.ObjectId(id), Types.ObjectId(tokenUserId));
-      res.clearCookie('R_AUTH');
-      res.status(204).json();
+      await UserServiceInstance.deleteUser(Types.ObjectId(id), tokenUserId);
+      return res.clearCookie('R_AUTH');
+      return res.status(204).json();
     }),
   );
 
@@ -130,7 +131,7 @@ export default (app: Router) => {
       const { id } = req.params;
       const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
       const user = await UserServiceInstance.findUserLikes(Types.ObjectId(id));
-      res.status(200).json(user);
+      return res.status(200).json(user);
     },
   );
 
@@ -144,7 +145,7 @@ export default (app: Router) => {
       const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
       const user = await UserServiceInstance.findReadList(Types.ObjectId(id));
 
-      res.status(200).json(user);
+      return res.status(200).json(user);
     }),
   );
 
@@ -158,7 +159,7 @@ export default (app: Router) => {
       const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
       const user = await UserServiceInstance.findMyStudies(Types.ObjectId(id));
 
-      res.status(200).json(user);
+      return res.status(200).json(user);
     }),
   );
 
@@ -169,7 +170,7 @@ export default (app: Router) => {
       const { id } = req.params;
       const NotificationServcieInstance = new NotificationService(NotificationModel);
       const notice = await NotificationServcieInstance.findMyNotice(Types.ObjectId(id));
-      res.status(200).json(notice);
+      return res.status(200).json(notice);
     }),
   );
 };

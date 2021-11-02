@@ -28,8 +28,8 @@ export class UserService {
   // 사용자 정보를 수정한다.
   // 닉네임을 기준으로 Token을 생성하기 때문에 Token을 재발급한다.
   async modifyUser(id: Types.ObjectId, tokenUserId: Types.ObjectId, user: IUserDocument) {
-    if (id !== tokenUserId) throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
-
+    if (id.toString() !== tokenUserId.toString())
+      throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
     const userRecord = await this.userModel.modifyUser(id, user);
     const accessToken = await userRecord.generateAccessToken();
     const refreshToken = await userRecord.generateRefreshToken();
@@ -92,6 +92,7 @@ export class UserService {
   }
 
   // S3 Pre-Sign Url을 발급한다.
+  // eslint-disable-next-line class-methods-use-this
   async getPreSignUrl(fileName: string) {
     const s3 = new AWS.S3({
       accessKeyId: config.S3AccessKeyId,

@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { ICommentModel, IStudyModel } from '../models/Study';
+import { ICommentDocument, IComment, IStudyModel } from '../models/Study';
 import { INotificationModel } from '../models/Notification';
 
 export class CommentService {
@@ -15,17 +15,17 @@ export class CommentService {
   }
 
   // 신규 댓글을 추가한다.
-  async registerComment(userID: Types.ObjectId, comment: ICommentModel) {
-    const { studyId, content } = comment;
+  async registerComment(userID: Types.ObjectId, studyId: Types.ObjectId, content: string) {
     const { study, commentId } = await this.studyModel.registerComment(studyId, content, userID);
     await this.notificationModel.registerNotification(studyId, study.author, userID, 'comment', commentId); // 알림 등록
     return study;
   }
 
   // 댓글을 수정한다.
-  async modifyComment(comment, tokenUserId: Types.ObjectId) {
-    await this.studyModel.checkCommentAuthorization(comment.id, tokenUserId);
+  async modifyComment(comment: ICommentDocument, tokenUserId: Types.ObjectId) {
+    await this.studyModel.checkCommentAuthorization(comment._id, tokenUserId);
     const commentRecord = await this.studyModel.modifyComment(comment);
+
     return commentRecord;
   }
 

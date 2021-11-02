@@ -3,7 +3,7 @@ import { AuthService, UserService } from '../../services/index';
 import { isUserIdValid, isTokenValidWithOauth, nickNameDuplicationCheck, autoSignUp } from '../middlewares/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Study as StudyModel } from '../../models/Study';
-import { User as UserModel } from '../../models/User';
+import { IUser, User as UserModel } from '../../models/User';
 import { Notification as NotificationModel } from '../../models/Notification';
 
 const route = Router();
@@ -26,7 +26,7 @@ export default (app: Router) => {
     isTokenValidWithOauth,
     autoSignUp,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { idToken } = req.user;
+      const { idToken } = req.user as IUser;
       const AuthServiceInstance = new AuthService(UserModel);
       const { _id, nickName, image, likeLanguages, accessToken, refreshToken } = await AuthServiceInstance.SignIn(
         idToken,
@@ -37,7 +37,7 @@ export default (app: Router) => {
         secure: true,
         maxAge: 1000 * 60 * 60 * 24 * 14, // 2 Week
       });
-      res.status(200).json({
+      return res.status(200).json({
         loginSuccess: true,
         _id,
         nickName,
@@ -74,7 +74,7 @@ export default (app: Router) => {
         maxAge: 1000 * 60 * 60 * 24 * 14, // 2 Week
       });
 
-      res.status(200).json({
+      return res.status(200).json({
         loginSuccess: true,
         _id: userRecord._id,
         nickName: userRecord.nickName,

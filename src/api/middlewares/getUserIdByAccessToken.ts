@@ -24,8 +24,7 @@ const getUserIdByAccessToken = asyncErrorWrapper(async (req: Request, res: Respo
       }
     } catch (err) {}
   }
-  req.user._id = userId;
-
+  req.user = { _id: userId };
   next();
 });
 export { getUserIdByAccessToken };

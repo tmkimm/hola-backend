@@ -16,7 +16,7 @@ export default (app: express.Application) => {
     res: express.Response,
     next: express.NextFunction,
   ) {
-    if (error instanceof mongoose.Error) res.status(400).json({ type: 'MongoError', message: error.message });
+    if (error instanceof mongoose.Error) return res.status(400).json({ type: 'MongoError', message: error.message });
     next(error);
   });
 
@@ -27,9 +27,9 @@ export default (app: express.Application) => {
     next: express.NextFunction,
   ) {
     if (error instanceof jsonwebtoken.TokenExpiredError)
-      res.status(401).json({ type: 'TokenExpiredError', message: error.message });
+      return res.status(401).json({ type: 'TokenExpiredError', message: error.message });
     if (error instanceof jsonwebtoken.JsonWebTokenError)
-      res.status(401).json({ type: 'JsonWebTokenError', message: error.message });
+      return res.status(401).json({ type: 'JsonWebTokenError', message: error.message });
     next(error);
   });
 
@@ -42,13 +42,13 @@ export default (app: express.Application) => {
   ) {
     if (error instanceof CustomError) {
       const { status, type, message } = error;
-      res.status(status).send({ type, message });
+      return res.status(status).send({ type, message });
     }
     next(error);
   });
 
   // error handler
   app.use(function (error: Error, req: express.Request, res: express.Response, next: express.NextFunction) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   });
 };

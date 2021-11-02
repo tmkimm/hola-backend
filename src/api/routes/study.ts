@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
+import { IUser, User as UserModel } from '../../models/User';
 import {
   checkStudy,
   isStudyValid,
@@ -10,7 +11,6 @@ import {
 import { StudyService } from '../../services/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Study as StudyModel } from '../../models/Study';
-import { User as UserModel } from '../../models/User';
 import { Notification as NotificationModel } from '../../models/Notification';
 
 const route = Router();
@@ -38,7 +38,7 @@ export default (app: Router) => {
       const { offset, limit, sort, language, period, isClosed } = req.query;
       const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
       const studies = await StudyServiceInstance.findStudy(offset, limit, sort, language, period, isClosed);
-      res.status(200).json(studies);
+      return res.status(200).json(studies);
     }),
   );
 
@@ -47,11 +47,11 @@ export default (app: Router) => {
     '/recommend',
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const userId = req.user._id;
+      const { _id: userId } = req.user as IUser;
       const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const studies = await StudyServiceInstance.recommendToUserFromMain(Types.ObjectId(userId));
+      const studies = await StudyServiceInstance.recommendToUserFromMain(userId);
 
-      res.status(200).json(studies);
+      return res.status(200).json(studies);
     }),
   );
 
@@ -61,14 +61,12 @@ export default (app: Router) => {
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const studyId = req.params.id;
-      const userId = req.user._id;
-      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const study = await StudyServiceInstance.recommendToUserFromStudy(
-        Types.ObjectId(studyId),
-        Types.ObjectId(userId),
-      );
+      const { _id: userId } = req.user as IUser;
 
-      res.status(200).json(study);
+      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
+      const study = await StudyServiceInstance.recommendToUserFromStudy(Types.ObjectId(studyId), userId);
+
+      return res.status(200).json(study);
     }),
   );
 
@@ -80,13 +78,14 @@ export default (app: Router) => {
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const studyId = req.params.id;
-      const userId = req.user._id;
+      const { _id: userId } = req.user as IUser;
+
       const readList = req.cookies.RVIEW;
       const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const study = await StudyServiceInstance.findStudyDetail(Types.ObjectId(studyId), Types.ObjectId(userId));
+      const study = await StudyServiceInstance.findStudyDetail(Types.ObjectId(studyId), userId);
       const { updateReadList, isAlreadyRead } = await StudyServiceInstance.increaseView(
         Types.ObjectId(studyId),
-        Types.ObjectId(userId),
+        userId,
         readList,
       );
       if (!isAlreadyRead) {
@@ -101,7 +100,7 @@ export default (app: Router) => {
         });
       }
 
-      res.status(200).json(study);
+      return res.status(200).json(study);
     }),
   );
 
@@ -112,14 +111,12 @@ export default (app: Router) => {
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const studyId = req.params.id;
-      const userId = req.user._id;
-      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const study = await StudyServiceInstance.findStudyDetailAndUpdateReadAt(
-        Types.ObjectId(studyId),
-        Types.ObjectId(userId),
-      );
+      const { _id: userId } = req.user as IUser;
 
-      res.status(200).json(study);
+      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
+      const study = await StudyServiceInstance.findStudyDetailAndUpdateReadAt(Types.ObjectId(studyId), userId);
+
+      return res.status(200).json(study);
     }),
   );
 
@@ -129,11 +126,12 @@ export default (app: Router) => {
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const studyId = req.params.id;
-      const userId = req.user._id;
-      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const isLiked = await StudyServiceInstance.findUserLiked(Types.ObjectId(studyId), Types.ObjectId(userId));
+      const { _id: userId } = req.user as IUser;
 
-      res.status(200).json({
+      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
+      const isLiked = await StudyServiceInstance.findUserLiked(Types.ObjectId(studyId), userId);
+
+      return res.status(200).json({
         isLiked,
       });
     }),
@@ -147,7 +145,7 @@ export default (app: Router) => {
       const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
       const likeUsers = await StudyServiceInstance.findLikeUsers(Types.ObjectId(studyId));
 
-      res.status(200).json({
+      return res.status(200).json({
         likeUsers,
       });
     }),
@@ -162,13 +160,13 @@ export default (app: Router) => {
     asyncErrorWrapper(async function (req: Request, res: Response, next: NextFunction) {
       try {
         const studyDTO = req.body;
-        const userId = req.user._id;
+        const { _id: userId } = req.user as IUser;
 
         const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-        const study = await StudyServiceInstance.registerStudy(Types.ObjectId(userId), studyDTO);
-        res.status(201).json(study);
+        const study = await StudyServiceInstance.registerStudy(userId, studyDTO);
+        return res.status(201).json(study);
       } catch (error) {
-        res.status(400).json({
+        return res.status(400).json({
           errors: [
             {
               location: 'body',
@@ -191,13 +189,14 @@ export default (app: Router) => {
     isStudyValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
-      const tokenUserId = req.user._id;
+      const { _id: tokenUserId } = req.user as IUser;
+
       const studyDTO = req.body;
 
       const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const study = await StudyServiceInstance.modifyStudy(Types.ObjectId(id), Types.ObjectId(tokenUserId), studyDTO);
+      const study = await StudyServiceInstance.modifyStudy(Types.ObjectId(id), tokenUserId, studyDTO);
 
-      res.status(200).json(study);
+      return res.status(200).json(study);
     }),
   );
 
@@ -208,11 +207,11 @@ export default (app: Router) => {
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
-      const tokenUserId = req.user._id;
+      const { _id: tokenUserId } = req.user as IUser;
 
       const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      await StudyServiceInstance.deleteStudy(Types.ObjectId(id), Types.ObjectId(tokenUserId));
-      res.status(204).json();
+      await StudyServiceInstance.deleteStudy(Types.ObjectId(id), tokenUserId);
+      return res.status(204).json();
     }),
   );
 
@@ -222,12 +221,12 @@ export default (app: Router) => {
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { studyId } = req.body;
-      const userId = req.user._id;
+      const { _id: userId } = req.user as IUser;
 
       const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const study = await StudyServiceInstance.addLike(Types.ObjectId(studyId), Types.ObjectId(userId));
+      const study = await StudyServiceInstance.addLike(Types.ObjectId(studyId), userId);
 
-      res.status(201).json({ likeUsers: study.likes });
+      return res.status(201).json({ likeUsers: study.likes });
     }),
   );
 
@@ -237,11 +236,11 @@ export default (app: Router) => {
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const studyId = req.params.id; // 사용자 id
-      const userId = req.user._id;
+      const { _id: userId } = req.user as IUser;
 
       const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const study = await StudyServiceInstance.deleteLike(Types.ObjectId(studyId), Types.ObjectId(userId));
-      res.status(201).json({ likeUsers: study.likes });
+      const study = await StudyServiceInstance.deleteLike(Types.ObjectId(studyId), userId);
+      return res.status(201).json({ likeUsers: study.likes });
     }),
   );
 };

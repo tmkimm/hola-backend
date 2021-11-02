@@ -21,14 +21,17 @@ export class AuthService {
     return { _id, nickName, image, likeLanguages, accessToken, refreshToken };
   }
 
+  // 리팩토링 필요. jwt verify 하는 부분이 중복된다.
   // Refresh Token을 이용하여 Access Token 재발급한다.
   async reissueAccessToken(refreshToken: string) {
     let decodeSuccess = true;
-    let decodeRefreshToken = '';
     try {
-      decodeRefreshToken = await jwt.verify(refreshToken, config.jwtSecretKey);
+      const decodeRefreshToken = await jwt.verify(refreshToken, config.jwtSecretKey);
+      if (typeof decodeRefreshToken === 'string') throw new CustomError('JsonWebTokenError', 401, 'Invaild Token');
+
       const user = await this.userModel.findByNickName(decodeRefreshToken.nickName);
       if (!user) throw new CustomError('InvaildParameterError', 401, 'User not found');
+
       const { _id, nickName, email, image, likeLanguages } = user;
       const accessToken = await user.generateAccessToken();
       return { decodeSuccess, _id, nickName, email, image, likeLanguages, accessToken };

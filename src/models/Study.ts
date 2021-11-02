@@ -12,7 +12,7 @@ export interface IReplyDocument extends IReply, Document {}
 export type IReplyModel = Model<IReplyDocument>;
 
 // 댓글
-interface IComment {
+export interface IComment {
   content: string;
   author: Types.ObjectId;
   replies: IReplyDocument[];
@@ -48,34 +48,40 @@ export interface IStudyModel extends Model<IStudyDocument> {
     language: string | null,
     period: number | null,
     isClosed: string | null,
-  ) => Promise<IStudy>;
+  ) => Promise<IStudyDocument[]>;
   findStudyRecommend: (
     sort: string | null,
-    language: string | null,
-    period: number | null,
-    isClosed: string | null,
+    language: string[] | null,
+    studyId: Types.ObjectId | null,
+    userId: Types.ObjectId | null,
     limit: number | null,
-  ) => Promise<IStudy>;
+  ) => Promise<IStudyDocument[]>;
   registerComment: (
     studyId: Types.ObjectId,
     content: string,
     author: Types.ObjectId,
-  ) => Promise<{ study: IStudy; commentId: Types.ObjectId }>;
+  ) => Promise<{ study: IStudyDocument; commentId: Types.ObjectId }>;
   registerReply: (
     studyId: Types.ObjectId,
     commentId: Types.ObjectId,
     content: string,
     author: Types.ObjectId,
-  ) => Promise<{ study: IStudy; replyId: Types.ObjectId }>;
-  findComments: (id: Types.ObjectId) => Promise<IStudy>;
+  ) => Promise<{ study: IStudyDocument; replyId: Types.ObjectId }>;
+  findComments: (id: Types.ObjectId) => Promise<IStudyDocument>;
   deleteStudy: (id: Types.ObjectId) => void;
-  modifyStudy: (id: Types.ObjectId, study: IStudy) => Promise<IStudy>;
-  modifyComment: (comment: IComment) => Promise<IStudy>;
-  modifyReply: (comment: IReply) => Promise<IStudy>;
-  deleteComment: (id: Types.ObjectId) => Promise<IStudy>;
-  deleteReply: (id: Types.ObjectId) => Promise<IStudy>;
-  addLike: (studyId: Types.ObjectId, userId: Types.ObjectId) => Promise<{ study: IStudy; isLikeExist: boolean }>;
-  deleteLike: (studyId: Types.ObjectId, userId: Types.ObjectId) => Promise<{ study: IStudy; isLikeExist: boolean }>;
+  modifyStudy: (id: Types.ObjectId, study: IStudy) => Promise<IStudyDocument>;
+  modifyComment: (comment: IComment) => Promise<IStudyDocument>;
+  modifyReply: (comment: IReply) => Promise<IStudyDocument>;
+  deleteComment: (id: Types.ObjectId) => Promise<IStudyDocument>;
+  deleteReply: (id: Types.ObjectId) => Promise<IStudyDocument>;
+  addLike: (
+    studyId: Types.ObjectId,
+    userId: Types.ObjectId,
+  ) => Promise<{ study: IStudyDocument; isLikeExist: boolean }>;
+  deleteLike: (
+    studyId: Types.ObjectId,
+    userId: Types.ObjectId,
+  ) => Promise<{ study: IStudyDocument; isLikeExist: boolean }>;
   increaseView: (studyId: Types.ObjectId) => void;
   findAuthorByCommentId: (commentId: Types.ObjectId) => Promise<Types.ObjectId | null>;
   findAuthorByReplyId: (replyId: Types.ObjectId) => Promise<Types.ObjectId | null>;
@@ -161,7 +167,7 @@ studySchema.statics.findStudy = async function (offset, limit, sort, language, p
   if (typeof language === 'string') query.language = { $in: language.split(',') };
   else if (typeof language === 'undefined') return [];
 
-  if (!Number.isNaN(period)) {
+  if (typeof period === 'number' && !Number.isNaN(period)) {
     const today = new Date();
     query.createdAt = { $gte: today.setDate(today.getDate() - period) };
   }
@@ -170,7 +176,6 @@ studySchema.statics.findStudy = async function (offset, limit, sort, language, p
   if (typeof isClosed === 'string' && !(isClosed === 'true')) {
     query.isClosed = { $eq: isClosed === 'true' };
   }
-
   const result = await this.find(query)
     .where('isDeleted')
     .equals(false)
@@ -236,7 +241,7 @@ studySchema.statics.findStudyRecommend = async function (sort, language, studyId
 };
 
 studySchema.statics.registerComment = async function (studyId, content, author) {
-  const commentId = Types.ObjectId;
+  const commentId = new Types.ObjectId();
   const study = await this.findOneAndUpdate(
     { _id: studyId },
     { $push: { comments: { _id: commentId, content, author } } },
@@ -246,7 +251,7 @@ studySchema.statics.registerComment = async function (studyId, content, author) 
 };
 
 studySchema.statics.registerReply = async function (studyId, commentId, content, author) {
-  const replyId = Types.ObjectId;
+  const replyId = new Types.ObjectId();
   const study = await this.findOneAndUpdate(
     { _id: studyId, comments: { $elemMatch: { _id: commentId } } },
     { $push: { 'comments.$.replies': { _id: replyId, content, author } } },
@@ -275,9 +280,9 @@ studySchema.statics.modifyStudy = async function (id, study) {
 
 // 댓글 수정
 studySchema.statics.modifyComment = async function (comment) {
-  const { id, content } = comment;
+  const { _id, content } = comment;
   const commentRecord = await this.findOneAndUpdate(
-    { comments: { $elemMatch: { _id: id } } },
+    { comments: { $elemMatch: { _id } } },
     { $set: { 'comments.$.content': content } },
     { new: true },
   );
@@ -286,7 +291,7 @@ studySchema.statics.modifyComment = async function (comment) {
 
 // 대댓글 수정
 studySchema.statics.modifyReply = async function (comment) {
-  const { id, content, commentId } = comment;
+  const { _id, content, commentId } = comment;
   const commentRecord = await this.findOneAndUpdate(
     {
       comments: { $elemMatch: { _id: commentId } },
@@ -295,7 +300,7 @@ studySchema.statics.modifyReply = async function (comment) {
       $set: { 'comments.$[].replies.$[i].content': content },
     },
     {
-      arrayFilters: [{ 'i._id': id }],
+      arrayFilters: [{ 'i._id': _id }],
       new: true,
     },
   );

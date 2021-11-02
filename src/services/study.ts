@@ -1,8 +1,9 @@
 import sanitizeHtml from 'sanitize-html';
 import { Types } from 'mongoose';
-import { IStudyModel, IStudyDocument } from '../models/Study';
+import { IStudy, IStudyModel, IStudyDocument } from '../models/Study';
 import { INotificationModel } from '../models/Notification';
 import { IUserModel } from '../models/User';
+import CustomError from '../CustomError';
 
 export class StudyService {
   constructor(
@@ -11,19 +12,27 @@ export class StudyService {
     protected notificationModel: INotificationModel,
   ) {}
 
+  // 리팩토링필요
   // 메인 화면에서 스터디 리스트를 조회한다.
-  async findStudy(offset, limit, sort, language, period, isClosed) {
+  async findStudy(
+    offset: number | null,
+    limit: number | null,
+    sort: string | null,
+    language: string | null,
+    period: number | null,
+    isClosed: string | null,
+  ) {
     const studies = await this.studyModel.findStudy(offset, limit, sort, language, period, isClosed);
     const sortStudies = this.sortLanguageByQueryParam(studies, language);
     return sortStudies;
   }
 
   // 선택한 언어가 리스트의 앞에 오도록 정렬
-  async sortLanguageByQueryParam(studies, language) {
-    if (typeof language === 'undefined') return studies;
+  async sortLanguageByQueryParam(studies: IStudyDocument[], language: string | null) {
+    if (typeof language !== 'string') return studies;
 
     const paramLanguage = language.split(',');
-    for (let i = 0; i < studies.length; i++) {
+    for (let i = 0; i < studies.length; i += 1) {
       studies[i].language.sort(function (a, b) {
         if (paramLanguage.indexOf(b) !== -1) return 1;
         return -1;
@@ -33,20 +42,20 @@ export class StudyService {
   }
 
   // 메인 화면에서 스터디를 추천한다.
-  // 4건 이하일 경우 무조건 다시 조회가 아니라, 해당 되는 건은 포함하고 나머지 건만 조회해야함
+  // 4건 이하일 경우 무조건 다시 조회가 아니라, 해당 되는 건은 포함하고 나머지 건만 조회해야한다.
   async recommendToUserFromMain(userId: Types.ObjectId) {
     let sort;
-    let likeLanguages;
+    let likeLanguages = null;
     const limit = 20;
     if (userId) {
       const user = await this.userModel.findById(userId);
-      likeLanguages = user.likeLanguages;
+      if (user !== null) likeLanguages = user.likeLanguages;
       sort = 'views';
     } else {
       sort = 'totalLikes';
     }
 
-    const studies = await this.studyModel.findStudyRecommend('-views', likeLanguages, null, limit);
+    const studies = await this.studyModel.findStudyRecommend('-views', likeLanguages, null, null, limit);
     return studies;
   }
 
@@ -54,10 +63,12 @@ export class StudyService {
   // 4건 이하일 경우 무조건 다시 조회가 아니라, 해당 되는 건은 포함하고 나머지 건만 조회해야함
   async recommendToUserFromStudy(studyId: Types.ObjectId, userId: Types.ObjectId) {
     const sort = '-views';
-    let language;
+    let language = null;
     const limit = 10;
     if (studyId) {
       const study = await this.studyModel.findById(studyId);
+      if (study === null) throw new CustomError('JsonWebTokenError', 404, 'Study not found');
+
       language = study.language;
     }
 
@@ -66,12 +77,12 @@ export class StudyService {
   }
 
   // 조회수 증가
-  async increaseView(studyId: Types.ObjectId, userId: Types.ObjectId, readList) {
+  async increaseView(studyId: Types.ObjectId, userId: Types.ObjectId, readList: string) {
     let isAlreadyRead = true;
     let updateReadList = readList;
 
     // 조회수 중복 증가 방지
-    if (readList === undefined || (typeof readList === 'string' && readList.indexOf(studyId) === -1)) {
+    if (readList === undefined || (typeof readList === 'string' && readList.indexOf(studyId.toString()) === -1)) {
       await this.studyModel.increaseView(studyId); // 조회수 증가
       if (userId) await this.userModel.addReadList(studyId, userId); // 읽은 목록 추가
       if (readList === undefined) updateReadList = `${studyId}`;
@@ -112,11 +123,9 @@ export class StudyService {
 
   // 스터디의 관심 등록한 사용자 리스트를 조회한다.
   async findLikeUsers(studyId: Types.ObjectId) {
-    if (studyId) {
-      const likeUsers = await this.studyModel.findById(studyId).select('likes');
-      return likeUsers.likes;
-    }
-    return [];
+    const likeUsers = await this.studyModel.findById(studyId).select('likes');
+    if (!likeUsers) return [];
+    return likeUsers.likes;
   }
 
   // 신규 스터디를 등록한다.
@@ -133,7 +142,7 @@ export class StudyService {
   }
 
   // 스터디 정보를 수정한다.
-  async modifyStudy(id: Types.ObjectId, tokenUserId: Types.ObjectId, study) {
+  async modifyStudy(id: Types.ObjectId, tokenUserId: Types.ObjectId, study: IStudy) {
     await this.studyModel.checkStudyAuthorization(id, tokenUserId); // 접근 권한 체크
     if (study.content) {
       const cleanHTML = sanitizeHtml(study.content, {

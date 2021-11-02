@@ -17,6 +17,6 @@ export default (app: Router) => {
 
     const FeedbackServiceInstance = new FeedbackService(FeedbackModel);
     const feedback = await FeedbackServiceInstance.registerFeedback(rating, content);
-    res.status(201).json(feedback);
+    return res.status(201).json(feedback);
   });
 };

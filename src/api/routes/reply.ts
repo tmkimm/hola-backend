@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
+import { IUser } from '../../models/User';
 import { isAccessTokenValid } from '../middlewares/index';
 import { ReplyService } from '../../services/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
@@ -24,13 +25,13 @@ export default (app: Router) => {
     '/',
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const commentDTO = req.body;
-      const userId = req.user._id;
+      const { studyId, commentId, content } = req.body;
+      const { _id: userId } = req.user as IUser;
 
       const ReplyServiceInstance = new ReplyService(StudyModel, NotificationModel);
-      const study = await ReplyServiceInstance.registerReply(userId, commentDTO);
+      const study = await ReplyServiceInstance.registerReply(userId, studyId, commentId, content);
 
-      res.status(201).json(study);
+      return res.status(201).json(study);
     }),
   );
 
@@ -40,13 +41,13 @@ export default (app: Router) => {
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const commentDTO = req.body;
-      commentDTO.id = req.params.id;
-      const tokenUserId = req.user._id;
+      commentDTO._id = req.params.id;
+      const { _id: tokenUserId } = req.user as IUser;
 
       const ReplyServiceInstance = new ReplyService(StudyModel, NotificationModel);
       const comment = await ReplyServiceInstance.modifyReply(commentDTO, tokenUserId);
 
-      res.status(200).json(comment);
+      return res.status(200).json(comment);
     }),
   );
   // 대댓글 삭제
@@ -55,12 +56,12 @@ export default (app: Router) => {
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const replyId = req.params.id;
-      const userId = req.user._id;
+      const { _id: userId } = req.user as IUser;
 
       const ReplyServiceInstance = new ReplyService(StudyModel, NotificationModel);
-      await ReplyServiceInstance.deleteReply(Types.ObjectId(replyId), Types.ObjectId(userId));
+      await ReplyServiceInstance.deleteReply(Types.ObjectId(replyId), userId);
 
-      res.status(204).json();
+      return res.status(204).json();
     }),
   );
 };

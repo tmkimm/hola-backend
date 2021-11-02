@@ -28,29 +28,29 @@ export default (app: Router) => {
       const { decodeSuccess, _id, nickName, email, image, likeLanguages, accessToken } =
         await AuthServiceInstance.reissueAccessToken(req.cookies.R_AUTH);
       // Refresh Token가 유효하지 않을 경우
-      if (!decodeSuccess || !_id) {
+
+      if (!decodeSuccess || typeof _id === 'undefined') {
         res.clearCookie('R_AUTH');
         throw new CustomError('RefreshTokenError', 401, 'Invalid refresh token');
-      } else {
-        const NotificationServcieInstance = new NotificationService(NotificationModel);
-        const unReadNoticeCount = await NotificationServcieInstance.findUnReadCount(_id);
-        const hasUnreadNotice = unReadNoticeCount > 0;
-        res.status(200).json({
-          _id,
-          email,
-          nickName,
-          image,
-          likeLanguages,
-          accessToken,
-          hasUnreadNotice,
-        });
       }
+      const NotificationServcieInstance = new NotificationService(NotificationModel);
+      const unReadNoticeCount = await NotificationServcieInstance.findUnReadCount(_id);
+      const hasUnreadNotice = unReadNoticeCount > 0;
+      return res.status(200).json({
+        _id,
+        email,
+        nickName,
+        image,
+        likeLanguages,
+        accessToken,
+        hasUnreadNotice,
+      });
     }),
   );
 
   // Access Token이 유효한지 체크
   route.get('/isValid', isAccessTokenValid, async (req: Request, res: Response, next: NextFunction) => {
-    res.status(200).json({
+    return res.status(200).json({
       isValid: true,
     });
   });

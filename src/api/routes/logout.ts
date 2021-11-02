@@ -12,6 +12,6 @@ export default (app: Router) => {
   // 로그아웃(Refresh Token 삭제)
   route.post('/', (req: Request, res: Response, next: NextFunction) => {
     res.clearCookie('R_AUTH');
-    res.status(204).json();
+    return res.status(204).json();
   });
 };

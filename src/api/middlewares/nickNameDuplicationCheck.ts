@@ -8,7 +8,7 @@ const nickNameDuplicationCheck = asyncErrorWrapper(async (req: Request, res: Res
   if (nickName) {
     const user = await User.findByNickName(nickName);
     if (user) {
-      res.status(200).json({
+      return res.status(200).json({
         message: `Nickname is duplicated.`,
         isExists: true,
       });
