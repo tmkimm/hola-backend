@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
+import { isString } from '../../utills/isStringEmpty';
 import { IUser, User as UserModel } from '../../models/User';
 import { UserService, NotificationService } from '../../services/index';
 import { nickNameDuplicationCheck, isAccessTokenValid, isUserIdValid } from '../middlewares/index';
@@ -30,11 +31,8 @@ export default (app: Router) => {
   route.get(
     '/',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const nickName: string = req.query.nickName as string;
-      // 리펙토링 필요(공통 함수로 분리 isEmpty)
-      if (
-        !(typeof nickName !== 'undefined' && typeof nickName.valueOf() === 'string' && nickName && nickName.length > 0)
-      ) {
+      const { nickName } = req.query;
+      if (!isString(nickName)) {
         return res.status(400).json({
           message: `parameter is incorrect`,
         });

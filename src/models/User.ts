@@ -1,6 +1,7 @@
 import { Model, Schema, model, Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import config from '../config/index';
+import { signJWT } from '../utills/jwt';
 
 export interface IUser {
   _id: Types.ObjectId;
@@ -89,31 +90,14 @@ userSchema.statics.findByNickName = async function (nickName) {
 };
 
 userSchema.methods.generateAccessToken = async function () {
-  const accessToken = await jwt.sign(
-    {
-      nickName: this.nickName,
-      idToken: this.idToken,
-    },
-    config.jwtSecretKey,
-    {
-      expiresIn: '1h',
-      issuer: config.issuer,
-    },
-  );
+  const accessToken = await signJWT({ nickName: this.nickName, idToken: this.idToken }, '1h');
+
   return accessToken;
 };
 
 userSchema.methods.generateRefreshToken = async function () {
-  const refreshToken = await jwt.sign(
-    {
-      nickName: this.nickName,
-    },
-    config.jwtSecretKey,
-    {
-      expiresIn: '2w',
-      issuer: config.issuer,
-    },
-  );
+  const refreshToken = await signJWT({ nickName: this.nickName }, '2w');
+
   return refreshToken;
 };
 

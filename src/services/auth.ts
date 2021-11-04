@@ -1,7 +1,6 @@
-import jwt from 'jsonwebtoken';
-import config from '../config/index';
 import CustomError from '../CustomError';
 import { IUserModel } from '../models/User';
+import { verifyJWT } from '../utills/jwt';
 
 export class AuthService {
   constructor(protected userModel: IUserModel) {}
@@ -21,12 +20,11 @@ export class AuthService {
     return { _id, nickName, image, likeLanguages, accessToken, refreshToken };
   }
 
-  // 리팩토링 필요. jwt verify 하는 부분이 중복된다.
   // Refresh Token을 이용하여 Access Token 재발급한다.
   async reissueAccessToken(refreshToken: string) {
     let decodeSuccess = true;
     try {
-      const decodeRefreshToken = await jwt.verify(refreshToken, config.jwtSecretKey);
+      const decodeRefreshToken = await verifyJWT(refreshToken);
       if (typeof decodeRefreshToken === 'string') throw new CustomError('JsonWebTokenError', 401, 'Invaild Token');
 
       const user = await this.userModel.findByNickName(decodeRefreshToken.nickName);
