@@ -37,26 +37,9 @@ export class UserService {
   }
 
   async deleteUser(id: Types.ObjectId, tokenUserId: Types.ObjectId) {
-    if (id !== tokenUserId) throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
-
-    // 사용자가 작성한 글 제거
-    await this.postModel.deleteMany({ author: id });
-
-    // 사용자가 작성한 댓글 제거
-    await this.postModel.findOneAndUpdate(
-      { comments: { $elemMatch: { author: id } } },
-      { $pull: { comments: { author: id } } },
-    );
-
-    // 사용자가 작성한 대댓글 제거
-    await this.postModel.findOneAndUpdate(
-      { 'comments.replies': { $elemMatch: { author: id } } },
-      { $pull: { 'comments.$.replies': { author: id } } },
-    );
-
-    // 회원 탈퇴 시 관련 알림 제거
-    await this.notificationModel.deleteNotificationByUser(id);
-    await this.userModel.deleteUser(id);
+    if (id.toString() !== tokenUserId.toString())
+      throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
+    await this.userModel.findOneAndDelete({ _id: id });
   }
 
   // 사용자가 관심 등록한 글 리스트를 조회한다.

@@ -219,6 +219,7 @@ export default (app: Router) => {
   route.post(
     '/likes',
     isAccessTokenValid,
+    isPostIdValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { postId } = req.body;
       const { _id: userId } = req.user as IUser;
@@ -234,6 +235,7 @@ export default (app: Router) => {
   route.delete(
     '/likes/:id',
     isAccessTokenValid,
+    isPostIdValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const postId = req.params.id; // 사용자 id
       const { _id: userId } = req.user as IUser;

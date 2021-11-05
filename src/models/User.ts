@@ -1,7 +1,7 @@
 import { Model, Schema, model, Types } from 'mongoose';
-import jwt from 'jsonwebtoken';
-import config from '../config/index';
 import { signJWT } from '../utills/jwt';
+import { Post as PostModel } from './Post';
+import { Notification as NotificationModel } from './Notification';
 
 export interface IUser {
   _id: Types.ObjectId;
@@ -63,9 +63,29 @@ const userSchema = new Schema<IUserDocument>(
   },
 );
 
-userSchema.statics.deleteUser = async function (id) {
-  await this.findByIdAndDelete({ _id: id });
-};
+userSchema.post('findOneAndDelete', async function (user: IUserDocument) {
+  // 사용자가 작성한 글 제거
+  await PostModel.deleteMany({ author: user._id });
+  // 사용자가 작성한 댓글 제거
+  await PostModel.findOneAndUpdate(
+    { comments: { $elemMatch: { author: user._id } } },
+    { $pull: { comments: { author: user._id } } },
+  );
+
+  // 사용자가 작성한 대댓글 제거
+  await PostModel.findOneAndUpdate(
+    { 'comments.replies': { $elemMatch: { author: user._id } } },
+    { $pull: { 'comments.$.replies': { author: user._id } } },
+  );
+
+  // 회원 탈퇴 시 관련 알림 제거
+  await NotificationModel.deleteNotificationByUser(user._id);
+});
+
+// userSchema.statics.deleteUser = async function (id) {
+//   const user: IUserDocument = await this.findOne({ _id: id });
+//   await user.remo();
+// };
 
 userSchema.statics.modifyUser = async function (id, user) {
   const userRecord = await this.findByIdAndUpdate(id, user, {
