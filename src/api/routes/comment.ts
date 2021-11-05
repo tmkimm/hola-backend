@@ -4,7 +4,7 @@ import { IUser } from '../../models/User';
 import { isAccessTokenValid } from '../middlewares/index';
 import { CommentService } from '../../services/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
-import { Study as StudyModel } from '../../models/Study';
+import { Post as PostModel } from '../../models/Post';
 import { Notification as NotificationModel } from '../../models/Notification';
 import CustomError from '../../CustomError';
 
@@ -14,12 +14,12 @@ export default (app: Router) => {
     댓글에 관련된 Router를 정의한다.
     등록 / 수정 / 삭제하려는 사용자의 정보는 Access Token을 이용하여 처리한다.
 
-    # GET /studies/comments/:id : 스터디의 댓글 리스트 조회
-    # POST /studies/comments : 신규 댓글 등록
-    # PATCH /studies/comments/:id : 댓글 정보 수정
-    # DELETE /studies/comments/:id : 댓글 삭제
+    # GET /posts/comments/:id : 스터디의 댓글 리스트 조회
+    # POST /posts/comments : 신규 댓글 등록
+    # PATCH /posts/comments/:id : 댓글 정보 수정
+    # DELETE /posts/comments/:id : 댓글 삭제
     */
-  app.use('/studies/comments', route);
+  app.use('/posts/comments', route);
 
   // 댓글 리스트 조회
   route.get(
@@ -29,7 +29,7 @@ export default (app: Router) => {
       if (!id || !Types.ObjectId.isValid(id)) {
         throw new CustomError('InvalidApiError', 400, 'Invalid Api Parameter');
       }
-      const CommentServiceInstance = new CommentService(StudyModel, NotificationModel);
+      const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
       const comments = await CommentServiceInstance.findComments(Types.ObjectId(id));
 
       return res.status(200).json(comments);
@@ -40,13 +40,13 @@ export default (app: Router) => {
     '/',
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { studyId, content } = req.body;
+      const { postId, content } = req.body;
       const { _id: userId } = req.user as IUser;
 
-      const CommentServiceInstance = new CommentService(StudyModel, NotificationModel);
-      const study = await CommentServiceInstance.registerComment(userId, studyId, content);
+      const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
+      const post = await CommentServiceInstance.registerComment(userId, postId, content);
 
-      return res.status(201).json(study);
+      return res.status(201).json(post);
     }),
   );
 
@@ -59,7 +59,7 @@ export default (app: Router) => {
       commentDTO._id = req.params.id;
       const { _id: tokenUserId } = req.user as IUser;
 
-      const CommentServiceInstance = new CommentService(StudyModel, NotificationModel);
+      const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
       const comment = await CommentServiceInstance.modifyComment(commentDTO, tokenUserId);
 
       return res.status(200).json(comment);
@@ -74,7 +74,7 @@ export default (app: Router) => {
       const commentId = req.params.id;
       const { _id: userId } = req.user as IUser;
 
-      const CommentServiceInstance = new CommentService(StudyModel, NotificationModel);
+      const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
       await CommentServiceInstance.deleteComment(Types.ObjectId(commentId), userId);
       return res.status(204).json();
     }),

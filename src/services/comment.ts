@@ -1,39 +1,39 @@
 import { Types } from 'mongoose';
-import { ICommentDocument, IComment, IStudyModel } from '../models/Study';
+import { ICommentDocument, IComment, IPostModel } from '../models/Post';
 import { INotificationModel } from '../models/Notification';
 
 export class CommentService {
-  constructor(protected studyModel: IStudyModel, protected notificationModel: INotificationModel) {
-    this.studyModel = studyModel;
+  constructor(protected postModel: IPostModel, protected notificationModel: INotificationModel) {
+    this.postModel = postModel;
     this.notificationModel = notificationModel;
   }
 
   // 스터디 id를 이용해 댓글 리스트를 조회한다.
   async findComments(id: Types.ObjectId) {
-    const comments = await this.studyModel.findComments(id);
+    const comments = await this.postModel.findComments(id);
     return comments;
   }
 
   // 신규 댓글을 추가한다.
-  async registerComment(userID: Types.ObjectId, studyId: Types.ObjectId, content: string) {
-    const { study, commentId } = await this.studyModel.registerComment(studyId, content, userID);
-    await this.notificationModel.registerNotification(studyId, study.author, userID, 'comment', commentId); // 알림 등록
-    return study;
+  async registerComment(userID: Types.ObjectId, postId: Types.ObjectId, content: string) {
+    const { post, commentId } = await this.postModel.registerComment(postId, content, userID);
+    await this.notificationModel.registerNotification(postId, post.author, userID, 'comment', commentId); // 알림 등록
+    return post;
   }
 
   // 댓글을 수정한다.
   async modifyComment(comment: ICommentDocument, tokenUserId: Types.ObjectId) {
-    await this.studyModel.checkCommentAuthorization(comment._id, tokenUserId);
-    const commentRecord = await this.studyModel.modifyComment(comment);
+    await this.postModel.checkCommentAuthorization(comment._id, tokenUserId);
+    const commentRecord = await this.postModel.modifyComment(comment);
 
     return commentRecord;
   }
 
   // 댓글을 삭제한다.
   async deleteComment(commentId: Types.ObjectId, userId: Types.ObjectId) {
-    await this.studyModel.checkCommentAuthorization(commentId, userId);
+    await this.postModel.checkCommentAuthorization(commentId, userId);
 
-    const studyRecord = await this.studyModel.deleteComment(commentId);
+    const postRecord = await this.postModel.deleteComment(commentId);
     await this.notificationModel.deleteNotification(commentId); // 알림 삭제
   }
 }

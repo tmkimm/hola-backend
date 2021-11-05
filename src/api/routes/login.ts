@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { AuthService, UserService } from '../../services/index';
 import { isUserIdValid, isTokenValidWithOauth, nickNameDuplicationCheck, autoSignUp } from '../middlewares/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
-import { Study as StudyModel } from '../../models/Study';
+import { Post as PostModel } from '../../models/Post';
 import { IUser, User as UserModel } from '../../models/User';
 import { Notification as NotificationModel } from '../../models/Notification';
 
@@ -61,7 +61,7 @@ export default (app: Router) => {
       delete userDTO.id;
 
       // 회원 정보 수정(등록)
-      const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
+      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
       const { userRecord } = await UserServiceInstance.modifyUser(id, id, userDTO);
       // AccessToken, RefreshToken 발급
       const AuthServiceInstance = new AuthService(UserModel);

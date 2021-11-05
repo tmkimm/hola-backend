@@ -5,7 +5,7 @@ import { IUser, User as UserModel } from '../../models/User';
 import { UserService, NotificationService } from '../../services/index';
 import { nickNameDuplicationCheck, isAccessTokenValid, isUserIdValid } from '../middlewares/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
-import { Study as StudyModel } from '../../models/Study';
+import { Post as PostModel } from '../../models/Post';
 import { Notification as NotificationModel } from '../../models/Notification';
 
 const route = Router();
@@ -18,7 +18,7 @@ export default (app: Router) => {
     '/sign',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { fileName } = req.body;
-      const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
+      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
       const signedUrlPut = await UserServiceInstance.getPreSignUrl(fileName);
 
       return res.status(200).json({
@@ -38,7 +38,7 @@ export default (app: Router) => {
         });
       }
 
-      const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
+      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
       const user = await UserServiceInstance.findByNickName(nickName);
       return res.status(200).json(user);
     }),
@@ -51,7 +51,7 @@ export default (app: Router) => {
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
 
-      const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
+      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
       const user = await UserServiceInstance.findById(Types.ObjectId(id));
 
       return res.status(200).json(user);
@@ -69,7 +69,7 @@ export default (app: Router) => {
       const { _id: tokenUserId } = req.user as IUser;
 
       const userDTO = req.body;
-      const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
+      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
       const { userRecord, accessToken, refreshToken } = await UserServiceInstance.modifyUser(
         Types.ObjectId(id),
         tokenUserId,
@@ -113,7 +113,7 @@ export default (app: Router) => {
       const { id } = req.params;
       const { _id: tokenUserId } = req.user as IUser;
 
-      const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
+      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
       await UserServiceInstance.deleteUser(Types.ObjectId(id), tokenUserId);
       return res.clearCookie('R_AUTH');
       return res.status(204).json();
@@ -127,7 +127,7 @@ export default (app: Router) => {
     isAccessTokenValid,
     async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
-      const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
+      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
       const user = await UserServiceInstance.findUserLikes(Types.ObjectId(id));
       return res.status(200).json(user);
     },
@@ -140,7 +140,7 @@ export default (app: Router) => {
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
-      const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
+      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
       const user = await UserServiceInstance.findReadList(Types.ObjectId(id));
 
       return res.status(200).json(user);
@@ -149,13 +149,13 @@ export default (app: Router) => {
 
   // 사용자 작성 글 목록 조회
   route.get(
-    '/myStudies/:id',
+    '/myPosts/:id',
     isUserIdValid,
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
-      const UserServiceInstance = new UserService(StudyModel, UserModel, NotificationModel);
-      const user = await UserServiceInstance.findMyStudies(Types.ObjectId(id));
+      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
+      const user = await UserServiceInstance.findMyPosts(Types.ObjectId(id));
 
       return res.status(200).json(user);
     }),

@@ -23,7 +23,7 @@ export interface ICommentDocument extends IComment, Document {}
 export type ICommentModel = Model<ICommentDocument>;
 
 // 글
-export interface IStudy {
+export interface IPost {
   author: Types.ObjectId; // 글 등록자 정보
   topic: string; // 글 주제(사용 X)
   language: string[]; // 사용 언어 리스트
@@ -38,54 +38,51 @@ export interface IStudy {
   totalLikes: number; // 관심 등록 수
 }
 
-export interface IStudyDocument extends IStudy, Document {}
+export interface IPostDocument extends IPost, Document {}
 
-export interface IStudyModel extends Model<IStudyDocument> {
-  findStudy: (
+export interface IPostModel extends Model<IPostDocument> {
+  findPost: (
     offset: number | null,
     limit: number | null,
     sort: string | null,
     language: string | null,
     period: number | null,
     isClosed: string | null,
-  ) => Promise<IStudyDocument[]>;
-  findStudyRecommend: (
+  ) => Promise<IPostDocument[]>;
+  findPostRecommend: (
     sort: string | null,
     language: string[] | null,
-    studyId: Types.ObjectId | null,
+    postId: Types.ObjectId | null,
     userId: Types.ObjectId | null,
     limit: number | null,
-  ) => Promise<IStudyDocument[]>;
+  ) => Promise<IPostDocument[]>;
   registerComment: (
-    studyId: Types.ObjectId,
+    postId: Types.ObjectId,
     content: string,
     author: Types.ObjectId,
-  ) => Promise<{ study: IStudyDocument; commentId: Types.ObjectId }>;
+  ) => Promise<{ post: IPostDocument; commentId: Types.ObjectId }>;
   registerReply: (
-    studyId: Types.ObjectId,
+    postId: Types.ObjectId,
     commentId: Types.ObjectId,
     content: string,
     author: Types.ObjectId,
-  ) => Promise<{ study: IStudyDocument; replyId: Types.ObjectId }>;
-  findComments: (id: Types.ObjectId) => Promise<IStudyDocument>;
-  deleteStudy: (id: Types.ObjectId) => void;
-  modifyStudy: (id: Types.ObjectId, study: IStudy) => Promise<IStudyDocument>;
-  modifyComment: (comment: IComment) => Promise<IStudyDocument>;
-  modifyReply: (comment: IReply) => Promise<IStudyDocument>;
-  deleteComment: (id: Types.ObjectId) => Promise<IStudyDocument>;
-  deleteReply: (id: Types.ObjectId) => Promise<IStudyDocument>;
-  addLike: (
-    studyId: Types.ObjectId,
-    userId: Types.ObjectId,
-  ) => Promise<{ study: IStudyDocument; isLikeExist: boolean }>;
+  ) => Promise<{ post: IPostDocument; replyId: Types.ObjectId }>;
+  findComments: (id: Types.ObjectId) => Promise<IPostDocument>;
+  deletePost: (id: Types.ObjectId) => void;
+  modifyPost: (id: Types.ObjectId, post: IPost) => Promise<IPostDocument>;
+  modifyComment: (comment: IComment) => Promise<IPostDocument>;
+  modifyReply: (comment: IReply) => Promise<IPostDocument>;
+  deleteComment: (id: Types.ObjectId) => Promise<IPostDocument>;
+  deleteReply: (id: Types.ObjectId) => Promise<IPostDocument>;
+  addLike: (postId: Types.ObjectId, userId: Types.ObjectId) => Promise<{ post: IPostDocument; isLikeExist: boolean }>;
   deleteLike: (
-    studyId: Types.ObjectId,
+    postId: Types.ObjectId,
     userId: Types.ObjectId,
-  ) => Promise<{ study: IStudyDocument; isLikeExist: boolean }>;
-  increaseView: (studyId: Types.ObjectId) => void;
+  ) => Promise<{ post: IPostDocument; isLikeExist: boolean }>;
+  increaseView: (postId: Types.ObjectId) => void;
   findAuthorByCommentId: (commentId: Types.ObjectId) => Promise<Types.ObjectId | null>;
   findAuthorByReplyId: (replyId: Types.ObjectId) => Promise<Types.ObjectId | null>;
-  checkStudyAuthorization: (studyId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
+  checkPostAuthorization: (postId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
   checkCommentAuthorization: (commentId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
   checkReplyAuthorization: (replyId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
 }
@@ -115,7 +112,7 @@ const commentSchema = new Schema<ICommentDocument>(
   },
 );
 
-const studySchema = new Schema<IStudyDocument>(
+const postSchema = new Schema<IPostDocument>(
   {
     author: { type: Types.ObjectId, ref: 'User' }, // 글 등록자 정보
     topic: String, // 글 주제(사용 X)
@@ -138,7 +135,7 @@ const studySchema = new Schema<IStudyDocument>(
   },
 );
 
-studySchema.virtual('totalComments').get(function (this: IStudy) {
+postSchema.virtual('totalComments').get(function (this: IPost) {
   return this.comments.length;
 });
 
@@ -146,7 +143,7 @@ studySchema.virtual('totalComments').get(function (this: IStudy) {
 //   return 42;
 // });
 // 최신, 트레딩 조회
-studySchema.statics.findStudy = async function (offset, limit, sort, language, period, isClosed) {
+postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed) {
   // Pagenation
   const offsetQuery = parseInt(offset, 10) || 0;
   const limitQuery = parseInt(limit, 10) || 20;
@@ -185,7 +182,7 @@ studySchema.statics.findStudy = async function (offset, limit, sort, language, p
   return result;
 };
 // 사용자에게 추천 조회
-studySchema.statics.findStudyRecommend = async function (sort, language, studyId, userId, limit) {
+postSchema.statics.findPostRecommend = async function (sort, language, postId, userId, limit) {
   let sortQuery = [];
   // Sorting
   if (sort) {
@@ -205,12 +202,12 @@ studySchema.statics.findStudyRecommend = async function (sort, language, studyId
   query.createdAt = { $gte: today.setDate(today.getDate() - 14) };
 
   // 현재 읽고 있는 글은 제외하고 조회
-  query._id = { $ne: studyId };
+  query._id = { $ne: postId };
 
   // 사용자가 작성한 글 제외하고 조회
   if (userId) query.author = { $ne: userId };
 
-  const studies = await this.find(query)
+  const posts = await this.find(query)
     .where('isDeleted')
     .equals(false)
     .where('isClosed')
@@ -220,66 +217,66 @@ studySchema.statics.findStudyRecommend = async function (sort, language, studyId
     .select('-isDeleted');
 
   // 부족한 개수만큼 추가 조회
-  if (studies.length < limit - 1) {
-    const notInStudyIdArr = studies.map((study: IStudyDocument) => {
-      return study._id;
+  if (posts.length < limit - 1) {
+    const notInPostIdArr = posts.map((post: IPostDocument) => {
+      return post._id;
     });
-    notInStudyIdArr.push(studyId);
-    query._id = { $nin: notInStudyIdArr }; // 이미 조회된 글들은 중복 x
+    notInPostIdArr.push(postId);
+    query._id = { $nin: notInPostIdArr }; // 이미 조회된 글들은 중복 x
     delete query.language;
-    const shortStudies = await this.find(query)
+    const shortPosts = await this.find(query)
       .where('isDeleted')
       .equals(false)
       .where('isClosed')
       .equals(false)
       .sort(sortQuery.join(' '))
-      .limit(limit - studies.length)
+      .limit(limit - posts.length)
       .select('-isDeleted');
-    studies.push(...shortStudies);
+    posts.push(...shortPosts);
   }
-  return studies;
+  return posts;
 };
 
-studySchema.statics.registerComment = async function (studyId, content, author) {
+postSchema.statics.registerComment = async function (postId, content, author) {
   const commentId = new Types.ObjectId();
-  const study = await this.findOneAndUpdate(
-    { _id: studyId },
+  const post = await this.findOneAndUpdate(
+    { _id: postId },
     { $push: { comments: { _id: commentId, content, author } } },
     { new: true, upsert: true },
   );
-  return { study, commentId };
+  return { post, commentId };
 };
 
-studySchema.statics.registerReply = async function (studyId, commentId, content, author) {
+postSchema.statics.registerReply = async function (postId, commentId, content, author) {
   const replyId = new Types.ObjectId();
-  const study = await this.findOneAndUpdate(
-    { _id: studyId, comments: { $elemMatch: { _id: commentId } } },
+  const post = await this.findOneAndUpdate(
+    { _id: postId, comments: { $elemMatch: { _id: commentId } } },
     { $push: { 'comments.$.replies': { _id: replyId, content, author } } },
     { new: true, upsert: true },
   );
-  return { study, replyId };
+  return { post, replyId };
 };
 
-studySchema.statics.findComments = async function (id) {
+postSchema.statics.findComments = async function (id) {
   const result = await this.findById(id)
     .populate('comments.author', 'nickName image')
     .populate('comments.replies.author', 'nickName image');
   return result;
 };
 
-studySchema.statics.deleteStudy = async function (id) {
+postSchema.statics.deletePost = async function (id) {
   await this.findOneAndUpdate({ _id: id }, { isDeleted: true });
 };
 
-studySchema.statics.modifyStudy = async function (id, study) {
-  const studyRecord = await this.findByIdAndUpdate({ _id: id }, study, {
+postSchema.statics.modifyPost = async function (id, post) {
+  const postRecord = await this.findByIdAndUpdate({ _id: id }, post, {
     new: true,
   });
-  return studyRecord;
+  return postRecord;
 };
 
 // 댓글 수정
-studySchema.statics.modifyComment = async function (comment) {
+postSchema.statics.modifyComment = async function (comment) {
   const { _id, content } = comment;
   const commentRecord = await this.findOneAndUpdate(
     { comments: { $elemMatch: { _id } } },
@@ -290,7 +287,7 @@ studySchema.statics.modifyComment = async function (comment) {
 };
 
 // 대댓글 수정
-studySchema.statics.modifyReply = async function (comment) {
+postSchema.statics.modifyReply = async function (comment) {
   const { _id, content, commentId } = comment;
   const commentRecord = await this.findOneAndUpdate(
     {
@@ -307,7 +304,7 @@ studySchema.statics.modifyReply = async function (comment) {
   return commentRecord;
 };
 
-studySchema.statics.deleteComment = async function (id) {
+postSchema.statics.deleteComment = async function (id) {
   const commentRecord = await this.findOneAndUpdate(
     { comments: { $elemMatch: { _id: id } } },
     { $pull: { comments: { _id: id } } },
@@ -315,7 +312,7 @@ studySchema.statics.deleteComment = async function (id) {
   return commentRecord;
 };
 
-studySchema.statics.deleteReply = async function (id) {
+postSchema.statics.deleteReply = async function (id) {
   const commentRecord = await this.findOneAndUpdate(
     { 'comments.replies': { $elemMatch: { _id: id } } },
     { $pull: { 'comments.$.replies': { _id: id } } },
@@ -325,14 +322,14 @@ studySchema.statics.deleteReply = async function (id) {
 
 // 관심등록 추가
 // 디바운스 실패 경우를 위해 예외처리
-studySchema.statics.addLike = async function (studyId, userId) {
-  const study: IStudy[] = await this.find({ _id: studyId, likes: { $in: [userId] } });
-  const isLikeExist = study.length > 0;
-  let result: IStudy;
+postSchema.statics.addLike = async function (postId, userId) {
+  const post: IPost[] = await this.find({ _id: postId, likes: { $in: [userId] } });
+  const isLikeExist = post.length > 0;
+  let result: IPost;
 
   if (!isLikeExist) {
     result = await this.findByIdAndUpdate(
-      { _id: studyId },
+      { _id: postId },
       {
         $push: {
           likes: {
@@ -349,19 +346,19 @@ studySchema.statics.addLike = async function (studyId, userId) {
       },
     );
   } else {
-    result = study[study.length - 1];
+    result = post[post.length - 1];
   }
-  return { study: result, isLikeExist };
+  return { post: result, isLikeExist };
 };
 
-studySchema.statics.deleteLike = async function (studyId, userId) {
-  const studies = await this.find({ _id: studyId });
-  let study: IStudy | null = studies[studies.length - 1];
+postSchema.statics.deleteLike = async function (postId, userId) {
+  const posts = await this.find({ _id: postId });
+  let post: IPost | null = posts[posts.length - 1];
 
-  const isLikeExist = study && study.likes.indexOf(userId) > 0;
+  const isLikeExist = post && post.likes.indexOf(userId) > 0;
   if (isLikeExist) {
-    study = await this.findOneAndUpdate(
-      { _id: studyId },
+    post = await this.findOneAndUpdate(
+      { _id: postId },
       {
         $pull: { likes: userId },
         $inc: {
@@ -373,13 +370,13 @@ studySchema.statics.deleteLike = async function (studyId, userId) {
       },
     );
   }
-  return { study, isLikeExist };
+  return { post, isLikeExist };
 };
 
 // 조회수 증가
-studySchema.statics.increaseView = async function (studyId) {
+postSchema.statics.increaseView = async function (postId) {
   await this.findOneAndUpdate(
-    { _id: studyId },
+    { _id: postId },
     {
       $inc: {
         views: 1,
@@ -389,49 +386,49 @@ studySchema.statics.increaseView = async function (studyId) {
 };
 
 // 댓글 등록한 사용자 아이디 조회
-studySchema.statics.findAuthorByCommentId = async function (commentId) {
-  const study = await this.findOne({ comments: { $elemMatch: { _id: commentId } } });
-  if (study) {
-    const { author } = study.comments[study.comments.length - 1];
+postSchema.statics.findAuthorByCommentId = async function (commentId) {
+  const post = await this.findOne({ comments: { $elemMatch: { _id: commentId } } });
+  if (post) {
+    const { author } = post.comments[post.comments.length - 1];
     return author;
   }
   return null;
 };
 
 // 대댓글 등록한 사용자 아이디 조회
-studySchema.statics.findAuthorByReplyId = async function (replyId) {
-  const study = await this.findOne({ 'comments.replies': { $elemMatch: { _id: replyId } } });
-  if (study) {
-    const { author } = study.comments[study.comments.length - 1];
+postSchema.statics.findAuthorByReplyId = async function (replyId) {
+  const post = await this.findOne({ 'comments.replies': { $elemMatch: { _id: replyId } } });
+  if (post) {
+    const { author } = post.comments[post.comments.length - 1];
     return author;
   }
   return null;
 };
 
 // 스터디 수정 권한 체크
-studySchema.statics.checkStudyAuthorization = async function (studyId, tokenUserId) {
-  const study = await this.findOne({ _id: studyId, author: tokenUserId });
-  if (!study) {
+postSchema.statics.checkPostAuthorization = async function (postId, tokenUserId) {
+  const post = await this.findOne({ _id: postId, author: tokenUserId });
+  if (!post) {
     throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
   }
 };
 
 // 댓글 수정 권한 체크
-studySchema.statics.checkCommentAuthorization = async function (commentId, tokenUserId) {
-  const study = await this.findOne({ comments: { $elemMatch: { _id: commentId, author: tokenUserId } } });
-  if (!study) {
+postSchema.statics.checkCommentAuthorization = async function (commentId, tokenUserId) {
+  const post = await this.findOne({ comments: { $elemMatch: { _id: commentId, author: tokenUserId } } });
+  if (!post) {
     throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
   }
 };
 
 // 대댓글 수정 권한 체크
-studySchema.statics.checkReplyAuthorization = async function (replyId, tokenUserId) {
-  const study = await this.findOne({ 'comments.replies': { $elemMatch: { _id: replyId, author: tokenUserId } } });
-  if (!study) {
+postSchema.statics.checkReplyAuthorization = async function (replyId, tokenUserId) {
+  const post = await this.findOne({ 'comments.replies': { $elemMatch: { _id: replyId, author: tokenUserId } } });
+  if (!post) {
     throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
   }
 };
 
-const Study = model<IStudyDocument, IStudyModel>('Study', studySchema);
+const Post = model<IPostDocument, IPostModel>('Post', postSchema);
 
-export { Study };
+export { Post };

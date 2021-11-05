@@ -4,7 +4,7 @@ import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import CustomError from '../../CustomError';
 import languageList from '../../languageList';
 
-const checkStudy = [
+const checkPost = [
   body('title').isString().withMessage('Invaild datatype(String)').optional({ nullable: true }),
   body('content').isString().withMessage('Invaild datatype(String)').optional({ nullable: true }),
   body('language').isArray().withMessage('Invaild datatype(Array)').optional({ nullable: true }),
@@ -18,8 +18,8 @@ const checkStudy = [
     .optional({ nullable: true }),
 ];
 
-// Study 유효성 검증 미들웨어
-const isStudyValid = asyncErrorWrapper(async function (req: Request, res: Response, next: NextFunction) {
+// Post 유효성 검증 미들웨어
+const isPostValid = asyncErrorWrapper(async function (req: Request, res: Response, next: NextFunction) {
   const errors = await validationResult(req);
   if (!errors.isEmpty()) {
     throw new CustomError('ContentInvaildError', 400, errors.array()[0].msg);
@@ -28,4 +28,4 @@ const isStudyValid = asyncErrorWrapper(async function (req: Request, res: Respon
   next();
 });
 
-export { checkStudy, isStudyValid };
+export { checkPost, isPostValid };

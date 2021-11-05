@@ -13,7 +13,7 @@ export interface IUser {
   password: string;
   image: string;
   likeLanguages: string[];
-  likeStudies: Types.ObjectId[];
+  likePosts: Types.ObjectId[];
   readList: Types.ObjectId[];
 }
 
@@ -28,9 +28,9 @@ export interface IUserModel extends Model<IUserDocument> {
   findByIdToken: (idToken: string) => Promise<IUserDocument>;
   findByEmail: (email: string) => Promise<IUserDocument>;
   findByNickName: (name: string) => Promise<IUserDocument>;
-  addLikeStudy: (studyId: Types.ObjectId, userId: Types.ObjectId) => Promise<IUserDocument>;
-  deleteLikeStudy: (studyId: Types.ObjectId, userId: Types.ObjectId) => Promise<IUserDocument>;
-  addReadList: (studyId: Types.ObjectId, userId: Types.ObjectId) => void;
+  addLikePost: (postId: Types.ObjectId, userId: Types.ObjectId) => Promise<IUserDocument>;
+  deleteLikePost: (postId: Types.ObjectId, userId: Types.ObjectId) => Promise<IUserDocument>;
+  addReadList: (postId: Types.ObjectId, userId: Types.ObjectId) => void;
 }
 
 const userSchema = new Schema<IUserDocument>(
@@ -55,8 +55,8 @@ const userSchema = new Schema<IUserDocument>(
     },
     image: String,
     likeLanguages: [String],
-    likeStudies: [{ type: Types.ObjectId, ref: 'Study' }],
-    readList: [{ type: Types.ObjectId, ref: 'Study' }],
+    likePosts: [{ type: Types.ObjectId, ref: 'Post' }],
+    readList: [{ type: Types.ObjectId, ref: 'Post' }],
   },
   {
     timestamps: true,
@@ -101,13 +101,13 @@ userSchema.methods.generateRefreshToken = async function () {
   return refreshToken;
 };
 
-userSchema.statics.addLikeStudy = async function (studyId, userId) {
+userSchema.statics.addLikePost = async function (postId, userId) {
   const result = await this.findByIdAndUpdate(
     { _id: userId },
     {
       $push: {
-        likeStudies: {
-          _id: studyId,
+        likePosts: {
+          _id: postId,
         },
       },
     },
@@ -119,25 +119,25 @@ userSchema.statics.addLikeStudy = async function (studyId, userId) {
   return result;
 };
 
-userSchema.statics.deleteLikeStudy = async function (studyId, userId) {
+userSchema.statics.deleteLikePost = async function (postId, userId) {
   const deleteRecord = await this.findOneAndUpdate(
     { _id: userId },
     {
-      $pull: { likeStudies: studyId },
+      $pull: { likePosts: postId },
     },
   );
   return deleteRecord;
 };
 
-userSchema.statics.addReadList = async function (studyId, userId) {
-  const isStudyExists = await this.findOne({ _id: userId, readList: studyId });
-  if (!isStudyExists) {
+userSchema.statics.addReadList = async function (postId, userId) {
+  const isPostExists = await this.findOne({ _id: userId, readList: postId });
+  if (!isPostExists) {
     await this.findByIdAndUpdate(
       { _id: userId },
       {
         $push: {
           readList: {
-            _id: studyId,
+            _id: postId,
           },
         },
       },

@@ -1,5 +1,5 @@
 export { AuthService } from './auth';
-export { StudyService } from './study';
+export { PostService } from './post';
 export { UserService } from './user';
 export { FeedbackService } from './feedback';
 export { NotificationService } from './notification';

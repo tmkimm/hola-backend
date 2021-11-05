@@ -2,13 +2,13 @@ import { Types } from 'mongoose';
 import AWS from 'aws-sdk';
 import { IUserDocument, IUserModel } from '../models/User';
 import { INotificationModel } from '../models/Notification';
-import { IStudyModel } from '../models/Study';
+import { IPostModel } from '../models/Post';
 import config from '../config/index';
 import CustomError from '../CustomError';
 
 export class UserService {
   constructor(
-    protected studyModel: IStudyModel,
+    protected postModel: IPostModel,
     protected userModel: IUserModel,
     protected notificationModel: INotificationModel,
   ) {}
@@ -40,16 +40,16 @@ export class UserService {
     if (id !== tokenUserId) throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
 
     // 사용자가 작성한 글 제거
-    await this.studyModel.deleteMany({ author: id });
+    await this.postModel.deleteMany({ author: id });
 
     // 사용자가 작성한 댓글 제거
-    await this.studyModel.findOneAndUpdate(
+    await this.postModel.findOneAndUpdate(
       { comments: { $elemMatch: { author: id } } },
       { $pull: { comments: { author: id } } },
     );
 
     // 사용자가 작성한 대댓글 제거
-    await this.studyModel.findOneAndUpdate(
+    await this.postModel.findOneAndUpdate(
       { 'comments.replies': { $elemMatch: { author: id } } },
       { $pull: { 'comments.$.replies': { author: id } } },
     );
@@ -64,11 +64,11 @@ export class UserService {
     const userLikes = await this.userModel
       .findById(id)
       .populate({
-        path: 'likeStudies',
+        path: 'likePosts',
         match: { isDeleted: false },
         options: { sort: { createdAt: -1 } },
       })
-      .select('likeStudies');
+      .select('likePosts');
     return userLikes;
   }
 
@@ -86,9 +86,9 @@ export class UserService {
   }
 
   // 사용자의 작성 목록을 조회한다.
-  async findMyStudies(id: Types.ObjectId) {
-    const myStudies = await this.studyModel.find({ author: id, isDeleted: false }).sort('-createdAt');
-    return myStudies;
+  async findMyPosts(id: Types.ObjectId) {
+    const myPosts = await this.postModel.find({ author: id, isDeleted: false }).sort('-createdAt');
+    return myPosts;
   }
 
   // S3 Pre-Sign Url을 발급한다.
@@ -111,8 +111,8 @@ export class UserService {
   }
 
   // 사용자의 읽은 목록을 추가한다.
-  async addReadLists(studyId: Types.ObjectId, userId: Types.ObjectId) {
-    const user = await this.userModel.addReadList(studyId, userId);
+  async addReadLists(postId: Types.ObjectId, userId: Types.ObjectId) {
+    const user = await this.userModel.addReadList(postId, userId);
     return user;
   }
 }

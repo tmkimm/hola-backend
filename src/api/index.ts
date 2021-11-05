@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import study from './routes/study';
+import post from './routes/post';
 import auth from './routes/auth';
 import login from './routes/login';
 import logout from './routes/logout';
@@ -14,7 +14,7 @@ export default () => {
   login(app);
   logout(app);
   user(app);
-  study(app);
+  post(app);
   feedback(app);
   commment(app);
   reply(app);

@@ -2,15 +2,15 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 import { IUser, User as UserModel } from '../../models/User';
 import {
-  checkStudy,
-  isStudyValid,
+  checkPost,
+  isPostValid,
   isAccessTokenValid,
   getUserIdByAccessToken,
-  isStudyIdValid,
+  isPostIdValid,
 } from '../middlewares/index';
-import { StudyService } from '../../services/index';
+import { PostService } from '../../services/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
-import { Study as StudyModel } from '../../models/Study';
+import { Post as PostModel } from '../../models/Post';
 import { Notification as NotificationModel } from '../../models/Notification';
 
 const route = Router();
@@ -20,25 +20,25 @@ export default (app: Router) => {
     스터디에 관련된 Router를 정의한다.
     등록 / 수정 / 삭제하려는 사용자의 정보는 Access Token을 이용하여 처리한다.
     
-    # GET /studies : 스터디 리스트 조회(pagenation, sort, query select)
-    # POST /studies/ : 신규 스터디 등록
-    # GET /studies/:id : 스터디 상세 정보 조회
-    # PATCH /studies/:id : 스터디 정보 수정
-    # DELETE /studies/:id : 스터디 삭제
+    # GET /posts : 스터디 리스트 조회(pagenation, sort, query select)
+    # POST /posts/ : 신규 스터디 등록
+    # GET /posts/:id : 스터디 상세 정보 조회
+    # PATCH /posts/:id : 스터디 정보 수정
+    # DELETE /posts/:id : 스터디 삭제
 
-    # POST /studies/likes : 좋아요 등록
-    # DELETE /studies/likes/:id : 좋아요 삭제
+    # POST /posts/likes : 좋아요 등록
+    # DELETE /posts/likes/:id : 좋아요 삭제
     */
-  app.use('/studies', route);
+  app.use('/posts', route);
 
   // 스터디 리스트 조회
   route.get(
     '/',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { offset, limit, sort, language, period, isClosed } = req.query;
-      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const studies = await StudyServiceInstance.findStudy(offset, limit, sort, language, period, isClosed);
-      return res.status(200).json(studies);
+      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+      const posts = await PostServiceInstance.findPost(offset, limit, sort, language, period, isClosed);
+      return res.status(200).json(posts);
     }),
   );
 
@@ -48,10 +48,10 @@ export default (app: Router) => {
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { _id: userId } = req.user as IUser;
-      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const studies = await StudyServiceInstance.recommendToUserFromMain(userId);
+      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+      const posts = await PostServiceInstance.recommendToUserFromMain(userId);
 
-      return res.status(200).json(studies);
+      return res.status(200).json(posts);
     }),
   );
 
@@ -60,13 +60,13 @@ export default (app: Router) => {
     '/:id/recommend',
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const studyId = req.params.id;
+      const postId = req.params.id;
       const { _id: userId } = req.user as IUser;
 
-      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const study = await StudyServiceInstance.recommendToUserFromStudy(Types.ObjectId(studyId), userId);
+      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+      const post = await PostServiceInstance.recommendToUserFromPost(Types.ObjectId(postId), userId);
 
-      return res.status(200).json(study);
+      return res.status(200).json(post);
     }),
   );
 
@@ -74,17 +74,17 @@ export default (app: Router) => {
   // 로그인된 사용자일 경우 읽은 목록을 추가한다.
   route.get(
     '/:id',
-    isStudyIdValid,
+    isPostIdValid,
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const studyId = req.params.id;
+      const postId = req.params.id;
       const { _id: userId } = req.user as IUser;
 
       const readList = req.cookies.RVIEW;
-      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const study = await StudyServiceInstance.findStudyDetail(Types.ObjectId(studyId), userId);
-      const { updateReadList, isAlreadyRead } = await StudyServiceInstance.increaseView(
-        Types.ObjectId(studyId),
+      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+      const post = await PostServiceInstance.findPostDetail(Types.ObjectId(postId), userId);
+      const { updateReadList, isAlreadyRead } = await PostServiceInstance.increaseView(
+        Types.ObjectId(postId),
         userId,
         readList,
       );
@@ -100,23 +100,23 @@ export default (app: Router) => {
         });
       }
 
-      return res.status(200).json(study);
+      return res.status(200).json(post);
     }),
   );
 
   // 알림을 통한 스터디 상세 보기
   route.get(
     '/:id/notice',
-    isStudyIdValid,
+    isPostIdValid,
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const studyId = req.params.id;
+      const postId = req.params.id;
       const { _id: userId } = req.user as IUser;
 
-      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const study = await StudyServiceInstance.findStudyDetailAndUpdateReadAt(Types.ObjectId(studyId), userId);
+      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+      const post = await PostServiceInstance.findPostDetailAndUpdateReadAt(Types.ObjectId(postId), userId);
 
-      return res.status(200).json(study);
+      return res.status(200).json(post);
     }),
   );
 
@@ -125,11 +125,11 @@ export default (app: Router) => {
     '/:id/isLiked',
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const studyId = req.params.id;
+      const postId = req.params.id;
       const { _id: userId } = req.user as IUser;
 
-      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const isLiked = await StudyServiceInstance.findUserLiked(Types.ObjectId(studyId), userId);
+      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+      const isLiked = await PostServiceInstance.findUserLiked(Types.ObjectId(postId), userId);
 
       return res.status(200).json({
         isLiked,
@@ -141,9 +141,9 @@ export default (app: Router) => {
   route.get(
     '/:id/likes',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const studyId = req.params.id;
-      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const likeUsers = await StudyServiceInstance.findLikeUsers(Types.ObjectId(studyId));
+      const postId = req.params.id;
+      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+      const likeUsers = await PostServiceInstance.findLikeUsers(Types.ObjectId(postId));
 
       return res.status(200).json({
         likeUsers,
@@ -154,17 +154,17 @@ export default (app: Router) => {
   // 스터디 등록
   route.post(
     '/',
-    checkStudy,
-    isStudyValid,
+    checkPost,
+    isPostValid,
     isAccessTokenValid,
     asyncErrorWrapper(async function (req: Request, res: Response, next: NextFunction) {
       try {
-        const studyDTO = req.body;
+        const postDTO = req.body;
         const { _id: userId } = req.user as IUser;
 
-        const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-        const study = await StudyServiceInstance.registerStudy(userId, studyDTO);
-        return res.status(201).json(study);
+        const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+        const post = await PostServiceInstance.registerPost(userId, postDTO);
+        return res.status(201).json(post);
       } catch (error) {
         return res.status(400).json({
           errors: [
@@ -185,32 +185,32 @@ export default (app: Router) => {
   route.patch(
     '/:id',
     isAccessTokenValid,
-    checkStudy,
-    isStudyValid,
+    checkPost,
+    isPostValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
       const { _id: tokenUserId } = req.user as IUser;
 
-      const studyDTO = req.body;
+      const postDTO = req.body;
 
-      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const study = await StudyServiceInstance.modifyStudy(Types.ObjectId(id), tokenUserId, studyDTO);
+      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+      const post = await PostServiceInstance.modifyPost(Types.ObjectId(id), tokenUserId, postDTO);
 
-      return res.status(200).json(study);
+      return res.status(200).json(post);
     }),
   );
 
   // 스터디 글 삭제
   route.delete(
     '/:id',
-    isStudyIdValid,
+    isPostIdValid,
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
       const { _id: tokenUserId } = req.user as IUser;
 
-      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      await StudyServiceInstance.deleteStudy(Types.ObjectId(id), tokenUserId);
+      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+      await PostServiceInstance.deletePost(Types.ObjectId(id), tokenUserId);
       return res.status(204).json();
     }),
   );
@@ -220,13 +220,13 @@ export default (app: Router) => {
     '/likes',
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { studyId } = req.body;
+      const { postId } = req.body;
       const { _id: userId } = req.user as IUser;
 
-      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const study = await StudyServiceInstance.addLike(Types.ObjectId(studyId), userId);
+      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+      const post = await PostServiceInstance.addLike(Types.ObjectId(postId), userId);
 
-      return res.status(201).json({ likeUsers: study.likes });
+      return res.status(201).json({ likeUsers: post.likes });
     }),
   );
 
@@ -235,12 +235,12 @@ export default (app: Router) => {
     '/likes/:id',
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const studyId = req.params.id; // 사용자 id
+      const postId = req.params.id; // 사용자 id
       const { _id: userId } = req.user as IUser;
 
-      const StudyServiceInstance = new StudyService(StudyModel, UserModel, NotificationModel);
-      const study = await StudyServiceInstance.deleteLike(Types.ObjectId(studyId), userId);
-      return res.status(201).json({ likeUsers: study.likes });
+      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+      const post = await PostServiceInstance.deleteLike(Types.ObjectId(postId), userId);
+      return res.status(201).json({ likeUsers: post.likes });
     }),
   );
 };
