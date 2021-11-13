@@ -2,14 +2,21 @@ import request from 'supertest';
 import 'regenerator-runtime/runtime';
 import mongoose from 'mongoose';
 import server from '../../../app';
+import mockData from '../../mockData';
 
 let accessToken: string;
 let newPostId: string;
 const createPostData = {
-  language: ['react'],
-  title: '같이 사이드 프로젝트 하실분!',
-  content: '댓글 달아주세요 :)',
+  language: mockData.PostLanguage,
+  title: mockData.PostTitle,
+  content: mockData.PostContent,
 };
+
+const getAccessToken = async (): Promise<string> => {
+  const result = await request(server).post('/api/login').type('application/json').send({ loginType: 'guest' });
+  return result.body.accessToken;
+};
+
 beforeAll(async () => {
   await mongoose.connect(process.env.MONGODB_TEST_URI! as string, {
     useNewUrlParser: true,
@@ -19,9 +26,8 @@ beforeAll(async () => {
     autoIndex: false,
   });
 
-  // 테스트를 위한 accessToken 발급
-  const res = await request(server).post('/api/login').type('application/json').send({ loginType: 'guest' });
-  accessToken = res.body.accessToken;
+  // accessToken 발급
+  accessToken = await getAccessToken();
 });
 
 afterAll(async () => {
@@ -36,7 +42,7 @@ describe('POST /api/posts', () => {
       .post('/api/posts')
       .type('application/json')
       .send(createPostData)
-      .set('Authorization', `Bearer ${accessToken}123`);
+      .set('Authorization', mockData.InvalidAccessToken);
     expect(res.status).toBe(401);
   });
 
@@ -48,6 +54,7 @@ describe('POST /api/posts', () => {
       .set('Authorization', `Bearer ${accessToken}`);
     expect(res.status).toBe(201);
     newPostId = res.body._id;
+    (global as any).newPostId = newPostId;
   });
 });
 
@@ -64,7 +71,7 @@ describe('PATCH /api/posts', () => {
 
 describe('GET /api/posts/:id', () => {
   it('스터디 id가 존재하지 않을 경우 404 응답', async () => {
-    const result = await request(server).get('/api/posts/6103fca959c4001f004943b9');
+    const result = await request(server).get(`/api/posts/${mockData.InvalidPostId}`);
     expect(result.status).toBe(404);
   });
 
@@ -99,7 +106,7 @@ describe('DELETE /api/posts/likes', () => {
 
 describe('DELETE /api/posts/:id', () => {
   it('스터디 id가 존재하지 않을 경우 404 응답', async () => {
-    const result = await request(server).delete(`/api/posts/6103fca959c4001f004943b9`);
+    const result = await request(server).delete(`/api/posts/${mockData.InvalidPostId}`);
     expect(result.status).toBe(404);
   });
   it('정상 삭제 시 204 응답', async () => {

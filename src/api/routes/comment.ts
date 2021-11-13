@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import { Router, Request, Response, NextFunction } from 'express';
+import { isPostIdValid } from '../middlewares/isPostIdValid';
 import { IUser } from '../../models/User';
 import { isAccessTokenValid } from '../middlewares/index';
 import { CommentService } from '../../services/index';
@@ -39,6 +40,7 @@ export default (app: Router) => {
   route.post(
     '/',
     isAccessTokenValid,
+    isPostIdValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { postId, content } = req.body;
       const { _id: userId } = req.user as IUser;

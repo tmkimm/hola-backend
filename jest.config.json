@@ -6,5 +6,8 @@
       "^.+\\.mjs$": "babel-jest"
     },
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$",
-    "testEnvironment": "node"
-  }
+    "testEnvironment": "node",
+    "globals": {
+      "newPostId": true
+    }
+}

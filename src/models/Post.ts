@@ -138,10 +138,6 @@ const postSchema = new Schema<IPostDocument>(
 postSchema.virtual('totalComments').get(function (this: IPost) {
   return this.comments.length;
 });
-
-// schema.static('myStaticMethod', function myStaticMethod() {
-//   return 42;
-// });
 // 최신, 트레딩 조회
 postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed) {
   // Pagenation

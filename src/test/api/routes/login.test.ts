@@ -4,6 +4,7 @@ import 'regenerator-runtime/runtime';
 import jwt from 'jsonwebtoken';
 import server from '../../../app';
 import config from '../../../config/index';
+import mockData from '../../mockData';
 
 beforeAll(async () => {
   await mongoose.connect(process.env.MONGODB_TEST_URI! as string, {
@@ -32,7 +33,10 @@ const isAccessTokenValid = async (accessToken: string): Promise<boolean> => {
 
 describe('POST /api/login/signup', () => {
   it('닉네임이 중복되었을 경우 200 응답', async () => {
-    const res = await request(server).post('/api/login/signup').type('application/json').send({ nickName: 'Hola' });
+    const res = await request(server)
+      .post('/api/login/signup')
+      .type('application/json')
+      .send({ nickName: mockData.DuplicateNickname });
     expect(res.status).toBe(200);
     expect(res.body.isExists).toEqual(true);
   });
@@ -41,7 +45,7 @@ describe('POST /api/login/signup', () => {
     const res = await request(server)
       .post('/api/login/signup')
       .type('application/json')
-      .send({ id: '61442c0e97ce44432e9d5999' });
+      .send({ id: mockData.InvalidUserId });
     expect(res.status).toBe(404);
   });
 
@@ -60,21 +64,21 @@ describe('POST /api/login', () => {
     const res = await request(server)
       .post('/api/login')
       .type('application/json')
-      .send({ loginType: 'google', code: '123456' });
+      .send({ loginType: 'google', code: mockData.InvalidOauthToken });
     expect(res.status).toBe(400);
   });
   it('깃허브 로그인 시 올바른 Oauth2.0 token이 아니면 400 응답', async () => {
     const res = await request(server)
       .post('/api/login')
       .type('application/json')
-      .send({ loginType: 'github', code: '123456' });
+      .send({ loginType: 'github', code: mockData.InvalidOauthToken });
     expect(res.status).toBe(400);
   });
   it('카카오 로그인 시 올바른 Oauth2.0 token이 아니면 400 응답', async () => {
     const res = await request(server)
       .post('/api/login')
       .type('application/json')
-      .send({ loginType: 'kakao', code: '123456' });
+      .send({ loginType: 'kakao', code: mockData.InvalidOauthToken });
     expect(res.status).toBe(400);
   });
 

@@ -3,12 +3,23 @@ import 'regenerator-runtime/runtime';
 import mongoose from 'mongoose';
 import server from '../../../app';
 import 'dotenv/config';
+import mockData from '../../mockData';
 
 let accessToken: string;
 let newCommentId: string;
-const createCommentData = {
-  postId: '6147620306514b21115b81d0',
-  content: '참여하고 싶습니다!',
+let commentData: any;
+
+const getCommentBody = async (): Promise<any> => {
+  const result = await request(server).get('/api/posts?language=react').type('application/json');
+  return {
+    postId: result.body[0]._id,
+    content: mockData.CommentContent,
+  };
+};
+
+const getAccessToken = async (): Promise<string> => {
+  const result = await request(server).post('/api/login').type('application/json').send({ loginType: 'guest' });
+  return result.body.accessToken;
 };
 
 beforeAll(async () => {
@@ -20,9 +31,9 @@ beforeAll(async () => {
     autoIndex: false,
   });
 
-  // 테스트를 위한 accessToken 발급
-  const res = await request(server).post('/api/login').type('application/json').send({ loginType: 'guest' });
-  accessToken = res.body.accessToken;
+  // accessToken 발급
+  accessToken = await getAccessToken();
+  commentData = await getCommentBody();
 });
 
 afterAll(async () => {
@@ -36,8 +47,8 @@ describe('POST /api/posts/comments', () => {
     const res = await request(server)
       .post('/api/posts/comments')
       .type('application/json')
-      .send(createCommentData)
-      .set('Authorization', `Bearer ${accessToken}123`);
+      .send(commentData)
+      .set('Authorization', mockData.InvalidAccessToken);
     expect(res.status).toBe(401);
   });
 
@@ -45,7 +56,7 @@ describe('POST /api/posts/comments', () => {
     const res = await request(server)
       .post('/api/posts/comments')
       .type('application/json')
-      .send(createCommentData)
+      .send(commentData)
       .set('Authorization', `Bearer ${accessToken}`);
     expect(res.status).toBe(201);
     newCommentId = res.body.comments[res.body.comments.length - 1]._id;
@@ -57,7 +68,7 @@ describe("PATCH /api/posts/comments'", () => {
     const res = await request(server)
       .patch(`/api/posts/comments/${newCommentId}`)
       .type('application/json')
-      .send(createCommentData)
+      .send(commentData)
       .set('Authorization', `Bearer ${accessToken}`);
     expect(res.status).toBe(200);
   });

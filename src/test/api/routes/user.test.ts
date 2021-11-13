@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import server from '../../../app';
 import config from '../../../config/index';
+import mockData from '../../mockData';
 
 let accessToken: string;
 const isAccessTokenValid = async (token: string): Promise<boolean> => {
@@ -37,7 +38,10 @@ afterAll(async () => {
 
 describe('POST /api/users/sign', () => {
   it('s3 pre-sign url 정상 발급', async () => {
-    const res = await request(server).post('/api/users/sign').type('application/json').send({ fileName: 'hola' });
+    const res = await request(server)
+      .post('/api/users/sign')
+      .type('application/json')
+      .send({ fileName: mockData.DuplicateNickname });
     expect(res.status).toBe(200);
     expect(res.body.preSignUrl).toBeDefined();
   });
@@ -45,7 +49,7 @@ describe('POST /api/users/sign', () => {
 
 describe('PATCH /api/users/:id', () => {
   it('사용자 id가 존재하지 않으면 404 응답', async () => {
-    const res = await request(server).patch('/api/users/61442c0e97ce44432e9d5999').type('application/json');
+    const res = await request(server).patch(`/api/users/${mockData.InvalidUserId}`).type('application/json');
     expect(res.status).toBe(404);
   });
 
@@ -53,7 +57,7 @@ describe('PATCH /api/users/:id', () => {
     const res = await request(server)
       .patch('/api/users/61442c0e97ce44432e9d5f2d')
       .type('application/json')
-      .set('Authorization', `Bearer ${accessToken}123`);
+      .set('Authorization', mockData.InvalidAccessToken);
     expect(res.status).toBe(401);
   });
 
@@ -71,7 +75,7 @@ describe('PATCH /api/users/:id', () => {
     const res = await request(server)
       .patch('/api/users/61442c0e97ce44432e9d5f2d')
       .type('application/json')
-      .send({ likeLanguages: ['c', 'java'] })
+      .send({ likeLanguages: mockData.PostLanguage })
       .set('Authorization', `Bearer ${accessToken}`);
     expect(res.status).toBe(200);
     await expect(await isAccessTokenValid(res.body.accessToken)).toEqual(true);
@@ -83,7 +87,7 @@ describe('DELETE /api/users/:id', () => {
     const res = await request(server)
       .delete('/api/users/61442c0e97ce44432e9d5f2d')
       .type('application/json')
-      .set('Authorization', `Bearer ${accessToken}123`);
+      .set('Authorization', mockData.InvalidAccessToken);
     expect(res.status).toBe(401);
   });
 });
