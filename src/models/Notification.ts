@@ -22,11 +22,11 @@ export interface INotificationModel extends Model<INotificationDocument> {
     generateUserId: Types.ObjectId,
     noticeType: string,
     generateObjectId: Types.ObjectId,
-  ) => void;
-  deleteNotification: (generateObjectId: Types.ObjectId) => void;
-  deleteNotificationByPost: (postId: Types.ObjectId) => void;
-  deleteNotificationByUser: (userId: Types.ObjectId) => void;
-  updateReadAt: (postId: Types.ObjectId, userId: Types.ObjectId) => void;
+  ) => Promise<void>;
+  deleteNotification: (generateObjectId: Types.ObjectId) => Promise<void>;
+  deleteNotificationByPost: (postId: Types.ObjectId) => Promise<void>;
+  deleteNotificationByUser: (userId: Types.ObjectId) => Promise<void>;
+  updateReadAt: (postId: Types.ObjectId, userId: Types.ObjectId) => Promise<void>;
 }
 
 const notificationSchema = new Schema<INotification>(
@@ -49,7 +49,9 @@ const notificationSchema = new Schema<INotification>(
 );
 
 // 내 알림 조회
-notificationSchema.statics.findMyNotifications = async function (targetUserId) {
+notificationSchema.statics.findMyNotifications = async function (
+  targetUserId: Types.ObjectId,
+): Promise<INotificationDocument> {
   let limit = 5;
   const unReadCount = await this.countDocuments({ targetUserId, isRead: false });
   if (unReadCount >= 6) limit = unReadCount;
@@ -64,7 +66,7 @@ notificationSchema.statics.findMyNotifications = async function (targetUserId) {
 };
 
 // 읽지 않은 알림 수 조회
-notificationSchema.statics.findUnReadCount = async function (targetUserId) {
+notificationSchema.statics.findUnReadCount = async function (targetUserId: Types.ObjectId): Promise<number> {
   const unReadCount = await this.countDocuments({ targetUserId, isRead: false });
   return unReadCount;
 };
@@ -72,12 +74,12 @@ notificationSchema.statics.findUnReadCount = async function (targetUserId) {
 // 신규 알림 등록
 // like : 좋아요, comment : 댓글, reply: 대댓글
 notificationSchema.statics.registerNotification = async function (
-  postId,
-  targetUserId,
-  generateUserId,
-  noticeType,
-  generateObjectId,
-) {
+  postId: Types.ObjectId,
+  targetUserId: Types.ObjectId,
+  generateUserId: Types.ObjectId,
+  noticeType: string,
+  generateObjectId: Types.ObjectId,
+): Promise<void> {
   const isNoticeExist = await this.findOne({ postId, generateObjectId });
   let noticeCode: string;
   if (!isNoticeExist && targetUserId !== generateUserId) {
@@ -101,22 +103,25 @@ notificationSchema.statics.registerNotification = async function (
 };
 
 // 알림 삭제
-notificationSchema.statics.deleteNotification = async function (generateObjectId) {
+notificationSchema.statics.deleteNotification = async function (generateObjectId: Types.ObjectId): Promise<void> {
   await this.deleteMany({ generateObjectId });
 };
 
 // 글 삭제 시 관련 알림 제거
-notificationSchema.statics.deleteNotificationByPost = async function (postId) {
+notificationSchema.statics.deleteNotificationByPost = async function (postId: Types.ObjectId): Promise<void> {
   await this.deleteMany({ postId });
 };
 
 // 회원 탈퇴 시 관련 알림 제거
-notificationSchema.statics.deleteNotificationByUser = async function (userId) {
+notificationSchema.statics.deleteNotificationByUser = async function (userId: Types.ObjectId): Promise<void> {
   await this.deleteMany({ $or: [{ targetUserId: userId }, { generateUserId: userId }] });
 };
 
 // 알림 읽음 처리
-notificationSchema.statics.updateReadAt = async function (postId, userId) {
+notificationSchema.statics.updateReadAt = async function (
+  postId: Types.ObjectId,
+  userId: Types.ObjectId,
+): Promise<void> {
   await this.updateMany(
     {
       postId,
