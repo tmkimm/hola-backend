@@ -54,6 +54,7 @@ describe('POST /api/login/signup', () => {
       .post('/api/login/signup')
       .type('application/json')
       .send({ id: '61442c0e97ce44432e9d5f2d' });
+
     expect(res.status).toBe(200);
     await expect(await isAccessTokenValid(res.body.accessToken)).toEqual(true);
   });

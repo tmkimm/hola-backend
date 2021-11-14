@@ -6,7 +6,7 @@ const route = Router();
 
 export default (app: Router) => {
   /*
-    스터디에 관련된 Router를 정의한다.
+    글에 관련된 Router를 정의한다.
     등록 / 수정 / 삭제하려는 사용자의 정보는 Access Token을 이용하여 처리한다.
     */
   app.use('/feedback', route);

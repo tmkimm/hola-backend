@@ -8,7 +8,7 @@ export class CommentService {
     this.notificationModel = notificationModel;
   }
 
-  // 스터디 id를 이용해 댓글 리스트를 조회한다.
+  // 글 id를 이용해 댓글 리스트를 조회한다.
   async findComments(id: Types.ObjectId) {
     const comments = await this.postModel.findComments(id);
     return comments;

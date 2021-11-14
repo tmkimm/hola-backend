@@ -1,3 +1,4 @@
+import { IPostDocument } from '../../../models/Post';
 import request from 'supertest';
 import 'regenerator-runtime/runtime';
 import mongoose from 'mongoose';
@@ -80,5 +81,21 @@ describe('DELETE /api/posts/comments/:id', () => {
       .delete(`/api/posts/comments/${newCommentId}`)
       .set('Authorization', `Bearer ${accessToken}`);
     expect(result.status).toBe(204);
+  });
+});
+
+describe('GET /api/posts/comments/:id', () => {
+  it('정상 조회 시 200번 응답', async () => {
+    const result = await request(server).get(`/api/posts/comments/${commentData.postId}`);
+    expect(result.status).toBe(200);
+  });
+  it('댓글 필수 필드 확인', async () => {
+    const result = await request(server).get(`/api/posts/comments/${commentData.postId}`);
+    const requiredField = [`author`, `nickName`, `image`];
+    result.body.comments.forEach((v: IPostDocument) => {
+      requiredField.forEach((field) => {
+        expect(v).toHaveProperty(field);
+      });
+    });
   });
 });

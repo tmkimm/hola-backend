@@ -1,6 +1,7 @@
-import request from 'supertest';
-import 'regenerator-runtime/runtime';
 import mongoose from 'mongoose';
+import request from 'supertest';
+import { IPostDocument } from '../../../models/Post';
+import 'regenerator-runtime/runtime';
 import server from '../../../app';
 import mockData from '../../mockData';
 
@@ -69,14 +70,22 @@ describe('PATCH /api/posts', () => {
 });
 
 describe('GET /api/posts/:id', () => {
-  it('스터디 id가 존재하지 않을 경우 404 응답', async () => {
+  it('글 id가 존재하지 않을 경우 404 응답', async () => {
     const result = await request(server).get(`/api/posts/${mockData.InvalidPostId}`);
     expect(result.status).toBe(404);
   });
 
-  it('신규 등록한 스터디 상세 정상 조회', async () => {
-    const result = await request(server).get(`/api/posts/${newPostId}`);
-    expect(result.status).toBe(200);
+  it('신규 등록한 글 상세 정상 조회', async () => {
+    const post = await request(server).get(`/api/posts/${newPostId}`);
+    expect(post.status).toBe(200);
+  });
+
+  it('글 필수 필드 존재하는지 확인', async () => {
+    const post = await request(server).get(`/api/posts/${newPostId}`);
+    const requiredField = [`title`, `content`, `language`, `isClosed`, `createdAt`, `likes`, `views`, `_id`];
+    requiredField.forEach((v) => {
+      expect(post.body).toHaveProperty(v);
+    });
   });
 });
 
@@ -104,7 +113,7 @@ describe('DELETE /api/posts/likes', () => {
 });
 
 describe('DELETE /api/posts/:id', () => {
-  it('스터디 id가 존재하지 않을 경우 404 응답', async () => {
+  it('글 id가 존재하지 않을 경우 404 응답', async () => {
     const result = await request(server).delete(`/api/posts/${mockData.InvalidPostId}`);
     expect(result.status).toBe(404);
   });
@@ -117,8 +126,18 @@ describe('DELETE /api/posts/:id', () => {
 });
 
 describe('GET /api/posts', () => {
-  it('스터디 리스트 정상 조회 시 200 응답', async () => {
+  it('글 리스트 정상 조회 시 200 응답', async () => {
     const result = await request(server).get('/api/posts');
     expect(result.status).toBe(200);
+  });
+
+  it('필수 필드 존재하는지 확인', async () => {
+    const post = await request(server).get(`/api/posts`);
+    const requiredField: string[] = [`title`, `language`, `isClosed`, `likes`, `views`, `_id`];
+    post.body.forEach((v: IPostDocument) => {
+      requiredField.forEach((field) => {
+        expect(v).toHaveProperty(field);
+      });
+    });
   });
 });

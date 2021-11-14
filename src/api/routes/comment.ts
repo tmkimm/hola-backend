@@ -15,7 +15,7 @@ export default (app: Router) => {
     댓글에 관련된 Router를 정의한다.
     등록 / 수정 / 삭제하려는 사용자의 정보는 Access Token을 이용하여 처리한다.
 
-    # GET /posts/comments/:id : 스터디의 댓글 리스트 조회
+    # GET /posts/comments/:id : 글의 댓글 리스트 조회
     # POST /posts/comments : 신규 댓글 등록
     # PATCH /posts/comments/:id : 댓글 정보 수정
     # DELETE /posts/comments/:id : 댓글 삭제

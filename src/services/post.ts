@@ -13,7 +13,7 @@ export class PostService {
   ) {}
 
   // 리팩토링필요
-  // 메인 화면에서 스터디 리스트를 조회한다.
+  // 메인 화면에서 글 리스트를 조회한다.
   async findPost(
     offset: number | null,
     limit: number | null,
@@ -42,7 +42,7 @@ export class PostService {
     return posts;
   }
 
-  // 메인 화면에서 스터디를 추천한다.
+  // 메인 화면에서 글를 추천한다.
   // 4건 이하일 경우 무조건 다시 조회가 아니라, 해당 되는 건은 포함하고 나머지 건만 조회해야한다.
   async recommendToUserFromMain(userId: Types.ObjectId) {
     let sort;
@@ -60,7 +60,7 @@ export class PostService {
     return posts;
   }
 
-  // 글에서 스터디를 추천한다.
+  // 글에서 글를 추천한다.
   // 4건 이하일 경우 무조건 다시 조회가 아니라, 해당 되는 건은 포함하고 나머지 건만 조회해야함
   async recommendToUserFromPost(postId: Types.ObjectId, userId: Types.ObjectId) {
     const sort = '-views';
@@ -93,7 +93,7 @@ export class PostService {
     return { updateReadList, isAlreadyRead };
   }
 
-  // 상세 스터디 정보를 조회한다.
+  // 상세 글 정보를 조회한다.
   // 로그인된 사용자일 경우 읽은 목록을 추가한다.
   async findPostDetail(postId: Types.ObjectId) {
     const posts = await this.postModel
@@ -103,7 +103,7 @@ export class PostService {
     return posts;
   }
 
-  // 알림을 읽음 표시하고 상세 스터디 정보를 조회한다.
+  // 알림을 읽음 표시하고 상세 글 정보를 조회한다.
   async findPostDetailAndUpdateReadAt(postId: Types.ObjectId, userId: Types.ObjectId) {
     if (userId) {
       await this.notificationModel.updateReadAt(postId, userId);
@@ -122,14 +122,14 @@ export class PostService {
     return false;
   }
 
-  // 스터디의 관심 등록한 사용자 리스트를 조회한다.
+  // 글의 관심 등록한 사용자 리스트를 조회한다.
   async findLikeUsers(postId: Types.ObjectId) {
     const likeUsers = await this.postModel.findById(postId).select('likes');
     if (!likeUsers) return [];
     return likeUsers.likes;
   }
 
-  // 신규 스터디를 등록한다.
+  // 신규 글를 등록한다.
   async registerPost(userID: Types.ObjectId, post: IPostDocument) {
     post.author = userID;
     if (post.content) {
@@ -142,7 +142,7 @@ export class PostService {
     return postRecord;
   }
 
-  // 스터디 정보를 수정한다.
+  // 글 정보를 수정한다.
   async modifyPost(id: Types.ObjectId, tokenUserId: Types.ObjectId, post: IPost) {
     await this.postModel.checkPostAuthorization(id, tokenUserId); // 접근 권한 체크
     if (post.content) {
@@ -155,7 +155,7 @@ export class PostService {
     return postRecord;
   }
 
-  // 스터디를 삭제한다.
+  // 글를 삭제한다.
   async deletePost(id: Types.ObjectId, tokenUserId: Types.ObjectId) {
     await this.postModel.checkPostAuthorization(id, tokenUserId); // 접근 권한 체크
     await this.postModel.deletePost(id);

@@ -17,21 +17,21 @@ const route = Router();
 
 export default (app: Router) => {
   /*
-    스터디에 관련된 Router를 정의한다.
+    글에 관련된 Router를 정의한다.
     등록 / 수정 / 삭제하려는 사용자의 정보는 Access Token을 이용하여 처리한다.
     
-    # GET /posts : 스터디 리스트 조회(pagenation, sort, query select)
-    # POST /posts/ : 신규 스터디 등록
-    # GET /posts/:id : 스터디 상세 정보 조회
-    # PATCH /posts/:id : 스터디 정보 수정
-    # DELETE /posts/:id : 스터디 삭제
+    # GET /posts : 글 리스트 조회(pagenation, sort, query select)
+    # POST /posts/ : 신규 글 등록
+    # GET /posts/:id : 글 상세 정보 조회
+    # PATCH /posts/:id : 글 정보 수정
+    # DELETE /posts/:id : 글 삭제
 
     # POST /posts/likes : 좋아요 등록
     # DELETE /posts/likes/:id : 좋아요 삭제
     */
   app.use('/posts', route);
 
-  // 스터디 리스트 조회
+  // 글 리스트 조회
   route.get(
     '/',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
@@ -43,7 +43,7 @@ export default (app: Router) => {
     }),
   );
 
-  // 메인에서의 스터디 추천
+  // 메인에서의 글 추천
   route.get(
     '/recommend',
     getUserIdByAccessToken,
@@ -56,7 +56,7 @@ export default (app: Router) => {
     }),
   );
 
-  // 글에서의 스터디 추천
+  // 글에서의 글 추천
   route.get(
     '/:id/recommend',
     getUserIdByAccessToken,
@@ -71,7 +71,7 @@ export default (app: Router) => {
     }),
   );
 
-  // 스터디 상세 보기
+  // 글 상세 보기
   // 로그인된 사용자일 경우 읽은 목록을 추가한다.
   route.get(
     '/:id',
@@ -105,7 +105,7 @@ export default (app: Router) => {
     }),
   );
 
-  // 알림을 통한 스터디 상세 보기
+  // 알림을 통한 글 상세 보기
   route.get(
     '/:id/notice',
     isPostIdValid,
@@ -121,7 +121,7 @@ export default (app: Router) => {
     }),
   );
 
-  // 사용자의 스터디 관심 등록 여부
+  // 사용자의 글 관심 등록 여부
   route.get(
     '/:id/isLiked',
     getUserIdByAccessToken,
@@ -152,7 +152,7 @@ export default (app: Router) => {
     }),
   );
 
-  // 스터디 등록
+  // 글 등록
   route.post(
     '/',
     checkPost,
@@ -182,7 +182,7 @@ export default (app: Router) => {
     }),
   );
 
-  // 스터디 수정
+  // 글 수정
   route.patch(
     '/:id',
     isAccessTokenValid,
@@ -201,7 +201,7 @@ export default (app: Router) => {
     }),
   );
 
-  // 스터디 글 삭제
+  // 글 글 삭제
   route.delete(
     '/:id',
     isPostIdValid,

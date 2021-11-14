@@ -34,7 +34,7 @@ const notificationSchema = new Schema<INotification>(
     targetUserId: { type: Types.ObjectId, ref: 'User' }, // 대상자 정보
     generateUserId: { type: Types.ObjectId, ref: 'User' }, // 사용자 정보
     generateObjectId: { type: Types.ObjectId }, // 알림 대상 Object Id
-    postId: { type: Types.ObjectId, ref: 'Post' }, // 스터디 ID
+    postId: { type: Types.ObjectId, ref: 'Post' }, // 글 ID
     readAt: Date, // 읽은 시간
     isRead: { type: Boolean, default: false },
     noticeCode: String,

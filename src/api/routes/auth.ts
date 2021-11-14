@@ -25,7 +25,7 @@ export default (app: Router) => {
         throw new CustomError('RefreshTokenError', 401, 'Refresh token not found');
       }
       const AuthServiceInstance = new AuthService(UserModel);
-      const { decodeSuccess, _id, nickName, email, image, likeLanguages, accessToken } =
+      const { decodeSuccess, _id, nickName, image, likeLanguages, accessToken } =
         await AuthServiceInstance.reissueAccessToken(req.cookies.R_AUTH);
       // Refresh Token가 유효하지 않을 경우
 

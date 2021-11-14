@@ -401,7 +401,7 @@ postSchema.statics.findAuthorByReplyId = async function (replyId) {
   return null;
 };
 
-// 스터디 수정 권한 체크
+// 글 수정 권한 체크
 postSchema.statics.checkPostAuthorization = async function (postId, tokenUserId) {
   const post = await this.findOne({ _id: postId, author: tokenUserId });
   if (!post) {
