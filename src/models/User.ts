@@ -10,11 +10,11 @@ export interface IUser {
   email: string | undefined;
   name: string;
   nickName: string;
-  password: string;
+  password: string | undefined;
   image: string;
-  likeLanguages: string[];
-  likePosts: Types.ObjectId[];
-  readList: Types.ObjectId[];
+  likeLanguages: string[] | undefined;
+  likePosts: Types.ObjectId[] | undefined;
+  readList: Types.ObjectId[] | undefined;
 }
 
 export interface IUserDocument extends IUser, Document {
@@ -35,8 +35,8 @@ export interface IUserModel extends Model<IUserDocument> {
 
 const userSchema = new Schema<IUserDocument>(
   {
-    idToken: String,
-    tokenType: String,
+    idToken: { type: String, required: true },
+    tokenType: { type: String, required: true },
     email: {
       type: String,
       trim: true,
@@ -44,6 +44,7 @@ const userSchema = new Schema<IUserDocument>(
     name: {
       type: String,
       maxlength: 50,
+      required: true,
     },
     nickName: {
       type: String,

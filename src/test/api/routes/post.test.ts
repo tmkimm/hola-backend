@@ -54,7 +54,6 @@ describe('POST /api/posts', () => {
       .set('Authorization', `Bearer ${accessToken}`);
     expect(res.status).toBe(201);
     newPostId = res.body._id;
-    (global as any).newPostId = newPostId;
   });
 });
 

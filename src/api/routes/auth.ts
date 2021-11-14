@@ -38,7 +38,6 @@ export default (app: Router) => {
       const hasUnreadNotice = unReadNoticeCount > 0;
       return res.status(200).json({
         _id,
-        email,
         nickName,
         image,
         likeLanguages,

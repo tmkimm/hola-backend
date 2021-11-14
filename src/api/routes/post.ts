@@ -83,7 +83,7 @@ export default (app: Router) => {
 
       const readList = req.cookies.RVIEW;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const post = await PostServiceInstance.findPostDetail(Types.ObjectId(postId), userId);
+      const post = await PostServiceInstance.findPostDetail(Types.ObjectId(postId));
       const { updateReadList, isAlreadyRead } = await PostServiceInstance.increaseView(
         Types.ObjectId(postId),
         userId,

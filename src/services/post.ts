@@ -23,6 +23,7 @@ export class PostService {
     isClosed: string | null,
   ) {
     const posts = await this.postModel.findPost(offset, limit, sort, language, period, isClosed);
+
     const sortPosts = this.sortLanguageByQueryParam(posts, language);
     return sortPosts;
   }
@@ -49,7 +50,7 @@ export class PostService {
     const limit = 20;
     if (userId) {
       const user = await this.userModel.findById(userId);
-      if (user !== null) likeLanguages = user.likeLanguages;
+      if (user !== null && user.likeLanguages) likeLanguages = user.likeLanguages;
       sort = 'views';
     } else {
       sort = 'totalLikes';
@@ -94,7 +95,7 @@ export class PostService {
 
   // 상세 스터디 정보를 조회한다.
   // 로그인된 사용자일 경우 읽은 목록을 추가한다.
-  async findPostDetail(postId: Types.ObjectId, userId: Types.ObjectId) {
+  async findPostDetail(postId: Types.ObjectId) {
     const posts = await this.postModel
       .findById(postId)
       .populate('author', 'nickName image')
@@ -107,7 +108,7 @@ export class PostService {
     if (userId) {
       await this.notificationModel.updateReadAt(postId, userId);
     }
-    const result = await this.findPostDetail(postId, userId);
+    const result = await this.findPostDetail(postId);
     return result;
   }
 

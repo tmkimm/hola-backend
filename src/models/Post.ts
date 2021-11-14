@@ -15,7 +15,7 @@ export type IReplyModel = Model<IReplyDocument>;
 export interface IComment {
   content: string;
   author: Types.ObjectId;
-  replies: IReplyDocument[];
+  replies: IReplyDocument[] | undefined;
 }
 
 export interface ICommentDocument extends IComment, Document {}
@@ -25,9 +25,7 @@ export type ICommentModel = Model<ICommentDocument>;
 // 글
 export interface IPost {
   author: Types.ObjectId; // 글 등록자 정보
-  topic: string; // 글 주제(사용 X)
   language: string[]; // 사용 언어 리스트
-  location: string; // 스터디 장소(사용 X)
   title: string; // 글 제목
   content: string; // 글 내용
   isDeleted: boolean; // 글 삭제 여부
@@ -91,7 +89,7 @@ export interface IPostModel extends Model<IPostDocument> {
 const replySchema = new Schema<IReplyDocument>(
   {
     content: String, // 댓글 내용
-    author: { type: Types.ObjectId, ref: 'User' }, // 댓글 등록자 정보
+    author: { type: Types.ObjectId, ref: 'User', required: true }, // 댓글 등록자 정보
   },
   {
     versionKey: false,
@@ -103,7 +101,7 @@ const replySchema = new Schema<IReplyDocument>(
 const commentSchema = new Schema<ICommentDocument>(
   {
     content: String, // 댓글 내용
-    author: { type: Types.ObjectId, ref: 'User' }, // 댓글 등록자 정보
+    author: { type: Types.ObjectId, ref: 'User', required: true }, // 댓글 등록자 정보
     replies: [replySchema],
   },
   {
@@ -114,12 +112,10 @@ const commentSchema = new Schema<ICommentDocument>(
 
 const postSchema = new Schema<IPostDocument>(
   {
-    author: { type: Types.ObjectId, ref: 'User' }, // 글 등록자 정보
-    topic: String, // 글 주제(사용 X)
-    language: [String], // 사용 언어 리스트
-    location: String, // 스터디 장소(사용 X)
-    title: String, // 글 제목
-    content: String, // 글 내용
+    author: { type: Types.ObjectId, ref: 'User', required: true }, // 글 등록자 정보
+    language: { type: [String], validate: (v: any) => Array.isArray(v) && v.length > 0 }, // 사용 언어 리스트
+    title: { type: String, required: true }, // 글 제목
+    content: { type: String, required: true }, // 글 내용
     isDeleted: { type: Boolean, default: false }, // 글 삭제 여부
     isClosed: { type: Boolean, default: false }, // 글 마감 여부
     views: { type: Number, default: 0 }, // 글 조회수
@@ -174,7 +170,8 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     .equals(false)
     .sort(sortQuery.join(' '))
     .skip(Number(offsetQuery))
-    .limit(Number(limitQuery));
+    .limit(Number(limitQuery))
+    .select(`title views comments likes language`);
   return result;
 };
 // 사용자에게 추천 조회
@@ -210,7 +207,8 @@ postSchema.statics.findPostRecommend = async function (sort, language, postId, u
     .equals(false)
     .sort(sortQuery.join(' '))
     .limit(limit)
-    .select('-isDeleted');
+    .select('title')
+    .lean();
 
   // 부족한 개수만큼 추가 조회
   if (posts.length < limit - 1) {
@@ -227,7 +225,9 @@ postSchema.statics.findPostRecommend = async function (sort, language, postId, u
       .equals(false)
       .sort(sortQuery.join(' '))
       .limit(limit - posts.length)
-      .select('-isDeleted');
+      .select('title')
+      .lean();
+
     posts.push(...shortPosts);
   }
   return posts;
