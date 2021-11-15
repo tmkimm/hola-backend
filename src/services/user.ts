@@ -31,8 +31,7 @@ export class UserService {
     if (id.toString() !== tokenUserId.toString())
       throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
     const userRecord = await this.userModel.modifyUser(id, user);
-    const accessToken = await userRecord.generateAccessToken();
-    const refreshToken = await userRecord.generateRefreshToken();
+    const [accessToken, refreshToken] = await Promise.all([userRecord.generateAccessToken(), userRecord.generateRefreshToken()])
     return { userRecord, accessToken, refreshToken };
   }
 

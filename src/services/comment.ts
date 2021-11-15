@@ -25,7 +25,6 @@ export class CommentService {
   async modifyComment(comment: ICommentDocument, tokenUserId: Types.ObjectId) {
     await this.postModel.checkCommentAuthorization(comment._id, tokenUserId);
     const commentRecord = await this.postModel.modifyComment(comment);
-
     return commentRecord;
   }
 

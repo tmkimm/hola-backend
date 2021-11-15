@@ -11,12 +11,9 @@ export class AuthService {
     if (!user) throw new CustomError('InvaildParameterError', 401, 'User not found');
 
     // Access Token, Refresh Token 발급
-    const { _id } = user;
-    const { nickName } = user;
-    const { image } = user;
-    const { likeLanguages } = user;
-    const accessToken = await user.generateAccessToken();
-    const refreshToken = await user.generateRefreshToken();
+    const { _id, nickName, image, likeLanguages } = user;
+    const [accessToken, refreshToken] = await Promise.all([user.generateAccessToken(), user.generateRefreshToken()])
+    
     return { _id, nickName, image, likeLanguages, accessToken, refreshToken };
   }
 

@@ -84,8 +84,11 @@ export class PostService {
 
     // 조회수 중복 증가 방지
     if (readList === undefined || (typeof readList === 'string' && readList.indexOf(postId.toString()) === -1)) {
-      await this.postModel.increaseView(postId); // 조회수 증가
-      if (userId) await this.userModel.addReadList(postId, userId); // 읽은 목록 추가
+      if (userId) 
+        await Promise.all([this.userModel.addReadList(postId, userId), this.postModel.increaseView(postId)])
+      else
+        await this.postModel.increaseView(postId); // 조회수 증가
+      
       if (readList === undefined) updateReadList = `${postId}`;
       else updateReadList = `${readList}|${postId}`;
       isAlreadyRead = false;
