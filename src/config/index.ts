@@ -24,4 +24,6 @@ export default {
   S3SecretAccessKey: process.env.S3_SECRET_ACCESS_KEY! as string,
   S3BucketName: process.env.S3_BUCKET_NAME! as string,
   S3BucketRegion: process.env.S3_BUCKET_REGION! as string,
+  /* Sentry DSN */
+  SentryDsn: process.env.SENTRY_DSN! as string,
 };

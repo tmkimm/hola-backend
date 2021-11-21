@@ -7,6 +7,7 @@ declare global {
       Query?: any;
     }
   }
+  var __rootdir__: string;
 }
 
 declare module 'express' {

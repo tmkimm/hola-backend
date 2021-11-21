@@ -2,9 +2,22 @@ import createError from 'http-errors';
 import mongoose from 'mongoose';
 import jsonwebtoken from 'jsonwebtoken';
 import express from 'express';
+import * as Sentry from '@sentry/node';
 import CustomError from '../CustomError';
 
 export default (app: express.Application) => {
+  app.use(
+    Sentry.Handlers.errorHandler({
+      shouldHandleError(error: Error) {
+        // Capture all 404 and 500 errors
+        if (!(error instanceof CustomError)) {
+          return true;
+        }
+        return false;
+      },
+    }) as express.ErrorRequestHandler,
+  );
+
   // catch 404 and forward to error handler
   app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
     next(createError(404));
