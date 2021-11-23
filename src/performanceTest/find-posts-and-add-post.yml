@@ -1,0 +1,42 @@
+config:
+  target: "http://localhost:5000/api"
+  payload:
+    path: "post.csv"
+    fields:
+      - "language"
+      - "title"
+      - "content"
+  phases:
+    - duration: 10
+      arrivalRate: 1
+      name: "Warm up"
+scenarios:
+  - name: "find Posts and Add Post"
+    flow:
+      - get:
+          url: "/posts?sort=-createdAt,+views&offset=0&limit=20&period=14&isClosed=false&language=javascript"
+          capture:
+            - json: "$[0]._id"
+              as: "postId"
+      - get:
+          url: "/posts/{{postId}}"
+      - post:
+          url: "/login"
+          json:
+            loginType: "guest"
+          capture:
+            - json: "$.accessToken"
+              as: "accessToken"
+      - post:
+          headers:
+            Authorization: 'Bearer {{ accessToken }}'
+          url: "/posts"
+          json:
+            language: ['{{language}}']
+            title: "{{title}}"
+            content: "{{content}}"
+          capture:
+            - json: "$._id"
+              as: "newPostId"
+      - get:
+          url: "/posts/{{newPostId}}"
