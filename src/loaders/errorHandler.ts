@@ -9,8 +9,8 @@ export default (app: express.Application) => {
   app.use(
     Sentry.Handlers.errorHandler({
       shouldHandleError(error: Error) {
-        // Capture all 404 and 500 errors
-        if (!(error instanceof CustomError)) {
+        // is Custom Error
+        if (!(`type` in error)) {
           return true;
         }
         return false;
