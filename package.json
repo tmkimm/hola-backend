@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "start": "pm2 start ./app.js",
-    "server": "nodemon ./app.js",
     "dev": "nodemon --exec ts-node --files src/app.ts",
-    "test": "cross-env NODE_ENV=test jest --forceExit --runInBand "
+    "test": "cross-env NODE_ENV=test jest --forceExit --runInBand ",
+    "build": "tsc",
+    "server": "NODE_ENV=production pm2 start pm2.config.js"
   },
   "dependencies": {
     "@babel/preset-typescript": "^7.16.0",
