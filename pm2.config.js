@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'hola',
+      name: 'hola-backend',
       script: './build/app.js',
       instances: 1,
       exec_mode: 'cluster',
