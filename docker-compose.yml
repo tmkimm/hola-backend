@@ -1,0 +1,22 @@
+version: '3'
+services:
+  nginx:
+    image: nginx
+    networks:
+      - backend
+    depends_on:
+      - hola-backend
+    ports:
+      - "8080:80"
+    volumes: 
+      - ./nginx.conf:/etc/nginx/nginx.conf
+  hola-backend:
+    image: hola-backend:0.2
+    networks:
+      - backend
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+networks:
+  backend:
+    driver: bridge
