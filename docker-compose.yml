@@ -7,9 +7,10 @@ services:
     depends_on:
       - hola-backend
     ports:
-      - "8080:80"
+      - "80:80"
     volumes: 
       - ./nginx.conf:/etc/nginx/nginx.conf
+    restart: "unless-stopped"
   hola-backend:
     image: hola-backend:0.2
     networks:
