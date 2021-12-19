@@ -1,0 +1,7 @@
+version: '3'
+services:
+  hola-backend:
+    image: tmkimm/hola-backend:0.2
+    ports:
+      - "5001:5000"
+    restart: "unless-stopped"

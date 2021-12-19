@@ -17,6 +17,10 @@ dev.js
 /build
 build
 
+# ssh key
+*.cer
+*.sh
+
 # misc
 .DS_Store
 .env.local
