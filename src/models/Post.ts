@@ -171,7 +171,7 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     .sort(sortQuery.join(' '))
     .skip(Number(offsetQuery))
     .limit(Number(limitQuery))
-    .select(`title views comments likes language`);
+    .select(`title views comments likes language isClosed`);
   return result;
 };
 // 사용자에게 추천 조회
