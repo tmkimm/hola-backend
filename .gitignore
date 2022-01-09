@@ -19,7 +19,7 @@ build
 
 # ssh key
 *.cer
-*.sh
+deploy.sh
 
 # misc
 .DS_Store
