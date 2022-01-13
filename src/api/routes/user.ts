@@ -121,23 +121,17 @@ export default (app: Router) => {
   );
 
   // 사용자 관심 등록 리스트 조회
-  route.get(
-    '/likes/:id',
-    isUserIdValid,
-    isAccessTokenValid,
-    async (req: Request, res: Response, next: NextFunction) => {
-      const { id } = req.params;
-      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
-      const user = await UserServiceInstance.findUserLikes(Types.ObjectId(id));
-      return res.status(200).json(user);
-    },
-  );
+  route.get('/likes/:id', isUserIdValid, async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
+    const user = await UserServiceInstance.findUserLikes(Types.ObjectId(id));
+    return res.status(200).json(user);
+  });
 
   // 사용자 읽은 목록  조회
   route.get(
     '/read-list/:id',
     isUserIdValid,
-    isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
       const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
@@ -151,7 +145,6 @@ export default (app: Router) => {
   route.get(
     '/myPosts/:id',
     isUserIdValid,
-    isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
       const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
