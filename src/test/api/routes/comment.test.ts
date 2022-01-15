@@ -91,7 +91,7 @@ describe('GET /api/posts/comments/:id', () => {
   });
   it('댓글 필수 필드 확인', async () => {
     const result = await request(server).get(`/api/posts/comments/${commentData.postId}`);
-    const requiredField = [`author`, `nickName`, `image`];
+    const requiredField = [`_id`, `author.nickName`, `author.image`];
     result.body.comments.forEach((v: IPostDocument) => {
       requiredField.forEach((field) => {
         expect(v).toHaveProperty(field);
