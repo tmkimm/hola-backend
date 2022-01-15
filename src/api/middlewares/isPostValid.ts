@@ -11,7 +11,7 @@ const checkPost = [
   body('language')
     .custom((language) => {
       return language.every((item: string) => {
-        return languageList.indexOf(item) > 0;
+        return languageList.indexOf(item) > -1;
       });
     })
     .withMessage('Invaild language list')
