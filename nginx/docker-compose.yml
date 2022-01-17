@@ -4,18 +4,19 @@ services:
     image: nginx:latest
     restart: unless-stopped
     volumes:
-      - ./conf:/etc/nginx/conf.d
-      - ./certbot/conf:/etc/letsencrypt 
-      - ./certbot/www:/var/www/certbot
+      - ./conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./data/certbot/conf:/etc/letsencrypt 
+      - ./data/certbot/www:/var/www/certbot
     ports:
       - 80:80
       - 443:443
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
   certbot:
     image: certbot/certbot
     restart: unless-stopped
-    command: certonly --webroot --webroot-path=/var/www/certbot --email xoals1417@google.com --agree-tos --no-eff-email -d api.holaworld.io
     volumes:
-        - ./certbot/conf:/etc/letsencrypt 
-        - ./certbot/www:/var/www/certbot
+      - ./data/certbot/conf:/etc/letsencrypt 
+      - ./data/certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
