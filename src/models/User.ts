@@ -8,7 +8,7 @@ export interface IUser {
   idToken: string;
   tokenType: string;
   email: string | undefined;
-  name: string;
+  name: string | undefined;
   nickName: string;
   password: string | undefined;
   image: string;
@@ -44,7 +44,6 @@ const userSchema = new Schema<IUserDocument>(
     name: {
       type: String,
       maxlength: 50,
-      required: true,
     },
     nickName: {
       type: String,
