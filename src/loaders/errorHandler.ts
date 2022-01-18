@@ -10,7 +10,7 @@ export default (app: express.Application) => {
     Sentry.Handlers.errorHandler({
       shouldHandleError(error: Error) {
         // is Custom Error
-        if (!(`type` in error)) {
+        if (error.message !== `jwt malformed` && !(`type` in error)) {
           return true;
         }
         return false;
