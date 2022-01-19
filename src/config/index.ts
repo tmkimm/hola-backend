@@ -26,4 +26,6 @@ export default {
   S3BucketRegion: process.env.S3_BUCKET_REGION! as string,
   /* Sentry DSN */
   SentryDsn: process.env.SENTRY_DSN! as string,
+  // Slack
+  SlackWebhook: process.env.SLACK_WEBHOOK! as string,
 };

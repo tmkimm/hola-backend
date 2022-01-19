@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import jsonwebtoken from 'jsonwebtoken';
 import express from 'express';
 import * as Sentry from '@sentry/node';
+import { IncomingWebhook } from '@slack/client';
+import config from '../config/index';
 import CustomError from '../CustomError';
 
 export default (app: express.Application) => {
@@ -11,13 +13,34 @@ export default (app: express.Application) => {
       shouldHandleError(error: Error) {
         // is Custom Error
         if (error.message !== `jwt malformed` && !(`type` in error)) {
+          const webhook = new IncomingWebhook(config.SlackWebhook);
+          webhook
+            .send({
+              attachments: [
+                {
+                  color: 'danger',
+                  text: '백엔드 에러 발생',
+                  fields: [
+                    {
+                      title: error.message,
+                      value: error.stack! as string,
+                      short: false,
+                    },
+                  ],
+                  ts: Math.floor(new Date().getTime() / 1000).toString(),
+                },
+              ],
+            })
+            .catch((err: Error) => {
+              if (err) Sentry.captureException(err);
+            });
+
           return true;
         }
         return false;
       },
     }) as express.ErrorRequestHandler,
   );
-
   // catch 404 and forward to error handler
   app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
     next(createError(404));

@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/node';
 import * as Tracing from '@sentry/tracing';
 import { RewriteFrames } from '@sentry/integrations';
+
 import express from 'express';
 import config from '../config/index';
 
@@ -8,6 +9,7 @@ export default (app: express.Application) => {
   Sentry.init({
     dsn: config.SentryDsn,
     tracesSampleRate: 0.2,
+    enabled: process.env.NODE_ENV === 'production',
     integrations: [
       new RewriteFrames({
         root: global.__rootdir__,
