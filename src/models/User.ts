@@ -15,6 +15,11 @@ export interface IUser {
   likeLanguages: string[] | undefined;
   likePosts: Types.ObjectId[] | undefined;
   readList: Types.ObjectId[] | undefined;
+  position: string;
+  affiliation: string;
+  githubLink: string;
+  blogLink: string;
+  aboutMe: string;
 }
 
 export interface IUserDocument extends IUser, Document {
@@ -57,6 +62,11 @@ const userSchema = new Schema<IUserDocument>(
     likeLanguages: [String],
     likePosts: [{ type: Types.ObjectId, ref: 'Post' }],
     readList: [{ type: Types.ObjectId, ref: 'Post' }],
+    position: { type: String, default: '' },
+    affiliation: { type: String, default: '' },
+    githubLink: { type: String, default: '' },
+    blogLink: { type: String, default: '' },
+    aboutMe: { type: String, default: '' },
   },
   {
     timestamps: true,
@@ -81,11 +91,6 @@ userSchema.post('findOneAndDelete', async function (user: IUserDocument) {
   // 회원 탈퇴 시 관련 알림 제거
   await NotificationModel.deleteNotificationByUser(user._id);
 });
-
-// userSchema.statics.deleteUser = async function (id) {
-//   const user: IUserDocument = await this.findOne({ _id: id });
-//   await user.remo();
-// };
 
 userSchema.statics.modifyUser = async function (id, user) {
   const userRecord = await this.findByIdAndUpdate(id, user, {
