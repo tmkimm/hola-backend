@@ -122,6 +122,9 @@ const postSchema = new Schema<IPostDocument>(
     comments: [commentSchema], // 글 댓글 정보
     likes: [{ type: Types.ObjectId, ref: 'User' }], // 관심 등록한 사용자 리스트
     totalLikes: { type: Number, default: 0 }, // 관심 등록 수
+    startDate: { type: Date }, // 진행 시작일
+    endDate: { type: Date }, //  진행 종료일
+    hashTag: { type: [String] }, // 해시태그
   },
   {
     versionKey: false,
