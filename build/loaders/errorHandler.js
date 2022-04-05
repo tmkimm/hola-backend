@@ -33,7 +33,7 @@ exports.default = (function (app) {
     app.use(Sentry.Handlers.errorHandler({
         shouldHandleError: function (error) {
             // is Custom Error
-            if (error.message !== "jwt malformed" && !("type" in error)) {
+            if (error.message !== "jwt malformed" && error.message !== "jwt expired" && !("type" in error)) {
                 var webhook = new client_1.IncomingWebhook(index_1.default.SlackWebhook);
                 webhook
                     .send({

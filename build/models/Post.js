@@ -69,7 +69,10 @@ var postSchema = new mongoose_1.Schema({
     views: { type: Number, default: 0 },
     comments: [commentSchema],
     likes: [{ type: mongoose_1.Types.ObjectId, ref: 'User' }],
-    totalLikes: { type: Number, default: 0 }, // 관심 등록 수
+    totalLikes: { type: Number, default: 0 },
+    startDate: { type: Date },
+    endDate: { type: Date },
+    hashTag: { type: [String] }, // 해시태그
 }, {
     versionKey: false,
     timestamps: true,
