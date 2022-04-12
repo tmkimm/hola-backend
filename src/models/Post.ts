@@ -46,6 +46,7 @@ export interface IPostModel extends Model<IPostDocument> {
     language: string | null,
     period: number | null,
     isClosed: string | null,
+    type: string | null,
   ) => Promise<IPostDocument[]>;
   findPostRecommend: (
     sort: string | null,
@@ -138,7 +139,7 @@ postSchema.virtual('totalComments').get(function (this: IPost) {
   return this.comments.length;
 });
 // 최신, 트레딩 조회
-postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed) {
+postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed, type) {
   // Pagenation
   const offsetQuery = parseInt(offset, 10) || 0;
   const limitQuery = parseInt(limit, 10) || 20;
@@ -168,6 +169,10 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
   if (typeof isClosed === 'string' && !(isClosed === 'true')) {
     query.isClosed = { $eq: isClosed === 'true' };
   }
+
+  // 글 구분(1: 프로젝트, 2: 스터디)
+  if (typeof type === 'string') query.type = { $eq: type };
+
   const result = await this.find(query)
     .where('isDeleted')
     .equals(false)

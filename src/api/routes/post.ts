@@ -35,9 +35,9 @@ export default (app: Router) => {
   route.get(
     '/',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { offset, limit, sort, language, period, isClosed } = req.query;
+      const { offset, limit, sort, language, period, isClosed, type } = req.query;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const posts = await PostServiceInstance.findPost(offset, limit, sort, language, period, isClosed);
+      const posts = await PostServiceInstance.findPost(offset, limit, sort, language, period, isClosed, type);
 
       return res.status(200).json(posts);
     }),
