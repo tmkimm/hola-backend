@@ -88,8 +88,6 @@ postSchema.virtual('hashTag').get(function () {
     var hashTag = [];
     if (this.onlineOffline)
         hashTag.push(this.onlineOffline);
-    if (this.contactType)
-        hashTag.push(this.contactType);
     if (this.recruits && !Number.isNaN(Number(this.recruits)))
         hashTag.push("".concat(this.recruits, "\uBA85"));
     return hashTag;

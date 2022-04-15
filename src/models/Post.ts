@@ -148,7 +148,6 @@ const postSchema = new Schema<IPostDocument>(
 postSchema.virtual('hashTag').get(function (this: IPost) {
   const hashTag: Array<string> = [];
   if (this.onlineOffline) hashTag.push(this.onlineOffline);
-  if (this.contactType) hashTag.push(this.contactType);
   if (this.recruits && !Number.isNaN(Number(this.recruits))) hashTag.push(`${this.recruits}명`);
   return hashTag;
 });
