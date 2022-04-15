@@ -69,15 +69,30 @@ var postSchema = new mongoose_1.Schema({
     views: { type: Number, default: 0 },
     comments: [commentSchema],
     likes: [{ type: mongoose_1.Types.ObjectId, ref: 'User' }],
-    totalLikes: { type: Number, default: 0 },
-    startDate: { type: Date },
-    endDate: { type: Date },
-    hashTag: { type: [String] }, // 해시태그
+    totalLikes: { type: Number, default: null },
+    startDate: { type: Date, default: null },
+    endDate: { type: Date, default: null },
+    type: { type: String, default: null },
+    recruits: { type: String, default: null },
+    onlineOffline: { type: String, default: null },
+    contactType: { type: String, default: null },
+    contactUs: { type: String, default: null },
+    udemyLecture: { type: String, default: null }, // udemy 강의
 }, {
     versionKey: false,
     timestamps: true,
     toObject: { virtuals: true },
     toJSON: { virtuals: true },
+});
+postSchema.virtual('hashTag').get(function () {
+    var hashTag = [];
+    if (this.onlineOffline)
+        hashTag.push(this.onlineOffline);
+    if (this.contactType)
+        hashTag.push(this.contactType);
+    if (this.recruits && !Number.isNaN(Number(this.recruits)))
+        hashTag.push("".concat(this.recruits, "\uBA85"));
+    return hashTag;
 });
 postSchema.virtual('totalComments').get(function () {
     return this.comments.length;
@@ -125,7 +140,7 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                             .sort(sortQuery.join(' '))
                             .skip(Number(offsetQuery))
                             .limit(Number(limitQuery))
-                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type")];
+                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOffline contactType recruits")];
                 case 1:
                     result = _a.sent();
                     return [2 /*return*/, result];
