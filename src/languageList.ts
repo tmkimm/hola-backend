@@ -1,7 +1,7 @@
 const languageList: string[] = [
   'c',
-  'c++',
-  'c#',
+  'cplusplus',
+  'csharp',
   'spring',
   'javascript',
   'typescript',

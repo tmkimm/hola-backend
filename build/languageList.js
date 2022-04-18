@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var languageList = [
     'c',
-    'c++',
-    'c#',
+    'cplusplus',
+    'csharp',
     'spring',
     'javascript',
     'typescript',
