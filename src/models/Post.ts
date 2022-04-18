@@ -40,6 +40,7 @@ export interface IPost {
   contactType: string; // 연락방법(오픈 카카오톡, 이메일, 개인 카카오톡)
   contactUs: string; // 연락 링크
   udemyLecture: string; // udemy 강의
+  expectedEndDate: string; // 예상 종료일
 }
 export interface IPostDocument extends IPost, Document {}
 
@@ -136,6 +137,7 @@ const postSchema = new Schema<IPostDocument>(
     contactType: { type: String, default: null }, // 연락방법(오픈 카카오톡, 이메일, 개인 카카오톡)
     contactUs: { type: String, default: null }, // 연락 링크
     udemyLecture: { type: String, default: null }, // udemy 강의
+    expectedEndDate: { type: String, default: null }, // 예상 종료일
   },
   {
     versionKey: false,
@@ -149,6 +151,7 @@ postSchema.virtual('hashTag').get(function (this: IPost) {
   const hashTag: Array<string> = [];
   if (this.onlineOffline) hashTag.push(this.onlineOffline);
   if (this.recruits && !Number.isNaN(Number(this.recruits))) hashTag.push(`${this.recruits}명`);
+  if (this.expectedEndDate) hashTag.push(this.expectedEndDate);
   return hashTag;
 });
 
@@ -197,7 +200,7 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     .skip(Number(offsetQuery))
     .limit(Number(limitQuery))
     .select(
-      `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOffline contactType recruits`,
+      `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOffline contactType recruits expectedEndDate`,
     );
   return result;
 };

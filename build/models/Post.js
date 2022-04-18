@@ -77,7 +77,8 @@ var postSchema = new mongoose_1.Schema({
     onlineOffline: { type: String, default: null },
     contactType: { type: String, default: null },
     contactUs: { type: String, default: null },
-    udemyLecture: { type: String, default: null }, // udemy 강의
+    udemyLecture: { type: String, default: null },
+    expectedEndDate: { type: String, default: null }, // 예상 종료일
 }, {
     versionKey: false,
     timestamps: true,
@@ -90,6 +91,8 @@ postSchema.virtual('hashTag').get(function () {
         hashTag.push(this.onlineOffline);
     if (this.recruits && !Number.isNaN(Number(this.recruits)))
         hashTag.push("".concat(this.recruits, "\uBA85"));
+    if (this.expectedEndDate)
+        hashTag.push(this.expectedEndDate);
     return hashTag;
 });
 postSchema.virtual('totalComments').get(function () {
@@ -138,7 +141,7 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                             .sort(sortQuery.join(' '))
                             .skip(Number(offsetQuery))
                             .limit(Number(limitQuery))
-                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOffline contactType recruits")];
+                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOffline contactType recruits expectedEndDate")];
                 case 1:
                     result = _a.sent();
                     return [2 /*return*/, result];
