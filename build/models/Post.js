@@ -122,8 +122,7 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                     query = {};
                     if (typeof language === 'string')
                         query.language = { $in: language.split(',') };
-                    else if (typeof language === 'undefined')
-                        return [2 /*return*/, []];
+                    // else if (typeof language === 'undefined') return [];
                     if (typeof period === 'number' && !Number.isNaN(period)) {
                         today = new Date();
                         query.createdAt = { $gte: today.setDate(today.getDate() - period) };
