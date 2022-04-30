@@ -178,7 +178,7 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
   // Query
   const query: any = {};
   if (typeof language === 'string') query.language = { $in: language.split(',') };
-  else if (typeof language === 'undefined') return [];
+  // else if (typeof language === 'undefined') return [];
 
   if (typeof period === 'number' && !Number.isNaN(period)) {
     const today = new Date();
