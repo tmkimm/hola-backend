@@ -17,6 +17,7 @@ const languageList: string[] = [
   'ruby',
   'java',
   'flutter',
+  'udemy',
 ];
 
 export default languageList;
