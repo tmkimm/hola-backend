@@ -36,11 +36,11 @@ export interface IPost {
   totalLikes: number; // 관심 등록 수
   type: string; // 모집 구분(스터디/프로젝트)
   recruits: string; // 모집인원
-  onlineOffline: string; // 진행방식(온라인/오프라인)
+  onlineOrOffline: string; // 진행방식(온라인/오프라인)
   contactType: string; // 연락방법(오픈 카카오톡, 이메일, 개인 카카오톡)
-  contactUs: string; // 연락 링크
+  contactPoint: string; // 연락 링크
   udemyLecture: string; // udemy 강의
-  expectedEndDate: string; // 예상 종료일
+  expectedPeriod: string; // 예상 종료일
 }
 export interface IPostDocument extends IPost, Document {}
 
@@ -128,16 +128,16 @@ const postSchema = new Schema<IPostDocument>(
     views: { type: Number, default: 0 }, // 글 조회수
     comments: [commentSchema], // 글 댓글 정보
     likes: [{ type: Types.ObjectId, ref: 'User' }], // 관심 등록한 사용자 리스트
-    totalLikes: { type: Number, default: null }, // 관심 등록 수
+    totalLikes: { type: Number, default: 0 }, // 관심 등록 수
     startDate: { type: Date, default: null }, // 진행 시작일
     endDate: { type: Date, default: null }, //  진행 종료일
     type: { type: String, default: null }, // 모집 구분(스터디/프로젝트)
     recruits: { type: String, default: null }, // 모집인원
-    onlineOffline: { type: String, default: null }, // 진행방식(온라인/오프라인)
+    onlineOrOffline: { type: String, default: null }, // 진행방식(온라인/오프라인)
     contactType: { type: String, default: null }, // 연락방법(오픈 카카오톡, 이메일, 개인 카카오톡)
-    contactUs: { type: String, default: null }, // 연락 링크
+    contactPoint: { type: String, default: null }, // 연락 링크
     udemyLecture: { type: String, default: null }, // udemy 강의
-    expectedEndDate: { type: String, default: null }, // 예상 종료일
+    expectedPeriod: { type: String, default: null }, // 예상 종료일
   },
   {
     versionKey: false,
@@ -149,9 +149,9 @@ const postSchema = new Schema<IPostDocument>(
 
 postSchema.virtual('hashTag').get(function (this: IPost) {
   const hashTag: Array<string> = [];
-  if (this.onlineOffline) hashTag.push(this.onlineOffline);
+  if (this.onlineOrOffline) hashTag.push(this.onlineOrOffline);
   if (this.recruits && !Number.isNaN(Number(this.recruits))) hashTag.push(`${this.recruits}명`);
-  if (this.expectedEndDate) hashTag.push(this.expectedEndDate);
+  if (this.expectedPeriod) hashTag.push(this.expectedPeriod);
   return hashTag;
 });
 
@@ -200,7 +200,7 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     .skip(Number(offsetQuery))
     .limit(Number(limitQuery))
     .select(
-      `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOffline contactType recruits expectedEndDate`,
+      `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod`,
     );
   return result;
 };
@@ -380,8 +380,7 @@ postSchema.statics.addLike = async function (postId, userId) {
 postSchema.statics.deleteLike = async function (postId, userId) {
   const posts = await this.find({ _id: postId });
   let post: IPost | null = posts[posts.length - 1];
-
-  const isLikeExist = post && post.likes.indexOf(userId) > 0;
+  const isLikeExist = post && post.likes.indexOf(userId) > -1;
   if (isLikeExist) {
     post = await this.findOneAndUpdate(
       { _id: postId },
