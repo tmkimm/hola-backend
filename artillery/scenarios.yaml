@@ -1,0 +1,22 @@
+config:
+  target: "http://ip:80"
+  phases:
+    - duration: 1
+      arrivalRate: 6
+      name: Warm up
+scenarios:
+  - name: "get post list"
+    flow:
+      - get:
+          url: "/api/posts?sort=-createdAt,+views&offset=0&limit=20&isClosed=false&type=2&language=react,javascript"
+      - post:
+          url: "/api/posts"
+          headers:
+            authorization: "Bearer eyJ"
+          json:
+            title: "사이드 프로젝트 같이하실 분"
+            language: ['react']
+            content: "구합니다"
+            type: "1"
+      - get:
+          url: "/api/posts/6267944de4c38e702f157244"
