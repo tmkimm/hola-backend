@@ -1,6 +1,7 @@
 import { Model, Schema, model, Types, Document } from 'mongoose';
 import CustomError from '../CustomError';
-
+// eslint-disable-next-line import/no-unresolved
+import { onlineOrOfflineCode, recruitsCode, expectedPeriodCode } from '../CommonCode';
 // 대댓글
 export interface IReply {
   contnet: string;
@@ -149,9 +150,12 @@ const postSchema = new Schema<IPostDocument>(
 
 postSchema.virtual('hashTag').get(function (this: IPost) {
   const hashTag: Array<string> = [];
-  if (this.onlineOrOffline) hashTag.push(this.onlineOrOffline);
-  if (this.recruits && !Number.isNaN(Number(this.recruits))) hashTag.push(`${this.recruits}명`);
-  if (this.expectedPeriod) hashTag.push(this.expectedPeriod);
+  if (this.onlineOrOffline && Object.prototype.hasOwnProperty.call(onlineOrOfflineCode, this.onlineOrOffline))
+    hashTag.push(onlineOrOfflineCode[this.onlineOrOffline]);
+  if (this.recruits && Object.prototype.hasOwnProperty.call(recruitsCode, this.recruits))
+    hashTag.push(recruitsCode[this.recruits]);
+  if (this.expectedPeriod && Object.prototype.hasOwnProperty.call(expectedPeriodCode, this.expectedPeriod))
+    hashTag.push(expectedPeriodCode[this.expectedPeriod]);
   return hashTag;
 });
 
