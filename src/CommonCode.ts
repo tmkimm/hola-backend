@@ -30,6 +30,7 @@ const contactTypeCode: CommonCodeType = {
   ok: '오픈 카카오톡',
   pk: '개인 카카오톡',
   em: '이메일',
+  gf: '구글폼',
 };
 
 const expectedPeriodCode: CommonCodeType = {
