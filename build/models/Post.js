@@ -42,6 +42,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Post = void 0;
 var mongoose_1 = require("mongoose");
 var CustomError_1 = __importDefault(require("../CustomError"));
+// eslint-disable-next-line import/no-unresolved
+var CommonCode_1 = require("../CommonCode");
 // 대댓글 스키마
 var replySchema = new mongoose_1.Schema({
     content: String,
@@ -69,16 +71,16 @@ var postSchema = new mongoose_1.Schema({
     views: { type: Number, default: 0 },
     comments: [commentSchema],
     likes: [{ type: mongoose_1.Types.ObjectId, ref: 'User' }],
-    totalLikes: { type: Number, default: null },
+    totalLikes: { type: Number, default: 0 },
     startDate: { type: Date, default: null },
     endDate: { type: Date, default: null },
     type: { type: String, default: null },
     recruits: { type: String, default: null },
-    onlineOffline: { type: String, default: null },
+    onlineOrOffline: { type: String, default: null },
     contactType: { type: String, default: null },
-    contactUs: { type: String, default: null },
+    contactPoint: { type: String, default: null },
     udemyLecture: { type: String, default: null },
-    expectedEndDate: { type: String, default: null }, // 예상 종료일
+    expectedPeriod: { type: String, default: null }, // 예상 종료일
 }, {
     versionKey: false,
     timestamps: true,
@@ -87,12 +89,12 @@ var postSchema = new mongoose_1.Schema({
 });
 postSchema.virtual('hashTag').get(function () {
     var hashTag = [];
-    if (this.onlineOffline)
-        hashTag.push(this.onlineOffline);
-    if (this.recruits && !Number.isNaN(Number(this.recruits)))
-        hashTag.push("".concat(this.recruits, "\uBA85"));
-    if (this.expectedEndDate)
-        hashTag.push(this.expectedEndDate);
+    if (this.onlineOrOffline && Object.prototype.hasOwnProperty.call(CommonCode_1.onlineOrOfflineCode, this.onlineOrOffline))
+        hashTag.push(CommonCode_1.onlineOrOfflineCode[this.onlineOrOffline]);
+    if (this.recruits && Object.prototype.hasOwnProperty.call(CommonCode_1.recruitsCode, this.recruits))
+        hashTag.push(CommonCode_1.recruitsCode[this.recruits]);
+    if (this.expectedPeriod && Object.prototype.hasOwnProperty.call(CommonCode_1.expectedPeriodCode, this.expectedPeriod))
+        hashTag.push(CommonCode_1.expectedPeriodCode[this.expectedPeriod]);
     return hashTag;
 });
 postSchema.virtual('totalComments').get(function () {
@@ -140,7 +142,7 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                             .sort(sortQuery.join(' '))
                             .skip(Number(offsetQuery))
                             .limit(Number(limitQuery))
-                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOffline contactType recruits expectedEndDate")];
+                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod")];
                 case 1:
                     result = _a.sent();
                     return [2 /*return*/, result];
@@ -394,7 +396,7 @@ postSchema.statics.deleteLike = function (postId, userId) {
                 case 1:
                     posts = _a.sent();
                     post = posts[posts.length - 1];
-                    isLikeExist = post && post.likes.indexOf(userId) > 0;
+                    isLikeExist = post && post.likes.indexOf(userId) > -1;
                     if (!isLikeExist) return [3 /*break*/, 3];
                     return [4 /*yield*/, this.findOneAndUpdate({ _id: postId }, {
                             $pull: { likes: userId },

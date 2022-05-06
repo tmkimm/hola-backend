@@ -19,6 +19,18 @@ var languageList = [
     'ruby',
     'java',
     'flutter',
+    'udemy',
+    'nextJS',
+    'nestJS',
+    'php',
+    'reactNative',
+    'unity',
+    'aws',
+    'kubernetes',
+    'docker',
+    'git',
+    'figma',
+    'zeplin',
 ];
 exports.default = languageList;
 //# sourceMappingURL=languageList.js.map
