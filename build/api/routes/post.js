@@ -137,22 +137,6 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 알림을 통한 글 상세 보기
-    route.get('/:id/notice', index_1.isPostIdValid, index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var postId, userId, PostServiceInstance, post;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    postId = req.params.id;
-                    userId = req.user._id;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findPostDetailAndUpdateReadAt(mongoose_1.Types.ObjectId(postId), userId)];
-                case 1:
-                    post = _a.sent();
-                    return [2 /*return*/, res.status(200).json(post)];
-            }
-        });
-    }); }));
     // 사용자의 글 관심 등록 여부
     route.get('/:id/isLiked', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var postId, userId, PostServiceInstance, isLiked;

@@ -43,7 +43,7 @@ var ReplyService = /** @class */ (function () {
         this.notificationModel = notificationModel;
     }
     // 신규 대댓글을 추가한다.
-    ReplyService.prototype.registerReply = function (userID, postId, commentId, content) {
+    ReplyService.prototype.registerReply = function (userID, postId, commentId, content, nickName) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, post, replyId, author;
             return __generator(this, function (_b) {
@@ -55,7 +55,7 @@ var ReplyService = /** @class */ (function () {
                     case 2:
                         author = _b.sent();
                         if (!(author !== null)) return [3 /*break*/, 4];
-                        return [4 /*yield*/, this.notificationModel.registerNotification(postId, author, userID, 'reply', replyId)];
+                        return [4 /*yield*/, this.notificationModel.registerNotification(postId, author, userID, 'reply', replyId, nickName)];
                     case 3:
                         _b.sent(); // 알림 등록
                         _b.label = 4;

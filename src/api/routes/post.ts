@@ -105,22 +105,6 @@ export default (app: Router) => {
     }),
   );
 
-  // 알림을 통한 글 상세 보기
-  route.get(
-    '/:id/notice',
-    isPostIdValid,
-    getUserIdByAccessToken,
-    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const postId = req.params.id;
-      const { _id: userId } = req.user as IUser;
-
-      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const post = await PostServiceInstance.findPostDetailAndUpdateReadAt(Types.ObjectId(postId), userId);
-
-      return res.status(200).json(post);
-    }),
-  );
-
   // 사용자의 글 관심 등록 여부
   route.get(
     '/:id/isLiked',

@@ -41,13 +41,27 @@ var NotificationService = /** @class */ (function () {
     function NotificationService(notificationModel) {
         this.notificationModel = notificationModel;
     }
-    // 내 알림을 조회한다.
-    NotificationService.prototype.findMyNotice = function (author) {
+    // 알림 리스트를 조회한다.
+    NotificationService.prototype.findNotifications = function (userId) {
         return __awaiter(this, void 0, void 0, function () {
             var notice;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.notificationModel.findMyNotifications(author)];
+                    case 0: return [4 /*yield*/, this.notificationModel.findNotifications(userId)];
+                    case 1:
+                        notice = _a.sent();
+                        return [2 /*return*/, notice];
+                }
+            });
+        });
+    };
+    // 알림을 조회한다.
+    NotificationService.prototype.findNotification = function (_id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var notice;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.notificationModel.findNotification(_id)];
                     case 1:
                         notice = _a.sent();
                         return [2 /*return*/, notice];
@@ -65,6 +79,32 @@ var NotificationService = /** @class */ (function () {
                     case 1:
                         notice = _a.sent();
                         return [2 /*return*/, notice];
+                }
+            });
+        });
+    };
+    // 알림 읽음 처리
+    NotificationService.prototype.readNotification = function (_id) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.notificationModel.readNotification(_id)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    // 알림 전체 읽음 처리
+    NotificationService.prototype.readAll = function (targetUserId) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.notificationModel.readAll(targetUserId)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
                 }
             });
         });

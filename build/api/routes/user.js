@@ -198,20 +198,5 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 사용자 알림 목록 조회
-    route.get('/notifications/:id', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, NotificationServcieInstance, notice;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    id = req.params.id;
-                    NotificationServcieInstance = new index_1.NotificationService(Notification_1.Notification);
-                    return [4 /*yield*/, NotificationServcieInstance.findMyNotice(mongoose_1.Types.ObjectId(id))];
-                case 1:
-                    notice = _a.sent();
-                    return [2 /*return*/, res.status(200).json(notice)];
-            }
-        });
-    }); }));
 });
 //# sourceMappingURL=user.js.map

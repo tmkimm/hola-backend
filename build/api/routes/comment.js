@@ -80,14 +80,17 @@ exports.default = (function (app) {
     }); }));
     // 댓글 등록
     route.post('/', index_1.isAccessTokenValid, isPostIdValid_1.isPostIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, postId, content, userId, CommentServiceInstance, post;
+        var _a, postId, content, nickName, userId, CommentServiceInstance, post;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = req.body, postId = _a.postId, content = _a.content;
+                    nickName = req.body.nickName;
                     userId = req.user._id;
+                    if (!nickName)
+                        nickName = "\uC0AC\uC6A9\uC790";
                     CommentServiceInstance = new index_2.CommentService(Post_1.Post, Notification_1.Notification);
-                    return [4 /*yield*/, CommentServiceInstance.registerComment(userId, postId, content)];
+                    return [4 /*yield*/, CommentServiceInstance.registerComment(userId, postId, content, nickName)];
                 case 1:
                     post = _b.sent();
                     return [2 /*return*/, res.status(201).json(post)];

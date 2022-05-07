@@ -105,15 +105,6 @@ export class PostService {
     return posts;
   }
 
-  // 알림을 읽음 표시하고 상세 글 정보를 조회한다.
-  async findPostDetailAndUpdateReadAt(postId: Types.ObjectId, userId: Types.ObjectId) {
-    if (userId) {
-      await this.notificationModel.updateReadAt(postId, userId);
-    }
-    const result = await this.findPostDetail(postId);
-    return result;
-  }
-
   // 사용자의 관심 등록 여부를 조회한다.
   async findUserLiked(postId: Types.ObjectId, userId: Types.ObjectId) {
     if (userId && postId) {

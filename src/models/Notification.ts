@@ -1,20 +1,24 @@
 import { Model, Schema, model, Types } from 'mongoose';
 
 interface INotification {
+  title: string;
+  content: string;
+  isRead: boolean;
   targetUserId: Types.ObjectId;
   generateUserId: Types.ObjectId;
   generateObjectId: Types.ObjectId;
-  postId: Types.ObjectId;
+  href: string;
   readAt?: Date;
-  isRead: boolean;
-  noticeCode: string;
   noticeType: string;
+  couphone: string;
+  recruits: string;
 }
 
 export interface INotificationDocument extends INotification, Document {}
 
 export interface INotificationModel extends Model<INotificationDocument> {
-  findMyNotifications: (targetUserId: Types.ObjectId) => Promise<INotificationDocument>;
+  findNotifications: (targetUserId: Types.ObjectId) => Promise<INotificationDocument>;
+  findNotification: (_id: Types.ObjectId) => Promise<INotificationDocument>;
   findUnReadCount: (targetUserId: Types.ObjectId) => Promise<number>;
   registerNotification: (
     postId: Types.ObjectId,
@@ -22,23 +26,28 @@ export interface INotificationModel extends Model<INotificationDocument> {
     generateUserId: Types.ObjectId,
     noticeType: string,
     generateObjectId: Types.ObjectId,
+    nickName: string,
   ) => Promise<void>;
   deleteNotification: (generateObjectId: Types.ObjectId) => Promise<void>;
-  deleteNotificationByPost: (postId: Types.ObjectId) => Promise<void>;
+  deleteNotificationByPost: (href: Types.ObjectId) => Promise<void>;
   deleteNotificationByUser: (userId: Types.ObjectId) => Promise<void>;
-  updateReadAt: (postId: Types.ObjectId, userId: Types.ObjectId) => Promise<void>;
+  readNotification: (_id: Types.ObjectId) => Promise<void>;
+  readAll: (targetUserId: Types.ObjectId) => Promise<void>;
 }
 
 const notificationSchema = new Schema<INotification>(
   {
-    targetUserId: { type: Types.ObjectId, ref: 'User' }, // 대상자 정보
-    generateUserId: { type: Types.ObjectId, ref: 'User' }, // 사용자 정보
-    generateObjectId: { type: Types.ObjectId }, // 알림 대상 Object Id
-    postId: { type: Types.ObjectId, ref: 'Post' }, // 글 ID
+    title: { type: String, default: null }, // 알림 타이틀
+    content: { type: String, default: null }, // 알림 내용
+    isRead: { type: Boolean, default: false }, // 읽음 여부
+    targetUserId: { type: Types.ObjectId, ref: 'User' }, // 알림 받을사람 id
+    generateUserId: { type: Types.ObjectId, ref: 'User' }, // 알림 보낸사람 id
+    generateObjectId: { type: Types.ObjectId }, // 알림 발생한 곳  Id(글, 댓글 등)
+    href: { type: String, default: null }, // 이동할 링크
     readAt: Date, // 읽은 시간
-    isRead: { type: Boolean, default: false },
-    noticeCode: String,
-    noticeType: String,
+    noticeType: String, // 알림 구분(like, comment, reply, couphone, notice)
+    couphone: { type: String, default: null }, // 쿠폰(유데미 협업용)
+    recruits: { type: String, default: null }, // 모집 인원(유데미 협업용)
   },
   {
     versionKey: false,
@@ -48,20 +57,30 @@ const notificationSchema = new Schema<INotification>(
   },
 );
 
-// 내 알림 조회
-notificationSchema.statics.findMyNotifications = async function (
+// 알림 리스트 조회
+notificationSchema.statics.findNotifications = async function (
   targetUserId: Types.ObjectId,
 ): Promise<INotificationDocument> {
-  let limit = 5;
-  const unReadCount = await this.countDocuments({ targetUserId, isRead: false });
-  if (unReadCount >= 6) limit = unReadCount;
+  // let limit = 5;
+  // const unReadCount = await this.countDocuments({ targetUserId, isRead: false });
+  // if (unReadCount >= 6) limit = unReadCount;
 
   const result = await this.find({ targetUserId })
     .populate('generateUserId', 'nickName')
-    .populate({ path: 'postId', match: { isDeleted: false }, select: 'title' })
+    // .populate({ path: 'postId', match: { isDeleted: false }, select: 'title' })
     .sort('+isRead -createdAt')
-    .limit(limit)
+    .select(`title isRead href generateUserId noticeType createdAt`)
+    // .limit(limit)
     .lean();
+  return result;
+};
+
+// 알림 상세 조회
+notificationSchema.statics.findNotification = async function (_id: Types.ObjectId): Promise<INotificationDocument> {
+  const result = await this.findOne({ _id })
+    .populate('generateUserId', 'nickName')
+    .select(`title content isRead href generateUserId noticeType couphone recruits createdAt`);
+
   return result;
 };
 
@@ -72,33 +91,34 @@ notificationSchema.statics.findUnReadCount = async function (targetUserId: Types
 };
 
 // 신규 알림 등록
-// like : 좋아요, comment : 댓글, reply: 대댓글
 notificationSchema.statics.registerNotification = async function (
   postId: Types.ObjectId,
   targetUserId: Types.ObjectId,
   generateUserId: Types.ObjectId,
   noticeType: string,
   generateObjectId: Types.ObjectId,
+  nickName: string,
 ): Promise<void> {
-  const isNoticeExist = await this.findOne({ postId, generateObjectId });
-  let noticeCode: string;
+  const isNoticeExist = await this.findOne({ href: postId.toString(), generateUserId });
+
+  let title: string;
+  // // 알림 구분(like, comment, reply, couphone, notice)
   if (!isNoticeExist && targetUserId !== generateUserId) {
     switch (noticeType) {
       case 'like':
-        noticeCode = '0';
+        title = `👀 ${nickName}님이 내 글을 북마크했어요.`;
         break;
       case 'comment':
-        noticeCode = '1';
+        title = `👀 ${nickName}님이 내 글에 댓글을 남겼어요.`;
         break;
       case 'reply':
-        noticeCode = '2';
+        title = `👀 ${nickName}님이 내 글에 답글을 남겼어요.`;
         break;
       default:
-        noticeCode = '0';
+        title = ``;
         break;
     }
-    // const noticeCode = noticeType === 'like' ? '0' : noticeType === 'comment' ? '1' : noticeType === 'reply' ? '2' : '';
-    await this.create({ targetUserId, generateUserId, postId, noticeCode, noticeType, generateObjectId });
+    await this.create({ targetUserId, generateUserId, href: postId, title, noticeType, generateObjectId });
   }
 };
 
@@ -108,8 +128,8 @@ notificationSchema.statics.deleteNotification = async function (generateObjectId
 };
 
 // 글 삭제 시 관련 알림 제거
-notificationSchema.statics.deleteNotificationByPost = async function (postId: Types.ObjectId): Promise<void> {
-  await this.deleteMany({ postId });
+notificationSchema.statics.deleteNotificationByPost = async function (href: string): Promise<void> {
+  await this.deleteMany({ href });
 };
 
 // 회원 탈퇴 시 관련 알림 제거
@@ -117,16 +137,27 @@ notificationSchema.statics.deleteNotificationByUser = async function (userId: Ty
   await this.deleteMany({ $or: [{ targetUserId: userId }, { generateUserId: userId }] });
 };
 
+// updateReadAt, updateReadAtByPost 분리하기
+
 // 알림 읽음 처리
-notificationSchema.statics.updateReadAt = async function (
-  postId: Types.ObjectId,
-  userId: Types.ObjectId,
-): Promise<void> {
+notificationSchema.statics.readNotification = async function (_id: Types.ObjectId): Promise<void> {
   await this.updateMany(
     {
-      postId,
-      targetUserId: userId,
-      readAt: undefined,
+      _id,
+      isRead: false,
+    },
+    {
+      readAt: new Date(),
+      isRead: true,
+    },
+  );
+};
+// 알림 전체 읽음 처리
+notificationSchema.statics.readAll = async function (targetUserId: Types.ObjectId): Promise<void> {
+  await this.updateMany(
+    {
+      targetUserId,
+      isRead: false,
     },
     {
       readAt: new Date(),

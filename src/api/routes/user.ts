@@ -153,15 +153,4 @@ export default (app: Router) => {
       return res.status(200).json(user);
     }),
   );
-
-  // 사용자 알림 목록 조회
-  route.get(
-    '/notifications/:id',
-    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { id } = req.params;
-      const NotificationServcieInstance = new NotificationService(NotificationModel);
-      const notice = await NotificationServcieInstance.findMyNotice(Types.ObjectId(id));
-      return res.status(200).json(notice);
-    }),
-  );
 };

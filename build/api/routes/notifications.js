@@ -38,74 +38,76 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mongoose_1 = require("mongoose");
-var isPostIdValid_1 = require("../middlewares/isPostIdValid");
-var index_1 = require("../middlewares/index");
-var index_2 = require("../../services/index");
+var index_1 = require("../../services/index");
+var index_2 = require("../middlewares/index");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
-var Post_1 = require("../../models/Post");
 var Notification_1 = require("../../models/Notification");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
-    /*
-      대댓글에 관련된 Router를 정의한다.
-      등록 / 수정 / 삭제하려는 사용자의 정보는 Access Token을 이용하여 처리한다.
-  
-      # POST /posts/replies : 신규 대댓글 등록
-      # PATCH /posts/replies/:id : 대댓글 정보 수정
-      # DELETE /posts/replies/:id : 대댓글 삭제
-      */
-    app.use('/posts/replies', route);
-    // 대댓글 등록
-    route.post('/', index_1.isAccessTokenValid, isPostIdValid_1.isPostIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, postId, commentId, content, nickName, userId, ReplyServiceInstance, post;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    _a = req.body, postId = _a.postId, commentId = _a.commentId, content = _a.content;
-                    nickName = req.body.nickName;
-                    userId = req.user._id;
-                    if (!nickName)
-                        nickName = "\uC0AC\uC6A9\uC790";
-                    ReplyServiceInstance = new index_2.ReplyService(Post_1.Post, Notification_1.Notification);
-                    return [4 /*yield*/, ReplyServiceInstance.registerReply(userId, postId, commentId, content, nickName)];
-                case 1:
-                    post = _b.sent();
-                    return [2 /*return*/, res.status(201).json(post)];
-            }
-        });
-    }); }));
-    // 대댓글 수정
-    route.patch('/:id', index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var commentDTO, tokenUserId, ReplyServiceInstance, comment;
+    app.use('/notifications', route);
+    // 알림 전체 조회
+    route.get('/', index_2.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var userId, NoticeServiceInstance, notifications;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    commentDTO = req.body;
-                    commentDTO._id = req.params.id;
-                    tokenUserId = req.user._id;
-                    ReplyServiceInstance = new index_2.ReplyService(Post_1.Post, Notification_1.Notification);
-                    return [4 /*yield*/, ReplyServiceInstance.modifyReply(commentDTO, tokenUserId)];
+                    userId = req.user._id;
+                    NoticeServiceInstance = new index_1.NotificationService(Notification_1.Notification);
+                    return [4 /*yield*/, NoticeServiceInstance.findNotifications(userId)];
                 case 1:
-                    comment = _a.sent();
-                    return [2 /*return*/, res.status(200).json(comment)];
+                    notifications = _a.sent();
+                    return [2 /*return*/, res.status(200).json(notifications)];
             }
         });
     }); }));
-    // 대댓글 삭제
-    route.delete('/:id', index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var replyId, userId, ReplyServiceInstance;
+    // 알림 상세 조회(개발필요)
+    route.get('/:id', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var id, NotificationServcieInstance, notice;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    replyId = req.params.id;
-                    userId = req.user._id;
-                    ReplyServiceInstance = new index_2.ReplyService(Post_1.Post, Notification_1.Notification);
-                    return [4 /*yield*/, ReplyServiceInstance.deleteReply(mongoose_1.Types.ObjectId(replyId), userId)];
+                    id = req.params.id;
+                    NotificationServcieInstance = new index_1.NotificationService(Notification_1.Notification);
+                    return [4 /*yield*/, NotificationServcieInstance.findNotification(mongoose_1.Types.ObjectId(id))];
                 case 1:
-                    _a.sent();
-                    return [2 /*return*/, res.status(204).json()];
+                    notice = _a.sent();
+                    return [2 /*return*/, res.status(200).json(notice)];
+            }
+        });
+    }); }));
+    // 알림 읽음 처리
+    route.patch('/:id/read', index_2.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var id, NotificationServcieInstance, notice;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    id = req.params.id;
+                    NotificationServcieInstance = new index_1.NotificationService(Notification_1.Notification);
+                    return [4 /*yield*/, NotificationServcieInstance.readNotification(mongoose_1.Types.ObjectId(id))];
+                case 1:
+                    notice = _a.sent();
+                    return [2 /*return*/, res.status(200).json({
+                            isRead: true,
+                        })];
+            }
+        });
+    }); }));
+    // 알림 전체 읽음 처리
+    route.patch('/read-all', index_2.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var userId, NotificationServcieInstance, notice;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    userId = req.user._id;
+                    NotificationServcieInstance = new index_1.NotificationService(Notification_1.Notification);
+                    return [4 /*yield*/, NotificationServcieInstance.readAll(userId)];
+                case 1:
+                    notice = _a.sent();
+                    return [2 /*return*/, res.status(200).json({
+                            isRead: true,
+                        })];
             }
         });
     }); }));
 });
-//# sourceMappingURL=reply.js.map
+//# sourceMappingURL=notifications.js.map

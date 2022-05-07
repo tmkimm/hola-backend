@@ -39,40 +39,53 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Notification = void 0;
 var mongoose_1 = require("mongoose");
 var notificationSchema = new mongoose_1.Schema({
+    title: { type: String, default: null },
+    content: { type: String, default: null },
+    isRead: { type: Boolean, default: false },
     targetUserId: { type: mongoose_1.Types.ObjectId, ref: 'User' },
     generateUserId: { type: mongoose_1.Types.ObjectId, ref: 'User' },
     generateObjectId: { type: mongoose_1.Types.ObjectId },
-    postId: { type: mongoose_1.Types.ObjectId, ref: 'Post' },
+    href: { type: String, default: null },
     readAt: Date,
-    isRead: { type: Boolean, default: false },
-    noticeCode: String,
     noticeType: String,
+    couphone: { type: String, default: null },
+    recruits: { type: String, default: null }, // 모집 인원(유데미 협업용)
 }, {
     versionKey: false,
     timestamps: true,
     toObject: { virtuals: true },
     toJSON: { virtuals: true },
 });
-// 내 알림 조회
-notificationSchema.statics.findMyNotifications = function (targetUserId) {
+// 알림 리스트 조회
+notificationSchema.statics.findNotifications = function (targetUserId) {
     return __awaiter(this, void 0, void 0, function () {
-        var limit, unReadCount, result;
+        var result;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    limit = 5;
-                    return [4 /*yield*/, this.countDocuments({ targetUserId: targetUserId, isRead: false })];
+                case 0: return [4 /*yield*/, this.find({ targetUserId: targetUserId })
+                        .populate('generateUserId', 'nickName')
+                        // .populate({ path: 'postId', match: { isDeleted: false }, select: 'title' })
+                        .sort('+isRead -createdAt')
+                        .select("title isRead href generateUserId noticeType createdAt")
+                        // .limit(limit)
+                        .lean()];
                 case 1:
-                    unReadCount = _a.sent();
-                    if (unReadCount >= 6)
-                        limit = unReadCount;
-                    return [4 /*yield*/, this.find({ targetUserId: targetUserId })
-                            .populate('generateUserId', 'nickName')
-                            .populate({ path: 'postId', match: { isDeleted: false }, select: 'title' })
-                            .sort('+isRead -createdAt')
-                            .limit(limit)
-                            .lean()];
-                case 2:
+                    result = _a.sent();
+                    return [2 /*return*/, result];
+            }
+        });
+    });
+};
+// 알림 상세 조회
+notificationSchema.statics.findNotification = function (_id) {
+    return __awaiter(this, void 0, void 0, function () {
+        var result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, this.findOne({ _id: _id })
+                        .populate('generateUserId', 'nickName')
+                        .select("title content isRead href generateUserId noticeType couphone recruits createdAt")];
+                case 1:
                     result = _a.sent();
                     return [2 /*return*/, result];
             }
@@ -94,34 +107,31 @@ notificationSchema.statics.findUnReadCount = function (targetUserId) {
     });
 };
 // 신규 알림 등록
-// like : 좋아요, comment : 댓글, reply: 대댓글
-notificationSchema.statics.registerNotification = function (postId, targetUserId, generateUserId, noticeType, generateObjectId) {
+notificationSchema.statics.registerNotification = function (postId, targetUserId, generateUserId, noticeType, generateObjectId, nickName) {
     return __awaiter(this, void 0, void 0, function () {
-        var isNoticeExist, noticeCode;
+        var isNoticeExist, title;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, this.findOne({ postId: postId, generateObjectId: generateObjectId })];
+                case 0: return [4 /*yield*/, this.findOne({ href: postId.toString(), generateUserId: generateUserId })];
                 case 1:
                     isNoticeExist = _a.sent();
                     if (!(!isNoticeExist && targetUserId !== generateUserId)) return [3 /*break*/, 3];
                     switch (noticeType) {
                         case 'like':
-                            noticeCode = '0';
+                            title = "\uD83D\uDC40 ".concat(nickName, "\uB2D8\uC774 \uB0B4 \uAE00\uC744 \uBD81\uB9C8\uD06C\uD588\uC5B4\uC694.");
                             break;
                         case 'comment':
-                            noticeCode = '1';
+                            title = "\uD83D\uDC40 ".concat(nickName, "\uB2D8\uC774 \uB0B4 \uAE00\uC5D0 \uB313\uAE00\uC744 \uB0A8\uACBC\uC5B4\uC694.");
                             break;
                         case 'reply':
-                            noticeCode = '2';
+                            title = "\uD83D\uDC40 ".concat(nickName, "\uB2D8\uC774 \uB0B4 \uAE00\uC5D0 \uB2F5\uAE00\uC744 \uB0A8\uACBC\uC5B4\uC694.");
                             break;
                         default:
-                            noticeCode = '0';
+                            title = "";
                             break;
                     }
-                    // const noticeCode = noticeType === 'like' ? '0' : noticeType === 'comment' ? '1' : noticeType === 'reply' ? '2' : '';
-                    return [4 /*yield*/, this.create({ targetUserId: targetUserId, generateUserId: generateUserId, postId: postId, noticeCode: noticeCode, noticeType: noticeType, generateObjectId: generateObjectId })];
+                    return [4 /*yield*/, this.create({ targetUserId: targetUserId, generateUserId: generateUserId, href: postId, title: title, noticeType: noticeType, generateObjectId: generateObjectId })];
                 case 2:
-                    // const noticeCode = noticeType === 'like' ? '0' : noticeType === 'comment' ? '1' : noticeType === 'reply' ? '2' : '';
                     _a.sent();
                     _a.label = 3;
                 case 3: return [2 /*return*/];
@@ -143,11 +153,11 @@ notificationSchema.statics.deleteNotification = function (generateObjectId) {
     });
 };
 // 글 삭제 시 관련 알림 제거
-notificationSchema.statics.deleteNotificationByPost = function (postId) {
+notificationSchema.statics.deleteNotificationByPost = function (href) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, this.deleteMany({ postId: postId })];
+                case 0: return [4 /*yield*/, this.deleteMany({ href: href })];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -168,15 +178,34 @@ notificationSchema.statics.deleteNotificationByUser = function (userId) {
         });
     });
 };
+// updateReadAt, updateReadAtByPost 분리하기
 // 알림 읽음 처리
-notificationSchema.statics.updateReadAt = function (postId, userId) {
+notificationSchema.statics.readNotification = function (_id) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, this.updateMany({
-                        postId: postId,
-                        targetUserId: userId,
-                        readAt: undefined,
+                        _id: _id,
+                        isRead: false,
+                    }, {
+                        readAt: new Date(),
+                        isRead: true,
+                    })];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+};
+// 알림 전체 읽음 처리
+notificationSchema.statics.readAll = function (targetUserId) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, this.updateMany({
+                        targetUserId: targetUserId,
+                        isRead: false,
                     }, {
                         readAt: new Date(),
                         isRead: true,

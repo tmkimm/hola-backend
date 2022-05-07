@@ -188,26 +188,6 @@ var PostService = /** @class */ (function () {
             });
         });
     };
-    // 알림을 읽음 표시하고 상세 글 정보를 조회한다.
-    PostService.prototype.findPostDetailAndUpdateReadAt = function (postId, userId) {
-        return __awaiter(this, void 0, void 0, function () {
-            var result;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!userId) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.notificationModel.updateReadAt(postId, userId)];
-                    case 1:
-                        _a.sent();
-                        _a.label = 2;
-                    case 2: return [4 /*yield*/, this.findPostDetail(postId)];
-                    case 3:
-                        result = _a.sent();
-                        return [2 /*return*/, result];
-                }
-            });
-        });
-    };
     // 사용자의 관심 등록 여부를 조회한다.
     PostService.prototype.findUserLiked = function (postId, userId) {
         return __awaiter(this, void 0, void 0, function () {

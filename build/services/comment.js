@@ -59,7 +59,7 @@ var CommentService = /** @class */ (function () {
         });
     };
     // 신규 댓글을 추가한다.
-    CommentService.prototype.registerComment = function (userID, postId, content) {
+    CommentService.prototype.registerComment = function (userID, postId, content, nickName) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, post, commentId;
             return __generator(this, function (_b) {
@@ -67,7 +67,7 @@ var CommentService = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.postModel.registerComment(postId, content, userID)];
                     case 1:
                         _a = _b.sent(), post = _a.post, commentId = _a.commentId;
-                        return [4 /*yield*/, this.notificationModel.registerNotification(postId, post.author, userID, 'comment', commentId)];
+                        return [4 /*yield*/, this.notificationModel.registerNotification(postId, post.author, userID, 'comment', commentId, nickName)];
                     case 2:
                         _b.sent(); // 알림 등록
                         return [2 /*return*/, post];

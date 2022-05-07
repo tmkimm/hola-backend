@@ -29,6 +29,7 @@ var contactTypeCode = {
     ok: '오픈 카카오톡',
     pk: '개인 카카오톡',
     em: '이메일',
+    gf: '구글폼',
 };
 exports.contactTypeCode = contactTypeCode;
 var expectedPeriodCode = {

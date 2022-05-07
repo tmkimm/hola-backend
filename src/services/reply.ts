@@ -6,12 +6,19 @@ export class ReplyService {
   constructor(protected postModel: IPostModel, protected notificationModel: INotificationModel) {}
 
   // 신규 대댓글을 추가한다.
-  async registerReply(userID: Types.ObjectId, postId: Types.ObjectId, commentId: Types.ObjectId, content: string) {
+  async registerReply(
+    userID: Types.ObjectId,
+    postId: Types.ObjectId,
+    commentId: Types.ObjectId,
+    content: string,
+    nickName: string,
+  ) {
     const { post, replyId } = await this.postModel.registerReply(postId, commentId, content, userID);
 
     // 대댓글 등록 시 댓글 등록자에게 달림 추가
     const author = await this.postModel.findAuthorByCommentId(commentId);
-    if (author !== null) await this.notificationModel.registerNotification(postId, author, userID, 'reply', replyId); // 알림 등록
+    if (author !== null)
+      await this.notificationModel.registerNotification(postId, author, userID, 'reply', replyId, nickName); // 알림 등록
 
     return post;
   }
