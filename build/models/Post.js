@@ -142,7 +142,8 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                             .sort(sortQuery.join(' '))
                             .skip(Number(offsetQuery))
                             .limit(Number(limitQuery))
-                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod")];
+                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author")
+                            .populate('author', 'nickName image')];
                 case 1:
                     result = _a.sent();
                     return [2 /*return*/, result];
