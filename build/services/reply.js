@@ -54,13 +54,10 @@ var ReplyService = /** @class */ (function () {
                         return [4 /*yield*/, this.postModel.findAuthorByCommentId(commentId)];
                     case 2:
                         author = _b.sent();
-                        if (!(author !== null)) return [3 /*break*/, 4];
-                        return [4 /*yield*/, this.notificationModel.registerNotification(postId, author, userID, 'reply', replyId, nickName)];
-                    case 3:
-                        _b.sent(); // 알림 등록
-                        _b.label = 4;
-                    case 4: // 알림 등록
-                    return [2 /*return*/, post];
+                        if (author !== null)
+                            // await this.notificationModel.registerNotification(postId, author, userID, 'reply', replyId, nickName); // 알림 등록
+                            return [2 /*return*/, post];
+                        return [2 /*return*/];
                 }
             });
         });
@@ -97,9 +94,6 @@ var ReplyService = /** @class */ (function () {
                         return [4 /*yield*/, this.postModel.deleteReply(replyId)];
                     case 3:
                         postRecord = _a.sent();
-                        return [4 /*yield*/, this.notificationModel.deleteNotification(replyId)];
-                    case 4:
-                        _a.sent(); // 알림 삭제
                         return [2 /*return*/];
                 }
             });

@@ -67,9 +67,7 @@ var CommentService = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.postModel.registerComment(postId, content, userID)];
                     case 1:
                         _a = _b.sent(), post = _a.post, commentId = _a.commentId;
-                        return [4 /*yield*/, this.notificationModel.registerNotification(postId, post.author, userID, 'comment', commentId, nickName)];
-                    case 2:
-                        _b.sent(); // 알림 등록
+                        // await this.notificationModel.registerNotification(postId, post.author, userID, 'comment', commentId, nickName); // 알림 등록
                         return [2 /*return*/, post];
                 }
             });
@@ -104,9 +102,6 @@ var CommentService = /** @class */ (function () {
                         return [4 /*yield*/, this.postModel.deleteComment(commentId)];
                     case 2:
                         postRecord = _a.sent();
-                        return [4 /*yield*/, this.notificationModel.deleteNotification(commentId)];
-                    case 3:
-                        _a.sent(); // 알림 삭제
                         return [2 /*return*/];
                 }
             });

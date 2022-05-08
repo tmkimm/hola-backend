@@ -18,9 +18,9 @@ export class ReplyService {
     // 대댓글 등록 시 댓글 등록자에게 달림 추가
     const author = await this.postModel.findAuthorByCommentId(commentId);
     if (author !== null)
-      await this.notificationModel.registerNotification(postId, author, userID, 'reply', replyId, nickName); // 알림 등록
+      // await this.notificationModel.registerNotification(postId, author, userID, 'reply', replyId, nickName); // 알림 등록
 
-    return post;
+      return post;
   }
 
   // 대댓글을 수정한다.
@@ -35,6 +35,6 @@ export class ReplyService {
     await this.postModel.checkReplyAuthorization(replyId, userId);
     const author = await this.postModel.findAuthorByReplyId(replyId);
     const postRecord = await this.postModel.deleteReply(replyId);
-    await this.notificationModel.deleteNotification(replyId); // 알림 삭제
+    // await this.notificationModel.deleteNotification(replyId); // 알림 삭제
   }
 }

@@ -31,6 +31,7 @@ var languageList = [
     'Git',
     'Figma',
     'Zeplin',
+    'Udemy',
 ];
 exports.default = languageList;
 //# sourceMappingURL=languageList.js.map
