@@ -29,6 +29,7 @@ const languageList: string[] = [
   'Git',
   'Figma',
   'Zeplin',
+  'Udemy',
 ];
 
 export default languageList;
