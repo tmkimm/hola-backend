@@ -14,6 +14,7 @@ export default (app: express.Application) => {
     'https://holaworld.io',
     'http://www.holaworld.io',
     'https://www.holaworld.io',
+    'ngork.io',
   ];
   // type StaticOrigin = boolean | string | RegExp | (boolean | string | RegExp)[];
   const corsOptions = {

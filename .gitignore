@@ -13,10 +13,6 @@ dev.js
 # testing
 /coverage
 
-# production
-/build
-build
-
 # ssh key
 *.cer
 deploy.sh

@@ -1,6 +1,7 @@
 import { Model, Schema, model, Types, Document } from 'mongoose';
 import CustomError from '../CustomError';
-
+// eslint-disable-next-line import/no-unresolved
+import { onlineOrOfflineCode, recruitsCode, expectedPeriodCode } from '../CommonCode';
 // 대댓글
 export interface IReply {
   contnet: string;
@@ -34,8 +35,14 @@ export interface IPost {
   comments: ICommentDocument[]; // 글 댓글 정보
   likes: Types.ObjectId[]; // 관심 등록한 사용자 리스트
   totalLikes: number; // 관심 등록 수
+  type: string; // 모집 구분(스터디/프로젝트)
+  recruits: string; // 모집인원
+  onlineOrOffline: string; // 진행방식(온라인/오프라인)
+  contactType: string; // 연락방법(오픈 카카오톡, 이메일, 개인 카카오톡)
+  contactPoint: string; // 연락 링크
+  udemyLecture: string; // udemy 강의
+  expectedPeriod: string; // 예상 종료일
 }
-
 export interface IPostDocument extends IPost, Document {}
 
 export interface IPostModel extends Model<IPostDocument> {
@@ -46,6 +53,7 @@ export interface IPostModel extends Model<IPostDocument> {
     language: string | null,
     period: number | null,
     isClosed: string | null,
+    type: string | null,
   ) => Promise<IPostDocument[]>;
   findPostRecommend: (
     sort: string | null,
@@ -122,6 +130,15 @@ const postSchema = new Schema<IPostDocument>(
     comments: [commentSchema], // 글 댓글 정보
     likes: [{ type: Types.ObjectId, ref: 'User' }], // 관심 등록한 사용자 리스트
     totalLikes: { type: Number, default: 0 }, // 관심 등록 수
+    startDate: { type: Date, default: null }, // 진행 시작일
+    endDate: { type: Date, default: null }, //  진행 종료일
+    type: { type: String, default: null }, // 모집 구분(스터디/프로젝트)
+    recruits: { type: String, default: null }, // 모집인원
+    onlineOrOffline: { type: String, default: null }, // 진행방식(온라인/오프라인)
+    contactType: { type: String, default: null }, // 연락방법(오픈 카카오톡, 이메일, 개인 카카오톡)
+    contactPoint: { type: String, default: null }, // 연락 링크
+    udemyLecture: { type: String, default: null }, // udemy 강의
+    expectedPeriod: { type: String, default: null }, // 예상 종료일
   },
   {
     versionKey: false,
@@ -131,11 +148,22 @@ const postSchema = new Schema<IPostDocument>(
   },
 );
 
+postSchema.virtual('hashTag').get(function (this: IPost) {
+  const hashTag: Array<string> = [];
+  if (this.onlineOrOffline && Object.prototype.hasOwnProperty.call(onlineOrOfflineCode, this.onlineOrOffline))
+    hashTag.push(onlineOrOfflineCode[this.onlineOrOffline]);
+  if (this.recruits && Object.prototype.hasOwnProperty.call(recruitsCode, this.recruits))
+    hashTag.push(recruitsCode[this.recruits]);
+  if (this.expectedPeriod && Object.prototype.hasOwnProperty.call(expectedPeriodCode, this.expectedPeriod))
+    hashTag.push(expectedPeriodCode[this.expectedPeriod]);
+  return hashTag;
+});
+
 postSchema.virtual('totalComments').get(function (this: IPost) {
   return this.comments.length;
 });
 // 최신, 트레딩 조회
-postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed) {
+postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed, type) {
   // Pagenation
   const offsetQuery = parseInt(offset, 10) || 0;
   const limitQuery = parseInt(limit, 10) || 20;
@@ -154,7 +182,7 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
   // Query
   const query: any = {};
   if (typeof language === 'string') query.language = { $in: language.split(',') };
-  else if (typeof language === 'undefined') return [];
+  // else if (typeof language === 'undefined') return [];
 
   if (typeof period === 'number' && !Number.isNaN(period)) {
     const today = new Date();
@@ -165,13 +193,19 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
   if (typeof isClosed === 'string' && !(isClosed === 'true')) {
     query.isClosed = { $eq: isClosed === 'true' };
   }
+
+  // 글 구분(1: 프로젝트, 2: 스터디)
+  if (typeof type === 'string') query.type = { $eq: type };
+
   const result = await this.find(query)
     .where('isDeleted')
     .equals(false)
     .sort(sortQuery.join(' '))
     .skip(Number(offsetQuery))
     .limit(Number(limitQuery))
-    .select(`title views comments likes language isClosed totalLikes`);
+    .select(
+      `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod`,
+    );
   return result;
 };
 // 사용자에게 추천 조회
@@ -350,8 +384,7 @@ postSchema.statics.addLike = async function (postId, userId) {
 postSchema.statics.deleteLike = async function (postId, userId) {
   const posts = await this.find({ _id: postId });
   let post: IPost | null = posts[posts.length - 1];
-
-  const isLikeExist = post && post.likes.indexOf(userId) > 0;
+  const isLikeExist = post && post.likes.indexOf(userId) > -1;
   if (isLikeExist) {
     post = await this.findOneAndUpdate(
       { _id: postId },

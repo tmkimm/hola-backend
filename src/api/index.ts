@@ -7,6 +7,7 @@ import user from './routes/user';
 import feedback from './routes/feedback';
 import commment from './routes/comment';
 import reply from './routes/reply';
+import notifications from './routes/notifications';
 
 export default () => {
   const app = Router();
@@ -18,5 +19,6 @@ export default () => {
   feedback(app);
   commment(app);
   reply(app);
+  notifications(app);
   return app;
 };

@@ -15,9 +15,9 @@ export class CommentService {
   }
 
   // 신규 댓글을 추가한다.
-  async registerComment(userID: Types.ObjectId, postId: Types.ObjectId, content: string) {
+  async registerComment(userID: Types.ObjectId, postId: Types.ObjectId, content: string, nickName: string) {
     const { post, commentId } = await this.postModel.registerComment(postId, content, userID);
-    await this.notificationModel.registerNotification(postId, post.author, userID, 'comment', commentId); // 알림 등록
+    // await this.notificationModel.registerNotification(postId, post.author, userID, 'comment', commentId, nickName); // 알림 등록
     return post;
   }
 
@@ -33,6 +33,6 @@ export class CommentService {
     await this.postModel.checkCommentAuthorization(commentId, userId);
 
     const postRecord = await this.postModel.deleteComment(commentId);
-    await this.notificationModel.deleteNotification(commentId); // 알림 삭제
+    // await this.notificationModel.deleteNotification(commentId); // 알림 삭제
   }
 }

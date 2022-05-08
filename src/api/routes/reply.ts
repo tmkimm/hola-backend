@@ -28,10 +28,11 @@ export default (app: Router) => {
     isPostIdValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { postId, commentId, content } = req.body;
+      let { nickName } = req.body;
       const { _id: userId } = req.user as IUser;
-
+      if (!nickName) nickName = `사용자`;
       const ReplyServiceInstance = new ReplyService(PostModel, NotificationModel);
-      const post = await ReplyServiceInstance.registerReply(userId, postId, commentId, content);
+      const post = await ReplyServiceInstance.registerReply(userId, postId, commentId, content, nickName);
 
       return res.status(201).json(post);
     }),

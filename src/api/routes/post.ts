@@ -35,9 +35,9 @@ export default (app: Router) => {
   route.get(
     '/',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { offset, limit, sort, language, period, isClosed } = req.query;
+      const { offset, limit, sort, language, period, isClosed, type } = req.query;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const posts = await PostServiceInstance.findPost(offset, limit, sort, language, period, isClosed);
+      const posts = await PostServiceInstance.findPost(offset, limit, sort, language, period, isClosed, type);
 
       return res.status(200).json(posts);
     }),
@@ -100,22 +100,6 @@ export default (app: Router) => {
           expires: untilMidnight,
         });
       }
-
-      return res.status(200).json(post);
-    }),
-  );
-
-  // 알림을 통한 글 상세 보기
-  route.get(
-    '/:id/notice',
-    isPostIdValid,
-    getUserIdByAccessToken,
-    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const postId = req.params.id;
-      const { _id: userId } = req.user as IUser;
-
-      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const post = await PostServiceInstance.findPostDetailAndUpdateReadAt(Types.ObjectId(postId), userId);
 
       return res.status(200).json(post);
     }),
