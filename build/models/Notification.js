@@ -47,9 +47,7 @@ var notificationSchema = new mongoose_1.Schema({
     generateObjectId: { type: mongoose_1.Types.ObjectId },
     href: { type: String, default: null },
     readAt: Date,
-    noticeType: String,
-    couphone: { type: String, default: null },
-    recruits: { type: String, default: null }, // 모집 인원(유데미 협업용)
+    noticeType: String, // 알림 구분(like, comment, reply, couphone, notice)
 }, {
     versionKey: false,
     timestamps: true,
@@ -66,7 +64,7 @@ notificationSchema.statics.findNotifications = function (targetUserId) {
                         .populate('generateUserId', 'nickName')
                         // .populate({ path: 'postId', match: { isDeleted: false }, select: 'title' })
                         .sort('+isRead -createdAt')
-                        .select("title isRead href generateUserId noticeType createdAt")
+                        .select("title content isRead href generateUserId noticeType createdAt")
                         // .limit(limit)
                         .lean()];
                 case 1:
@@ -84,7 +82,7 @@ notificationSchema.statics.findNotification = function (_id) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, this.findOne({ _id: _id })
                         .populate('generateUserId', 'nickName')
-                        .select("title content isRead href generateUserId noticeType couphone recruits createdAt")];
+                        .select("title content isRead href generateUserId noticeType createdAt")];
                 case 1:
                     result = _a.sent();
                     return [2 /*return*/, result];
