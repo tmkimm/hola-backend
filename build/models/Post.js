@@ -89,6 +89,8 @@ var postSchema = new mongoose_1.Schema({
 });
 postSchema.virtual('hashTag').get(function () {
     var hashTag = [];
+    if (this.type && Object.prototype.hasOwnProperty.call(CommonCode_1.studyOrProjectCode, this.type))
+        hashTag.push(CommonCode_1.studyOrProjectCode[this.type]);
     if (this.onlineOrOffline && Object.prototype.hasOwnProperty.call(CommonCode_1.onlineOrOfflineCode, this.onlineOrOffline))
         hashTag.push(CommonCode_1.onlineOrOfflineCode[this.onlineOrOffline]);
     if (this.recruits && Object.prototype.hasOwnProperty.call(CommonCode_1.recruitsCode, this.recruits))
