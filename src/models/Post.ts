@@ -154,9 +154,13 @@ postSchema.virtual('hashTag').get(function (this: IPost) {
     hashTag.push(studyOrProjectCode[this.type]);
   if (this.onlineOrOffline && Object.prototype.hasOwnProperty.call(onlineOrOfflineCode, this.onlineOrOffline))
     hashTag.push(onlineOrOfflineCode[this.onlineOrOffline]);
-  if (this.recruits && Object.prototype.hasOwnProperty.call(recruitsCode, this.recruits))
+  if (this.recruits && this.recruits !== `und` && Object.prototype.hasOwnProperty.call(recruitsCode, this.recruits))
     hashTag.push(recruitsCode[this.recruits]);
-  if (this.expectedPeriod && Object.prototype.hasOwnProperty.call(expectedPeriodCode, this.expectedPeriod))
+  if (
+    this.expectedPeriod &&
+    this.expectedPeriod !== `und` &&
+    Object.prototype.hasOwnProperty.call(expectedPeriodCode, this.expectedPeriod)
+  )
     hashTag.push(expectedPeriodCode[this.expectedPeriod]);
   return hashTag;
 });

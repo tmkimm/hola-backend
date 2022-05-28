@@ -93,9 +93,11 @@ postSchema.virtual('hashTag').get(function () {
         hashTag.push(CommonCode_1.studyOrProjectCode[this.type]);
     if (this.onlineOrOffline && Object.prototype.hasOwnProperty.call(CommonCode_1.onlineOrOfflineCode, this.onlineOrOffline))
         hashTag.push(CommonCode_1.onlineOrOfflineCode[this.onlineOrOffline]);
-    if (this.recruits && Object.prototype.hasOwnProperty.call(CommonCode_1.recruitsCode, this.recruits))
+    if (this.recruits && this.recruits !== "und" && Object.prototype.hasOwnProperty.call(CommonCode_1.recruitsCode, this.recruits))
         hashTag.push(CommonCode_1.recruitsCode[this.recruits]);
-    if (this.expectedPeriod && Object.prototype.hasOwnProperty.call(CommonCode_1.expectedPeriodCode, this.expectedPeriod))
+    if (this.expectedPeriod &&
+        this.expectedPeriod !== "und" &&
+        Object.prototype.hasOwnProperty.call(CommonCode_1.expectedPeriodCode, this.expectedPeriod))
         hashTag.push(CommonCode_1.expectedPeriodCode[this.expectedPeriod]);
     return hashTag;
 });
