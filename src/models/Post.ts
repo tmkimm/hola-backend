@@ -200,9 +200,11 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     query.isClosed = { $eq: isClosed === 'true' };
   }
 
-  // 글 구분(1: 프로젝트, 2: 스터디)
-  if (typeof type === 'string') query.type = { $eq: type };
-
+  // 글 구분(0: 전체, 1: 프로젝트, 2: 스터디)
+  if (typeof type === 'string') {
+    if (type === '0') query.$or = [{ type: '1' }, { type: '2' }];
+    else query.type = { $eq: type };
+  }
   const result = await this.find(query)
     .where('isDeleted')
     .equals(false)
