@@ -32,6 +32,16 @@ var contactTypeCode = {
     gf: '구글폼',
 };
 exports.contactTypeCode = contactTypeCode;
+var PositionsCode = {
+    frdev: '프론트엔드 개발',
+    badev: '서버 개발',
+    iosdev: 'ios 개발',
+    anddev: '안드로이드 개발',
+    devops: 'DevOps',
+    prdi: '프로덕트 디자인',
+    uidi: '구글폼',
+    pmpl: '구글폼',
+};
 var expectedPeriodCode = {
     und: '기간 미정',
     '1': '1개월',

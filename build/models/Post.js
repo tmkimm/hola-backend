@@ -80,7 +80,8 @@ var postSchema = new mongoose_1.Schema({
     contactType: { type: String, default: null },
     contactPoint: { type: String, default: null },
     udemyLecture: { type: String, default: null },
-    expectedPeriod: { type: String, default: null }, // 예상 종료일
+    expectedPeriod: { type: String, default: null },
+    positions: { type: [String] },
 }, {
     versionKey: false,
     timestamps: true,
@@ -150,7 +151,7 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                             .sort(sortQuery.join(' '))
                             .skip(Number(offsetQuery))
                             .limit(Number(limitQuery))
-                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author")
+                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions")
                             .populate('author', 'nickName image')];
                 case 1:
                     result = _a.sent();

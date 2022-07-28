@@ -42,6 +42,7 @@ export interface IPost {
   contactPoint: string; // 연락 링크
   udemyLecture: string; // udemy 강의
   expectedPeriod: string; // 예상 종료일
+  positions: string[]; // 포지션
 }
 export interface IPostDocument extends IPost, Document {}
 
@@ -139,6 +140,7 @@ const postSchema = new Schema<IPostDocument>(
     contactPoint: { type: String, default: null }, // 연락 링크
     udemyLecture: { type: String, default: null }, // udemy 강의
     expectedPeriod: { type: String, default: null }, // 예상 종료일
+    positions: { type: [String] },
   },
   {
     versionKey: false,
@@ -212,7 +214,7 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     .skip(Number(offsetQuery))
     .limit(Number(limitQuery))
     .select(
-      `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author`,
+      `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions`,
     )
     .populate('author', 'nickName image');
   return result;

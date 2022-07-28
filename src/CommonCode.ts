@@ -1,3 +1,5 @@
+import { DevOpsGuru } from 'aws-sdk';
+
 interface CommonCodeType {
   [key: string]: string;
 }
@@ -31,6 +33,17 @@ const contactTypeCode: CommonCodeType = {
   pk: '개인 카카오톡',
   em: '이메일',
   gf: '구글폼',
+};
+
+const PositionsCode: CommonCodeType = {
+  frdev: '프론트엔드 개발',
+  badev: '서버 개발',
+  iosdev: 'ios 개발',
+  anddev: '안드로이드 개발',
+  devops: 'DevOps',
+  prdi: '프로덕트 디자인',
+  uidi: '구글폼',
+  pmpl: '구글폼',
 };
 
 const expectedPeriodCode: CommonCodeType = {
