@@ -39,8 +39,7 @@ var PositionsCode = {
     anddev: '안드로이드 개발',
     devops: 'DevOps',
     prdi: '프로덕트 디자인',
-    uidi: '구글폼',
-    pmpl: '구글폼',
+    uidi: 'UI/UX 디자인',
 };
 var expectedPeriodCode = {
     und: '기간 미정',
