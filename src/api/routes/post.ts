@@ -185,7 +185,7 @@ export default (app: Router) => {
     }),
   );
 
-  // 글 글 삭제
+  // 글 삭제
   route.delete(
     '/:id',
     isPostIdValid,

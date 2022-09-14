@@ -222,7 +222,7 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 글 글 삭제
+    // 글 삭제
     route.delete('/:id', index_1.isPostIdValid, index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, tokenUserId, PostServiceInstance;
         return __generator(this, function (_a) {

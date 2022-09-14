@@ -72,7 +72,10 @@ export class UserService {
 
   // 사용자의 작성 목록을 조회한다.
   async findMyPosts(id: Types.ObjectId) {
-    const myPosts = await this.postModel.find({ author: id, isDeleted: false }).sort('-createdAt');
+    const myPosts = await this.postModel
+      .find({ author: id, isDeleted: false })
+      .populate('author', 'nickName image')
+      .sort('-createdAt');
     return myPosts;
   }
 
