@@ -102,6 +102,20 @@ postSchema.virtual('hashTag').get(function () {
         hashTag.push(CommonCode_1.expectedPeriodCode[this.expectedPeriod]);
     return hashTag;
 });
+postSchema.virtual('state').get(function () {
+    var state = '';
+    var today = new Date();
+    var daysAgo = new Date();
+    daysAgo.setDate(today.getDate() - 3); // 오늘에서 3일전
+    // 1. 3일 이내에 등록된 글이면 최신 글
+    // 2. 3일 이내 글이면 마감 임박
+    // 3. 일 조회수가 50 이상이면 인기?
+    if (this.createdAt > daysAgo)
+        state = 'new';
+    else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24) <= 3)
+        state = 'deadline'; // 마감일 3일 전이면 마감 임박
+    return state;
+});
 postSchema.virtual('totalComments').get(function () {
     return this.comments.length;
 });
@@ -151,7 +165,7 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                             .sort(sortQuery.join(' '))
                             .skip(Number(offsetQuery))
                             .limit(Number(limitQuery))
-                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions")
+                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
                             .populate('author', 'nickName image')];
                 case 1:
                     result = _a.sent();

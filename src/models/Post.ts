@@ -43,6 +43,8 @@ export interface IPost {
   udemyLecture: string; // udemy 강의
   expectedPeriod: string; // 예상 종료일
   positions: string[]; // 포지션
+  createdAt: Date; // 등록일
+  startDate: Date; // 시작예정일
 }
 export interface IPostDocument extends IPost, Document {}
 
@@ -131,7 +133,7 @@ const postSchema = new Schema<IPostDocument>(
     comments: [commentSchema], // 글 댓글 정보
     likes: [{ type: Types.ObjectId, ref: 'User' }], // 관심 등록한 사용자 리스트
     totalLikes: { type: Number, default: 0 }, // 관심 등록 수
-    startDate: { type: Date, default: null }, // 진행 시작일
+    startDate: { type: Date, default: null }, // 시작예정일
     endDate: { type: Date, default: null }, //  진행 종료일
     type: { type: String, default: null }, // 모집 구분(스터디/프로젝트)
     recruits: { type: String, default: null }, // 모집인원
@@ -165,6 +167,20 @@ postSchema.virtual('hashTag').get(function (this: IPost) {
   )
     hashTag.push(expectedPeriodCode[this.expectedPeriod]);
   return hashTag;
+});
+
+postSchema.virtual('state').get(function (this: IPost) {
+  let state = '';
+  const today: Date = new Date();
+  const daysAgo: Date = new Date();
+  daysAgo.setDate(today.getDate() - 3); // 오늘에서 3일전
+  // 1. 3일 이내에 등록된 글이면 최신 글
+  // 2. 3일 이내 글이면 마감 임박
+  // 3. 일 조회수가 50 이상이면 인기?
+  if (this.createdAt > daysAgo) state = 'new';
+  else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24) <= 3)
+    state = 'deadline'; // 마감일 3일 전이면 마감 임박
+  return state;
 });
 
 postSchema.virtual('totalComments').get(function (this: IPost) {
@@ -214,7 +230,7 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     .skip(Number(offsetQuery))
     .limit(Number(limitQuery))
     .select(
-      `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions`,
+      `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
     )
     .populate('author', 'nickName image');
   return result;

@@ -1,5 +1,3 @@
-import { DevOpsGuru } from 'aws-sdk';
-
 interface CommonCodeType {
   [key: string]: string;
 }
@@ -35,16 +33,6 @@ const contactTypeCode: CommonCodeType = {
   gf: '구글폼',
 };
 
-const PositionsCode: CommonCodeType = {
-  frdev: '프론트엔드 개발',
-  badev: '서버 개발',
-  iosdev: 'ios 개발',
-  anddev: '안드로이드 개발',
-  devops: 'DevOps',
-  prdi: '프로덕트 디자인',
-  uidi: 'UI/UX 디자인',
-};
-
 const expectedPeriodCode: CommonCodeType = {
   und: '기간 미정',
   '1': '1개월',
@@ -55,5 +43,7 @@ const expectedPeriodCode: CommonCodeType = {
   '6': '6개월',
   mo: '장기',
 };
+
+const positionsCode: string[] = ['FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM'];
 
 export { studyOrProjectCode, onlineOrOfflineCode, recruitsCode, contactTypeCode, expectedPeriodCode };
