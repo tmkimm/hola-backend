@@ -174,4 +174,9 @@ export class PostService {
     }
     return post;
   }
+
+  // 자동 마감
+  async autoClosing() {
+    await this.postModel.autoClosing();
+  }
 }

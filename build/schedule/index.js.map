@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sourceRoot":"/","sources":["schedule/index.ts"],"names":[],"mappings":";;AAAA,+BAAqC;AAErC,mBAAe;IACb,IAAA,kBAAW,GAAE,CAAC,CAAC,QAAQ;AACzB,CAAC,EAAC","sourcesContent":["import { autoClosing } from './post';\n\nexport default () => {\n  autoClosing(); // 자동 마감\n};\n"]}

@@ -94,6 +94,7 @@ export interface IPostModel extends Model<IPostDocument> {
   checkPostAuthorization: (postId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
   checkCommentAuthorization: (commentId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
   checkReplyAuthorization: (replyId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
+  autoClosing: () => void;
 }
 
 // 대댓글 스키마
@@ -487,6 +488,15 @@ postSchema.statics.checkReplyAuthorization = async function (replyId, tokenUserI
   if (!post) {
     throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
   }
+};
+
+// 글 자동 마감
+postSchema.statics.autoClosing = async function () {
+  const today = new Date();
+  await this.updateMany(
+    { $and: [{ isClosed: false }, { endDate: { $ne: null } }, { endDate: { $lte: today } }] },
+    { isClosed: true },
+  );
 };
 
 const Post = model<IPostDocument, IPostModel>('Post', postSchema);

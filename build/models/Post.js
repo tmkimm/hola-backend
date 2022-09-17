@@ -547,6 +547,22 @@ postSchema.statics.checkReplyAuthorization = function (replyId, tokenUserId) {
         });
     });
 };
+// 글 자동 마감
+postSchema.statics.autoClosing = function () {
+    return __awaiter(this, void 0, void 0, function () {
+        var today;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    today = new Date();
+                    return [4 /*yield*/, this.updateMany({ $and: [{ isClosed: false }, { endDate: { $ne: null } }, { endDate: { $lte: today } }] }, { isClosed: true })];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+};
 var Post = (0, mongoose_1.model)('Post', postSchema);
 exports.Post = Post;
 //# sourceMappingURL=Post.js.map

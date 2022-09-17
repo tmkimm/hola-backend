@@ -9,6 +9,7 @@ var cookie_parser_1 = __importDefault(require("cookie-parser"));
 var cors_1 = __importDefault(require("cors"));
 var index_1 = __importDefault(require("../config/index"));
 var index_2 = __importDefault(require("../api/index"));
+var index_3 = __importDefault(require("../schedule/index"));
 exports.default = (function (app) {
     var whitelist = [
         'http://localhost:3000',
@@ -34,5 +35,7 @@ exports.default = (function (app) {
     app.use(express_1.default.static(path_1.default.join(path_1.default.resolve(), 'public')));
     // API Route 설정
     app.use(index_1.default.api.prefix, (0, index_2.default)());
+    // 스케줄러 실행
+    (0, index_3.default)();
 });
 //# sourceMappingURL=express.js.map
