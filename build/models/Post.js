@@ -88,6 +88,7 @@ var postSchema = new mongoose_1.Schema({
     toObject: { virtuals: true },
     toJSON: { virtuals: true },
 });
+// 해시태그
 postSchema.virtual('hashTag').get(function () {
     var hashTag = [];
     if (this.type && Object.prototype.hasOwnProperty.call(CommonCode_1.studyOrProjectCode, this.type))
@@ -102,18 +103,22 @@ postSchema.virtual('hashTag').get(function () {
         hashTag.push(CommonCode_1.expectedPeriodCode[this.expectedPeriod]);
     return hashTag;
 });
+// 글 상태(뱃지)
 postSchema.virtual('state').get(function () {
     var state = '';
     var today = new Date();
     var daysAgo = new Date();
+    var millisecondDay = 1000 * 60 * 60 * 24;
     daysAgo.setDate(today.getDate() - 3); // 오늘에서 3일전
     // 1. 3일 이내에 등록된 글이면 최신 글
     // 2. 3일 이내 글이면 마감 임박
-    // 3. 일 조회수가 50 이상이면 인기?
+    // 3. 일 조회수가 50 이상이면 인기
     if (this.createdAt > daysAgo)
         state = 'new';
-    else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24) <= 3)
-        state = 'deadline'; // 마감일 3일 전이면 마감 임박
+    else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
+        state = 'deadline';
+    else if (Math.abs(this.views / ((this.createdAt.getTime() - today.getTime()) / millisecondDay)) >= 40)
+        state = 'hot';
     return state;
 });
 postSchema.virtual('totalComments').get(function () {
