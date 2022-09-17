@@ -125,7 +125,7 @@ postSchema.virtual('totalComments').get(function () {
     return this.comments.length;
 });
 // 최신, 트레딩 조회
-postSchema.statics.findPost = function (offset, limit, sort, language, period, isClosed, type) {
+postSchema.statics.findPost = function (offset, limit, sort, language, period, isClosed, type, position) {
     return __awaiter(this, void 0, void 0, function () {
         var offsetQuery, limitQuery, sortQuery, sortableColumns_1, query, today, result;
         return __generator(this, function (_a) {
@@ -148,7 +148,8 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                     query = {};
                     if (typeof language === 'string')
                         query.language = { $in: language.split(',') };
-                    // else if (typeof language === 'undefined') return [];
+                    if (typeof position === 'string')
+                        query.positions = { $in: position.split(',') };
                     if (typeof period === 'number' && !Number.isNaN(period)) {
                         today = new Date();
                         query.createdAt = { $gte: today.setDate(today.getDate() - period) };

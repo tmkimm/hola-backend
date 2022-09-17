@@ -57,6 +57,7 @@ export interface IPostModel extends Model<IPostDocument> {
     period: number | null,
     isClosed: string | null,
     type: string | null,
+    position: string | null,
   ) => Promise<IPostDocument[]>;
   findPostRecommend: (
     sort: string | null,
@@ -192,7 +193,7 @@ postSchema.virtual('totalComments').get(function (this: IPost) {
   return this.comments.length;
 });
 // 최신, 트레딩 조회
-postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed, type) {
+postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed, type, position) {
   // Pagenation
   const offsetQuery = parseInt(offset, 10) || 0;
   const limitQuery = parseInt(limit, 10) || 20;
@@ -211,7 +212,7 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
   // Query
   const query: any = {};
   if (typeof language === 'string') query.language = { $in: language.split(',') };
-  // else if (typeof language === 'undefined') return [];
+  if (typeof position === 'string') query.positions = { $in: position.split(',') };
 
   if (typeof period === 'number' && !Number.isNaN(period)) {
     const today = new Date();

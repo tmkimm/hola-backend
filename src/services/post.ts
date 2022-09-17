@@ -22,8 +22,9 @@ export class PostService {
     period: number | null,
     isClosed: string | null,
     type: string | null,
+    position: string | null,
   ) {
-    const posts = await this.postModel.findPost(offset, limit, sort, language, period, isClosed, type);
+    const posts = await this.postModel.findPost(offset, limit, sort, language, period, isClosed, type, position);
 
     const sortPosts = this.sortLanguageByQueryParam(posts, language);
     return sortPosts;
