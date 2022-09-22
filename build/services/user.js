@@ -164,7 +164,10 @@ var UserService = /** @class */ (function () {
             var myPosts;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.find({ author: id, isDeleted: false }).sort('-createdAt')];
+                    case 0: return [4 /*yield*/, this.postModel
+                            .find({ author: id, isDeleted: false })
+                            .populate('author', 'nickName image')
+                            .sort('-createdAt')];
                     case 1:
                         myPosts = _a.sent();
                         return [2 /*return*/, myPosts];

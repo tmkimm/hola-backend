@@ -80,28 +80,52 @@ var postSchema = new mongoose_1.Schema({
     contactType: { type: String, default: null },
     contactPoint: { type: String, default: null },
     udemyLecture: { type: String, default: null },
-    expectedPeriod: { type: String, default: null }, // 예상 종료일
+    expectedPeriod: { type: String, default: null },
+    positions: { type: [String] },
 }, {
     versionKey: false,
     timestamps: true,
     toObject: { virtuals: true },
     toJSON: { virtuals: true },
 });
+// 해시태그
 postSchema.virtual('hashTag').get(function () {
     var hashTag = [];
+    if (this.type && Object.prototype.hasOwnProperty.call(CommonCode_1.studyOrProjectCode, this.type))
+        hashTag.push(CommonCode_1.studyOrProjectCode[this.type]);
     if (this.onlineOrOffline && Object.prototype.hasOwnProperty.call(CommonCode_1.onlineOrOfflineCode, this.onlineOrOffline))
         hashTag.push(CommonCode_1.onlineOrOfflineCode[this.onlineOrOffline]);
-    if (this.recruits && Object.prototype.hasOwnProperty.call(CommonCode_1.recruitsCode, this.recruits))
+    if (this.recruits && this.recruits !== "und" && Object.prototype.hasOwnProperty.call(CommonCode_1.recruitsCode, this.recruits))
         hashTag.push(CommonCode_1.recruitsCode[this.recruits]);
-    if (this.expectedPeriod && Object.prototype.hasOwnProperty.call(CommonCode_1.expectedPeriodCode, this.expectedPeriod))
+    if (this.expectedPeriod &&
+        this.expectedPeriod !== "und" &&
+        Object.prototype.hasOwnProperty.call(CommonCode_1.expectedPeriodCode, this.expectedPeriod))
         hashTag.push(CommonCode_1.expectedPeriodCode[this.expectedPeriod]);
     return hashTag;
+});
+// 글 상태(뱃지)
+postSchema.virtual('state').get(function () {
+    var state = '';
+    var today = new Date();
+    var daysAgo = new Date();
+    var millisecondDay = 1000 * 60 * 60 * 24;
+    daysAgo.setDate(today.getDate() - 3); // 오늘에서 3일전
+    // 1. 3일 이내에 등록된 글이면 최신 글
+    // 2. 3일 이내 글이면 마감 임박
+    // 3. 일 조회수가 50 이상이면 인기
+    if (this.createdAt > daysAgo)
+        state = 'new';
+    else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
+        state = 'deadline';
+    else if (Math.abs(this.views / ((this.createdAt.getTime() - today.getTime()) / millisecondDay)) >= 40)
+        state = 'hot';
+    return state;
 });
 postSchema.virtual('totalComments').get(function () {
     return this.comments.length;
 });
 // 최신, 트레딩 조회
-postSchema.statics.findPost = function (offset, limit, sort, language, period, isClosed, type) {
+postSchema.statics.findPost = function (offset, limit, sort, language, period, isClosed, type, position) {
     return __awaiter(this, void 0, void 0, function () {
         var offsetQuery, limitQuery, sortQuery, sortableColumns_1, query, today, result;
         return __generator(this, function (_a) {
@@ -124,7 +148,8 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                     query = {};
                     if (typeof language === 'string')
                         query.language = { $in: language.split(',') };
-                    // else if (typeof language === 'undefined') return [];
+                    if (typeof position === 'string')
+                        query.positions = { $in: position.split(',') };
                     if (typeof period === 'number' && !Number.isNaN(period)) {
                         today = new Date();
                         query.createdAt = { $gte: today.setDate(today.getDate() - period) };
@@ -133,16 +158,21 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                     if (typeof isClosed === 'string' && !(isClosed === 'true')) {
                         query.isClosed = { $eq: isClosed === 'true' };
                     }
-                    // 글 구분(1: 프로젝트, 2: 스터디)
-                    if (typeof type === 'string')
-                        query.type = { $eq: type };
+                    // 글 구분(0: 전체, 1: 프로젝트, 2: 스터디)
+                    if (typeof type === 'string') {
+                        if (type === '0')
+                            query.$or = [{ type: '1' }, { type: '2' }];
+                        else
+                            query.type = { $eq: type };
+                    }
                     return [4 /*yield*/, this.find(query)
                             .where('isDeleted')
                             .equals(false)
                             .sort(sortQuery.join(' '))
                             .skip(Number(offsetQuery))
                             .limit(Number(limitQuery))
-                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod")];
+                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
+                            .populate('author', 'nickName image')];
                 case 1:
                     result = _a.sent();
                     return [2 /*return*/, result];
@@ -513,6 +543,22 @@ postSchema.statics.checkReplyAuthorization = function (replyId, tokenUserId) {
                     if (!post) {
                         throw new CustomError_1.default('NotAuthenticatedError', 401, 'User does not match');
                     }
+                    return [2 /*return*/];
+            }
+        });
+    });
+};
+// 글 자동 마감
+postSchema.statics.autoClosing = function () {
+    return __awaiter(this, void 0, void 0, function () {
+        var today;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    today = new Date();
+                    return [4 /*yield*/, this.updateMany({ $and: [{ isClosed: false }, { endDate: { $ne: null } }, { endDate: { $lte: today } }] }, { isClosed: true })];
+                case 1:
+                    _a.sent();
                     return [2 /*return*/];
             }
         });

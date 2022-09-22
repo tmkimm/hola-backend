@@ -50,12 +50,12 @@ var PostService = /** @class */ (function () {
     }
     // 리팩토링필요
     // 메인 화면에서 글 리스트를 조회한다.
-    PostService.prototype.findPost = function (offset, limit, sort, language, period, isClosed, type) {
+    PostService.prototype.findPost = function (offset, limit, sort, language, period, isClosed, type, position) {
         return __awaiter(this, void 0, void 0, function () {
             var posts, sortPosts;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.findPost(offset, limit, sort, language, period, isClosed, type)];
+                    case 0: return [4 /*yield*/, this.postModel.findPost(offset, limit, sort, language, period, isClosed, type, position)];
                     case 1:
                         posts = _a.sent();
                         sortPosts = this.sortLanguageByQueryParam(posts, language);
@@ -320,6 +320,19 @@ var PostService = /** @class */ (function () {
                         _b.sent();
                         _b.label = 3;
                     case 3: return [2 /*return*/, post];
+                }
+            });
+        });
+    };
+    // 자동 마감
+    PostService.prototype.autoClosing = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.postModel.autoClosing()];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
                 }
             });
         });

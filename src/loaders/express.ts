@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import config from '../config/index';
 import routes from '../api/index';
+import schedule from '../schedule/index';
 
 export default (app: express.Application) => {
   type StaticOrigin = boolean | string | RegExp | (boolean | string | RegExp)[];
@@ -34,4 +35,7 @@ export default (app: express.Application) => {
 
   // API Route 설정
   app.use(config.api.prefix, routes());
+
+  // 스케줄러 실행
+  schedule();
 };

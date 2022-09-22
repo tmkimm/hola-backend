@@ -1,7 +1,7 @@
 import { Model, Schema, model, Types, Document } from 'mongoose';
 import CustomError from '../CustomError';
 // eslint-disable-next-line import/no-unresolved
-import { onlineOrOfflineCode, recruitsCode, expectedPeriodCode } from '../CommonCode';
+import { studyOrProjectCode, onlineOrOfflineCode, recruitsCode, expectedPeriodCode } from '../CommonCode';
 // 대댓글
 export interface IReply {
   contnet: string;
@@ -42,6 +42,9 @@ export interface IPost {
   contactPoint: string; // 연락 링크
   udemyLecture: string; // udemy 강의
   expectedPeriod: string; // 예상 종료일
+  positions: string[]; // 포지션
+  createdAt: Date; // 등록일
+  startDate: Date; // 시작예정일
 }
 export interface IPostDocument extends IPost, Document {}
 
@@ -54,6 +57,7 @@ export interface IPostModel extends Model<IPostDocument> {
     period: number | null,
     isClosed: string | null,
     type: string | null,
+    position: string | null,
   ) => Promise<IPostDocument[]>;
   findPostRecommend: (
     sort: string | null,
@@ -91,6 +95,7 @@ export interface IPostModel extends Model<IPostDocument> {
   checkPostAuthorization: (postId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
   checkCommentAuthorization: (commentId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
   checkReplyAuthorization: (replyId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
+  autoClosing: () => void;
 }
 
 // 대댓글 스키마
@@ -130,7 +135,7 @@ const postSchema = new Schema<IPostDocument>(
     comments: [commentSchema], // 글 댓글 정보
     likes: [{ type: Types.ObjectId, ref: 'User' }], // 관심 등록한 사용자 리스트
     totalLikes: { type: Number, default: 0 }, // 관심 등록 수
-    startDate: { type: Date, default: null }, // 진행 시작일
+    startDate: { type: Date, default: null }, // 시작예정일
     endDate: { type: Date, default: null }, //  진행 종료일
     type: { type: String, default: null }, // 모집 구분(스터디/프로젝트)
     recruits: { type: String, default: null }, // 모집인원
@@ -139,6 +144,7 @@ const postSchema = new Schema<IPostDocument>(
     contactPoint: { type: String, default: null }, // 연락 링크
     udemyLecture: { type: String, default: null }, // udemy 강의
     expectedPeriod: { type: String, default: null }, // 예상 종료일
+    positions: { type: [String] },
   },
   {
     versionKey: false,
@@ -148,22 +154,46 @@ const postSchema = new Schema<IPostDocument>(
   },
 );
 
+// 해시태그
 postSchema.virtual('hashTag').get(function (this: IPost) {
   const hashTag: Array<string> = [];
+  if (this.type && Object.prototype.hasOwnProperty.call(studyOrProjectCode, this.type))
+    hashTag.push(studyOrProjectCode[this.type]);
   if (this.onlineOrOffline && Object.prototype.hasOwnProperty.call(onlineOrOfflineCode, this.onlineOrOffline))
     hashTag.push(onlineOrOfflineCode[this.onlineOrOffline]);
-  if (this.recruits && Object.prototype.hasOwnProperty.call(recruitsCode, this.recruits))
+  if (this.recruits && this.recruits !== `und` && Object.prototype.hasOwnProperty.call(recruitsCode, this.recruits))
     hashTag.push(recruitsCode[this.recruits]);
-  if (this.expectedPeriod && Object.prototype.hasOwnProperty.call(expectedPeriodCode, this.expectedPeriod))
+  if (
+    this.expectedPeriod &&
+    this.expectedPeriod !== `und` &&
+    Object.prototype.hasOwnProperty.call(expectedPeriodCode, this.expectedPeriod)
+  )
     hashTag.push(expectedPeriodCode[this.expectedPeriod]);
   return hashTag;
+});
+
+// 글 상태(뱃지)
+postSchema.virtual('state').get(function (this: IPost) {
+  let state = '';
+  const today: Date = new Date();
+  const daysAgo: Date = new Date();
+  const millisecondDay: number = 1000 * 60 * 60 * 24;
+  daysAgo.setDate(today.getDate() - 3); // 오늘에서 3일전
+  // 1. 3일 이내에 등록된 글이면 최신 글
+  // 2. 3일 이내 글이면 마감 임박
+  // 3. 일 조회수가 50 이상이면 인기
+  if (this.createdAt > daysAgo) state = 'new';
+  else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
+    state = 'deadline';
+  else if (Math.abs(this.views / ((this.createdAt.getTime() - today.getTime()) / millisecondDay)) >= 40) state = 'hot';
+  return state;
 });
 
 postSchema.virtual('totalComments').get(function (this: IPost) {
   return this.comments.length;
 });
 // 최신, 트레딩 조회
-postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed, type) {
+postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed, type, position) {
   // Pagenation
   const offsetQuery = parseInt(offset, 10) || 0;
   const limitQuery = parseInt(limit, 10) || 20;
@@ -182,7 +212,7 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
   // Query
   const query: any = {};
   if (typeof language === 'string') query.language = { $in: language.split(',') };
-  // else if (typeof language === 'undefined') return [];
+  if (typeof position === 'string') query.positions = { $in: position.split(',') };
 
   if (typeof period === 'number' && !Number.isNaN(period)) {
     const today = new Date();
@@ -194,9 +224,11 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     query.isClosed = { $eq: isClosed === 'true' };
   }
 
-  // 글 구분(1: 프로젝트, 2: 스터디)
-  if (typeof type === 'string') query.type = { $eq: type };
-
+  // 글 구분(0: 전체, 1: 프로젝트, 2: 스터디)
+  if (typeof type === 'string') {
+    if (type === '0') query.$or = [{ type: '1' }, { type: '2' }];
+    else query.type = { $eq: type };
+  }
   const result = await this.find(query)
     .where('isDeleted')
     .equals(false)
@@ -204,8 +236,9 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     .skip(Number(offsetQuery))
     .limit(Number(limitQuery))
     .select(
-      `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod`,
-    );
+      `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
+    )
+    .populate('author', 'nickName image');
   return result;
 };
 // 사용자에게 추천 조회
@@ -456,6 +489,15 @@ postSchema.statics.checkReplyAuthorization = async function (replyId, tokenUserI
   if (!post) {
     throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
   }
+};
+
+// 글 자동 마감
+postSchema.statics.autoClosing = async function () {
+  const today = new Date();
+  await this.updateMany(
+    { $and: [{ isClosed: false }, { endDate: { $ne: null } }, { endDate: { $lte: today } }] },
+    { isClosed: true },
+  );
 };
 
 const Post = model<IPostDocument, IPostModel>('Post', postSchema);

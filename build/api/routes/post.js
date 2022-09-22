@@ -62,13 +62,13 @@ exports.default = (function (app) {
     app.use('/posts', route);
     // 글 리스트 조회
     route.get('/', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, offset, limit, sort, language, period, isClosed, type, PostServiceInstance, posts;
+        var _a, offset, limit, sort, language, period, isClosed, type, position, PostServiceInstance, posts;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    _a = req.query, offset = _a.offset, limit = _a.limit, sort = _a.sort, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type;
+                    _a = req.query, offset = _a.offset, limit = _a.limit, sort = _a.sort, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position;
                     PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findPost(offset, limit, sort, language, period, isClosed, type)];
+                    return [4 /*yield*/, PostServiceInstance.findPost(offset, limit, sort, language, period, isClosed, type, position)];
                 case 1:
                     posts = _b.sent();
                     return [2 /*return*/, res.status(200).json(posts)];
@@ -222,7 +222,7 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 글 글 삭제
+    // 글 삭제
     route.delete('/:id', index_1.isPostIdValid, index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, tokenUserId, PostServiceInstance;
         return __generator(this, function (_a) {

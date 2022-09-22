@@ -10,8 +10,6 @@ interface INotification {
   href: string;
   readAt?: Date;
   noticeType: string;
-  couphone: string;
-  recruits: string;
 }
 
 export interface INotificationDocument extends INotification, Document {}
@@ -46,8 +44,6 @@ const notificationSchema = new Schema<INotification>(
     href: { type: String, default: null }, // 이동할 링크
     readAt: Date, // 읽은 시간
     noticeType: String, // 알림 구분(like, comment, reply, couphone, notice)
-    couphone: { type: String, default: null }, // 쿠폰(유데미 협업용)
-    recruits: { type: String, default: null }, // 모집 인원(유데미 협업용)
   },
   {
     versionKey: false,
@@ -69,7 +65,7 @@ notificationSchema.statics.findNotifications = async function (
     .populate('generateUserId', 'nickName')
     // .populate({ path: 'postId', match: { isDeleted: false }, select: 'title' })
     .sort('+isRead -createdAt')
-    .select(`title isRead href generateUserId noticeType createdAt`)
+    .select(`title content isRead href generateUserId noticeType createdAt`)
     // .limit(limit)
     .lean();
   return result;
@@ -79,7 +75,7 @@ notificationSchema.statics.findNotifications = async function (
 notificationSchema.statics.findNotification = async function (_id: Types.ObjectId): Promise<INotificationDocument> {
   const result = await this.findOne({ _id })
     .populate('generateUserId', 'nickName')
-    .select(`title content isRead href generateUserId noticeType couphone recruits createdAt`);
+    .select(`title content isRead href generateUserId noticeType createdAt`);
 
   return result;
 };
