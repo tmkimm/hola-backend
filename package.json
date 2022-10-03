@@ -7,7 +7,7 @@
     "dev": "nodemon --exec ts-node --files src/app.ts",
     "test": "cross-env NODE_ENV=test jest --forceExit --runInBand ",
     "build": "tsc",
-    "server": "NODE_ENV=production pm2 start pm2.config.js"
+    "server": "NODE_ENV=production node build/app.js"
   },
   "dependencies": {
     "@babel/preset-typescript": "^7.16.0",
