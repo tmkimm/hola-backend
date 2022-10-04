@@ -20,6 +20,7 @@ export interface IUser {
   githubLink: string;
   blogLink: string;
   aboutMe: string;
+  createdAt: Date;
 }
 
 export interface IUserDocument extends IUser, Document {

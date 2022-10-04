@@ -45,6 +45,8 @@ export interface IPost {
   positions: string[]; // 포지션
   createdAt: Date; // 등록일
   startDate: Date; // 시작예정일
+  closeDate: Date; // 마감일
+  deleteDate: Date; // 삭제일
 }
 export interface IPostDocument extends IPost, Document {}
 
@@ -145,6 +147,8 @@ const postSchema = new Schema<IPostDocument>(
     udemyLecture: { type: String, default: null }, // udemy 강의
     expectedPeriod: { type: String, default: null }, // 예상 종료일
     positions: { type: [String] },
+    closeDate: { type: Date, default: null }, //  마감일
+    deleteDate: { type: Date, default: null }, //  삭제일
   },
   {
     versionKey: false,

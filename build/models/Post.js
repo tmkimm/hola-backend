@@ -82,6 +82,8 @@ var postSchema = new mongoose_1.Schema({
     udemyLecture: { type: String, default: null },
     expectedPeriod: { type: String, default: null },
     positions: { type: [String] },
+    closeDate: { type: Date, default: null },
+    deleteDate: { type: Date, default: null }, //  삭제일
 }, {
     versionKey: false,
     timestamps: true,
