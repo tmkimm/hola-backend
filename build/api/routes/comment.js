@@ -99,33 +99,33 @@ exports.default = (function (app) {
     }); }));
     // 댓글 수정
     route.patch('/:id', index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var commentDTO, tokenUserId, CommentServiceInstance, comment;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var commentDTO, _a, tokenUserId, tokenType, CommentServiceInstance, comment;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
                     commentDTO = req.body;
                     commentDTO._id = req.params.id;
-                    tokenUserId = req.user._id;
+                    _a = req.user, tokenUserId = _a._id, tokenType = _a.tokenType;
                     CommentServiceInstance = new index_2.CommentService(Post_1.Post, Notification_1.Notification);
-                    return [4 /*yield*/, CommentServiceInstance.modifyComment(commentDTO, tokenUserId)];
+                    return [4 /*yield*/, CommentServiceInstance.modifyComment(commentDTO, tokenUserId, tokenType)];
                 case 1:
-                    comment = _a.sent();
+                    comment = _b.sent();
                     return [2 /*return*/, res.status(200).json(comment)];
             }
         });
     }); }));
     // 댓글 삭제
     route.delete('/:id', index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var commentId, userId, CommentServiceInstance;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var commentId, _a, userId, tokenType, CommentServiceInstance;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
                     commentId = req.params.id;
-                    userId = req.user._id;
+                    _a = req.user, userId = _a._id, tokenType = _a.tokenType;
                     CommentServiceInstance = new index_2.CommentService(Post_1.Post, Notification_1.Notification);
-                    return [4 /*yield*/, CommentServiceInstance.deleteComment(mongoose_1.Types.ObjectId(commentId), userId)];
+                    return [4 /*yield*/, CommentServiceInstance.deleteComment(mongoose_1.Types.ObjectId(commentId), userId, tokenType)];
                 case 1:
-                    _a.sent();
+                    _b.sent();
                     return [2 /*return*/, res.status(204).json()];
             }
         });

@@ -39,13 +39,44 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var index_1 = require("../../services/index");
 var Feedback_1 = require("../../models/Feedback");
+var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
+var User_1 = require("../../models/User");
+var isPasswordValidWithAdmin_1 = require("../middlewares/isPasswordValidWithAdmin");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /*
       글에 관련된 Router를 정의한다.
       등록 / 수정 / 삭제하려는 사용자의 정보는 Access Token을 이용하여 처리한다.
       */
-    app.use('/admnin', route);
+    app.use('/admin', route);
+    // Admin 로그인
+    route.post('/login', isPasswordValidWithAdmin_1.isPasswordValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var idToken, AuthServiceInstance, _a, _id, nickName, image, likeLanguages, accessToken, refreshToken;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    idToken = req.user.idToken;
+                    AuthServiceInstance = new index_1.AuthService(User_1.User);
+                    return [4 /*yield*/, AuthServiceInstance.SignIn(idToken)];
+                case 1:
+                    _a = _b.sent(), _id = _a._id, nickName = _a.nickName, image = _a.image, likeLanguages = _a.likeLanguages, accessToken = _a.accessToken, refreshToken = _a.refreshToken;
+                    res.cookie('R_AUTH', refreshToken, {
+                        sameSite: 'none',
+                        httpOnly: true,
+                        secure: true,
+                        maxAge: 1000 * 60 * 60 * 24 * 14, // 2 Week
+                    });
+                    return [2 /*return*/, res.status(200).json({
+                            loginSuccess: true,
+                            _id: _id,
+                            nickName: nickName,
+                            image: image,
+                            likeLanguages: likeLanguages,
+                            accessToken: accessToken,
+                        })];
+            }
+        });
+    }); }));
     // 어드민 등록
     route.post('/', function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {

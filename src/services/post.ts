@@ -137,8 +137,8 @@ export class PostService {
   }
 
   // 글 정보를 수정한다.
-  async modifyPost(id: Types.ObjectId, tokenUserId: Types.ObjectId, post: IPost) {
-    await this.postModel.checkPostAuthorization(id, tokenUserId); // 접근 권한 체크
+  async modifyPost(id: Types.ObjectId, tokenUserId: Types.ObjectId, tokenType: string, post: IPost) {
+    await this.postModel.checkPostAuthorization(id, tokenUserId, tokenType); // 접근 권한 체크
     if (post.content) {
       const cleanHTML = sanitizeHtml(post.content, {
         allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
@@ -150,8 +150,8 @@ export class PostService {
   }
 
   // 글를 삭제한다.
-  async deletePost(id: Types.ObjectId, tokenUserId: Types.ObjectId) {
-    await this.postModel.checkPostAuthorization(id, tokenUserId); // 접근 권한 체크
+  async deletePost(id: Types.ObjectId, tokenUserId: Types.ObjectId, tokenType: string) {
+    await this.postModel.checkPostAuthorization(id, tokenUserId, tokenType); // 접근 권한 체크
     await this.postModel.deletePost(id);
     await this.notificationModel.deleteNotificationByPost(id); // 글 삭제 시 관련 알림 제거
   }

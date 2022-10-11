@@ -28,4 +28,6 @@ export default {
   SentryDsn: process.env.SENTRY_DSN! as string,
   // Slack
   SlackWebhook: process.env.SLACK_WEBHOOK! as string,
+  AdminId: process.env.ADMIN_ID! as string,
+  AdminPassword: process.env.ADMIN_PASSWORD! as string,
 };

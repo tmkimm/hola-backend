@@ -61,10 +61,10 @@ export default (app: Router) => {
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const commentDTO = req.body;
       commentDTO._id = req.params.id;
-      const { _id: tokenUserId } = req.user as IUser;
+      const { _id: tokenUserId, tokenType } = req.user as IUser;
 
       const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
-      const comment = await CommentServiceInstance.modifyComment(commentDTO, tokenUserId);
+      const comment = await CommentServiceInstance.modifyComment(commentDTO, tokenUserId, tokenType);
 
       return res.status(200).json(comment);
     }),
@@ -76,10 +76,10 @@ export default (app: Router) => {
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const commentId = req.params.id;
-      const { _id: userId } = req.user as IUser;
+      const { _id: userId, tokenType } = req.user as IUser;
 
       const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
-      await CommentServiceInstance.deleteComment(Types.ObjectId(commentId), userId);
+      await CommentServiceInstance.deleteComment(Types.ObjectId(commentId), userId, tokenType);
       return res.status(204).json();
     }),
   );

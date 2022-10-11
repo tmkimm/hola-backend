@@ -174,12 +174,12 @@ export default (app: Router) => {
     isPostValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
-      const { _id: tokenUserId } = req.user as IUser;
+      const { _id: tokenUserId, tokenType } = req.user as IUser;
 
       const postDTO = req.body;
 
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const post = await PostServiceInstance.modifyPost(Types.ObjectId(id), tokenUserId, postDTO);
+      const post = await PostServiceInstance.modifyPost(Types.ObjectId(id), tokenUserId, tokenType, postDTO);
 
       return res.status(200).json(post);
     }),
@@ -192,10 +192,10 @@ export default (app: Router) => {
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
-      const { _id: tokenUserId } = req.user as IUser;
+      const { _id: tokenUserId, tokenType } = req.user as IUser;
 
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      await PostServiceInstance.deletePost(Types.ObjectId(id), tokenUserId);
+      await PostServiceInstance.deletePost(Types.ObjectId(id), tokenUserId, tokenType);
       return res.status(204).json();
     }),
   );

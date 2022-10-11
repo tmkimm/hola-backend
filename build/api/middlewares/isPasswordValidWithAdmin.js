@@ -39,45 +39,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isAccessTokenValid = void 0;
-var User_1 = require("../../models/User");
+exports.isPasswordValidWithAdmin = void 0;
+var index_1 = __importDefault(require("../../config/index"));
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
-var jwt_1 = require("../../utills/jwt");
 var CustomError_1 = __importDefault(require("../../CustomError"));
-// Access Token이 유효한지 확인한다.
-var isAccessTokenValid = (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        var token, decodedUser, user;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (!(req.headers.authorization && req.headers.authorization.startsWith('Bearer'))) return [3 /*break*/, 3];
-                    token = req.headers.authorization.split(' ')[1];
-                    return [4 /*yield*/, (0, jwt_1.verifyJWT)(token)];
-                case 1:
-                    decodedUser = _a.sent();
-                    if (!(0, jwt_1.isValidAccessToken)(decodedUser))
-                        throw new CustomError_1.default('JsonWebTokenError', 401, 'Invaild Token');
-                    return [4 /*yield*/, User_1.User.findByIdToken(decodedUser.idToken)];
-                case 2:
-                    user = _a.sent();
-                    if (!user) {
-                        throw new CustomError_1.default('JsonWebTokenError', 401, 'User not found');
-                    }
-                    else {
-                        req.user = {
-                            _id: user._id,
-                            nickName: user.nickName,
-                            tokenType: user.tokenType,
-                        };
-                    }
-                    next();
-                    return [3 /*break*/, 4];
-                case 3: throw new CustomError_1.default('JsonWebTokenError', 401, 'Token not found');
-                case 4: return [2 /*return*/];
-            }
-        });
+// Admin Login
+var isPasswordValidWithAdmin = (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, id, password, loginType;
+    return __generator(this, function (_b) {
+        _a = req.body, id = _a.id, password = _a.password;
+        loginType = 'admin';
+        if (id === index_1.default.AdminId && password === index_1.default.AdminPassword) {
+            req.user = { idToken: loginType, tokenType: loginType, name: loginType };
+            next();
+        }
+        else {
+            throw new CustomError_1.default('authError', 400, 'Id/Password is Invalid');
+        }
+        return [2 /*return*/];
     });
-});
-exports.isAccessTokenValid = isAccessTokenValid;
-//# sourceMappingURL=isAccessTokenValid.js.map
+}); });
+exports.isPasswordValidWithAdmin = isPasswordValidWithAdmin;
+//# sourceMappingURL=isPasswordValidWithAdmin.js.map

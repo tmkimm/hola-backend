@@ -245,12 +245,12 @@ var PostService = /** @class */ (function () {
         });
     };
     // 글 정보를 수정한다.
-    PostService.prototype.modifyPost = function (id, tokenUserId, post) {
+    PostService.prototype.modifyPost = function (id, tokenUserId, tokenType, post) {
         return __awaiter(this, void 0, void 0, function () {
             var cleanHTML, postRecord;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.checkPostAuthorization(id, tokenUserId)];
+                    case 0: return [4 /*yield*/, this.postModel.checkPostAuthorization(id, tokenUserId, tokenType)];
                     case 1:
                         _a.sent(); // 접근 권한 체크
                         if (post.content) {
@@ -268,11 +268,11 @@ var PostService = /** @class */ (function () {
         });
     };
     // 글를 삭제한다.
-    PostService.prototype.deletePost = function (id, tokenUserId) {
+    PostService.prototype.deletePost = function (id, tokenUserId, tokenType) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.checkPostAuthorization(id, tokenUserId)];
+                    case 0: return [4 /*yield*/, this.postModel.checkPostAuthorization(id, tokenUserId, tokenType)];
                     case 1:
                         _a.sent(); // 접근 권한 체크
                         return [4 /*yield*/, this.postModel.deletePost(id)];

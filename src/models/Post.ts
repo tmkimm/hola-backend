@@ -94,8 +94,8 @@ export interface IPostModel extends Model<IPostDocument> {
   increaseView: (postId: Types.ObjectId) => void;
   findAuthorByCommentId: (commentId: Types.ObjectId) => Promise<Types.ObjectId | null>;
   findAuthorByReplyId: (replyId: Types.ObjectId) => Promise<Types.ObjectId | null>;
-  checkPostAuthorization: (postId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
-  checkCommentAuthorization: (commentId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
+  checkPostAuthorization: (postId: Types.ObjectId, tokenUserId: Types.ObjectId, tokenType: string) => void;
+  checkCommentAuthorization: (commentId: Types.ObjectId, tokenUserId: Types.ObjectId, tokenType: string) => void;
   checkReplyAuthorization: (replyId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
   autoClosing: () => void;
 }
@@ -472,18 +472,22 @@ postSchema.statics.findAuthorByReplyId = async function (replyId) {
 };
 
 // 글 수정 권한 체크
-postSchema.statics.checkPostAuthorization = async function (postId, tokenUserId) {
-  const post = await this.findOne({ _id: postId, author: tokenUserId });
-  if (!post) {
-    throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
+postSchema.statics.checkPostAuthorization = async function (postId, tokenUserId, tokenType) {
+  if (tokenType !== 'admin') {
+    const post = await this.findOne({ _id: postId, author: tokenUserId });
+    if (!post) {
+      throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
+    }
   }
 };
 
 // 댓글 수정 권한 체크
-postSchema.statics.checkCommentAuthorization = async function (commentId, tokenUserId) {
-  const post = await this.findOne({ comments: { $elemMatch: { _id: commentId, author: tokenUserId } } });
-  if (!post) {
-    throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
+postSchema.statics.checkCommentAuthorization = async function (commentId, tokenUserId, tokenType) {
+  if (tokenType !== 'admin') {
+    const post = await this.findOne({ comments: { $elemMatch: { _id: commentId, author: tokenUserId } } });
+    if (!post) {
+      throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
+    }
   }
 };
 

@@ -207,33 +207,33 @@ exports.default = (function (app) {
     }));
     // 글 수정
     route.patch('/:id', index_1.isAccessTokenValid, index_1.checkPost, index_1.isPostValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, tokenUserId, postDTO, PostServiceInstance, post;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var id, _a, tokenUserId, tokenType, postDTO, PostServiceInstance, post;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
                     id = req.params.id;
-                    tokenUserId = req.user._id;
+                    _a = req.user, tokenUserId = _a._id, tokenType = _a.tokenType;
                     postDTO = req.body;
                     PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.modifyPost(mongoose_1.Types.ObjectId(id), tokenUserId, postDTO)];
+                    return [4 /*yield*/, PostServiceInstance.modifyPost(mongoose_1.Types.ObjectId(id), tokenUserId, tokenType, postDTO)];
                 case 1:
-                    post = _a.sent();
+                    post = _b.sent();
                     return [2 /*return*/, res.status(200).json(post)];
             }
         });
     }); }));
     // 글 삭제
     route.delete('/:id', index_1.isPostIdValid, index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, tokenUserId, PostServiceInstance;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var id, _a, tokenUserId, tokenType, PostServiceInstance;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
                     id = req.params.id;
-                    tokenUserId = req.user._id;
+                    _a = req.user, tokenUserId = _a._id, tokenType = _a.tokenType;
                     PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.deletePost(mongoose_1.Types.ObjectId(id), tokenUserId)];
+                    return [4 /*yield*/, PostServiceInstance.deletePost(mongoose_1.Types.ObjectId(id), tokenUserId, tokenType)];
                 case 1:
-                    _a.sent();
+                    _b.sent();
                     return [2 /*return*/, res.status(204).json()];
             }
         });

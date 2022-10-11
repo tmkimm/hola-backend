@@ -74,12 +74,12 @@ var CommentService = /** @class */ (function () {
         });
     };
     // 댓글을 수정한다.
-    CommentService.prototype.modifyComment = function (comment, tokenUserId) {
+    CommentService.prototype.modifyComment = function (comment, tokenUserId, tokenType) {
         return __awaiter(this, void 0, void 0, function () {
             var commentRecord;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.checkCommentAuthorization(comment._id, tokenUserId)];
+                    case 0: return [4 /*yield*/, this.postModel.checkCommentAuthorization(comment._id, tokenUserId, tokenType)];
                     case 1:
                         _a.sent();
                         return [4 /*yield*/, this.postModel.modifyComment(comment)];
@@ -91,12 +91,12 @@ var CommentService = /** @class */ (function () {
         });
     };
     // 댓글을 삭제한다.
-    CommentService.prototype.deleteComment = function (commentId, userId) {
+    CommentService.prototype.deleteComment = function (commentId, userId, tokenType) {
         return __awaiter(this, void 0, void 0, function () {
             var postRecord;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.checkCommentAuthorization(commentId, userId)];
+                    case 0: return [4 /*yield*/, this.postModel.checkCommentAuthorization(commentId, userId, tokenType)];
                     case 1:
                         _a.sent();
                         return [4 /*yield*/, this.postModel.deleteComment(commentId)];
