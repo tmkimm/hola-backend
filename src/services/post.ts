@@ -2,6 +2,8 @@ import sanitizeHtml from 'sanitize-html';
 import { Types } from 'mongoose';
 import { IPost, IPostModel, IPostDocument } from '../models/Post';
 import { INotificationModel } from '../models/Notification';
+import { PostFilterLog } from '../models/PostFilterLog';
+
 import { IUserModel } from '../models/User';
 import CustomError from '../CustomError';
 
@@ -25,7 +27,13 @@ export class PostService {
     position: string | null,
   ) {
     const posts = await this.postModel.findPost(offset, limit, sort, language, period, isClosed, type, position);
-
+    // 언어 필터링 로그 생성
+    if (language) {
+      await PostFilterLog.create({
+        viewDate: new Date(),
+        language: language.split(','),
+      });
+    }
     const sortPosts = this.sortLanguageByQueryParam(posts, language);
     return sortPosts;
   }

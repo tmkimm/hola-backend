@@ -37,11 +37,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var User_1 = require("../../models/User");
 var index_1 = require("../../services/index");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
-var Post_1 = require("../../models/Post");
-var Notification_1 = require("../../models/Notification");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /*
@@ -50,12 +47,12 @@ exports.default = (function (app) {
     app.use('/dashboard', route);
     // 사용자 정보 데일리 엑션(현재 총 회원 수, 오늘 가입자, 오늘 탈퇴자)
     route.get('/users/daily', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var UserServiceInstance, user;
+        var DashboardServiceInstance, user;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    UserServiceInstance = new index_1.UserService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, UserServiceInstance.findDashboardDailyUser()];
+                    DashboardServiceInstance = new index_1.DashboardService();
+                    return [4 /*yield*/, DashboardServiceInstance.findDailyUser()];
                 case 1:
                     user = _a.sent();
                     return [2 /*return*/, res.status(200).json(user)];
@@ -64,12 +61,26 @@ exports.default = (function (app) {
     }); }));
     // 일자별 회원 가입 현황(일자 / 신규 가입자 / 탈퇴자)
     route.get('/users/history', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var UserServiceInstance, user;
+        var DashboardServiceInstance, user;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    UserServiceInstance = new index_1.UserService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, UserServiceInstance.findDashboardHistoryUser()];
+                    DashboardServiceInstance = new index_1.DashboardService();
+                    return [4 /*yield*/, DashboardServiceInstance.findUserHistory()];
+                case 1:
+                    user = _a.sent();
+                    return [2 /*return*/, res.status(200).json(user)];
+            }
+        });
+    }); }));
+    // 가장 많이 조회해 본 언어 필터
+    route.get('/posts/filter-rank', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var DashboardServiceInstance, user;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    DashboardServiceInstance = new index_1.DashboardService();
+                    return [4 /*yield*/, DashboardServiceInstance.findPostFilterRank()];
                 case 1:
                     user = _a.sent();
                     return [2 /*return*/, res.status(200).json(user)];

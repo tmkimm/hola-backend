@@ -1,12 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { Types } from 'mongoose';
-import { isString } from '../../utills/isStringEmpty';
-import { IUser, User as UserModel } from '../../models/User';
-import { UserService, NotificationService } from '../../services/index';
-import { nickNameDuplicationCheck, isAccessTokenValid, isUserIdValid } from '../middlewares/index';
+import { DashboardService } from '../../services/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
-import { Post as PostModel } from '../../models/Post';
-import { Notification as NotificationModel } from '../../models/Notification';
 
 const route = Router();
 
@@ -20,8 +14,8 @@ export default (app: Router) => {
   route.get(
     '/users/daily',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
-      const user = await UserServiceInstance.findDashboardDailyUser();
+      const DashboardServiceInstance = new DashboardService();
+      const user = await DashboardServiceInstance.findDailyUser();
       return res.status(200).json(user);
     }),
   );
@@ -30,8 +24,18 @@ export default (app: Router) => {
   route.get(
     '/users/history',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
-      const user = await UserServiceInstance.findDashboardHistoryUser();
+      const DashboardServiceInstance = new DashboardService();
+      const user = await DashboardServiceInstance.findUserHistory();
+      return res.status(200).json(user);
+    }),
+  );
+
+  // 가장 많이 조회해 본 언어 필터
+  route.get(
+    '/posts/filter-rank',
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const DashboardServiceInstance = new DashboardService();
+      const user = await DashboardServiceInstance.findPostFilterRank();
       return res.status(200).json(user);
     }),
   );

@@ -235,64 +235,6 @@ var UserService = /** @class */ (function () {
             });
         });
     };
-    // 데일리 액션) 현재 총 회원 수, 오늘 가입자, 오늘 탈퇴자
-    UserService.prototype.findDashboardDailyUser = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var totalUser, today, signUpCount, signOutCount;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.userModel.countDocuments()];
-                    case 1:
-                        totalUser = _a.sent();
-                        today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        return [4 /*yield*/, this.userModel.countDocuments({ createdAt: { $gte: today } })];
-                    case 2:
-                        signUpCount = _a.sent();
-                        return [4 /*yield*/, SignOutUser_1.SignOutUser.countDocuments({ signOutDate: { $gte: today } })];
-                    case 3:
-                        signOutCount = _a.sent();
-                        return [2 /*return*/, {
-                                totalUser: totalUser,
-                                signUpCount: signUpCount,
-                                signOutCount: signOutCount,
-                            }];
-                }
-            });
-        });
-    };
-    // 일자별 회원 가입 현황(일자 / 신규 가입자 / 탈퇴자)
-    UserService.prototype.findDashboardHistoryUser = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var today, userHistory;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        today = new Date('09/01/2022');
-                        return [4 /*yield*/, this.userModel.aggregate([
-                                { $match: { createdAt: { $gte: today } } },
-                                { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, signIn: { $sum: 1 } } },
-                                { $addFields: { signOut: 0 } },
-                                {
-                                    $unionWith: {
-                                        coll: 'signoutusers',
-                                        pipeline: [
-                                            { $match: { signOutDate: { $gte: today } } },
-                                            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$signOutDate' } }, signOut: { $sum: 1 } } },
-                                            { $addFields: { signIn: 0 } },
-                                        ],
-                                    },
-                                },
-                                { $group: { _id: '$_id', signIn: { $sum: '$signIn' }, signOut: { $sum: '$signOut' } } },
-                                { $sort: { _id: 1 } },
-                            ])];
-                    case 1:
-                        userHistory = _a.sent();
-                        return [2 /*return*/, userHistory];
-                }
-            });
-        });
-    };
     return UserService;
 }());
 exports.UserService = UserService;

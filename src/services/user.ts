@@ -118,43 +118,4 @@ export class UserService {
     const user = await this.userModel.addReadList(postId, userId);
     return user;
   }
-
-  // 데일리 액션) 현재 총 회원 수, 오늘 가입자, 오늘 탈퇴자
-  async findDashboardDailyUser() {
-    const totalUser: number = await this.userModel.countDocuments();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const signUpCount: number = await this.userModel.countDocuments({ createdAt: { $gte: today } });
-    const signOutCount: number = await SignOutUser.countDocuments({ signOutDate: { $gte: today } });
-
-    return {
-      totalUser,
-      signUpCount,
-      signOutCount,
-    };
-  }
-
-  // 일자별 회원 가입 현황(일자 / 신규 가입자 / 탈퇴자)
-  async findDashboardHistoryUser() {
-    const today = new Date('09/01/2022');
-
-    const userHistory = await this.userModel.aggregate([
-      { $match: { createdAt: { $gte: today } } },
-      { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, signIn: { $sum: 1 } } },
-      { $addFields: { signOut: 0 } },
-      {
-        $unionWith: {
-          coll: 'signoutusers',
-          pipeline: [
-            { $match: { signOutDate: { $gte: today } } },
-            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$signOutDate' } }, signOut: { $sum: 1 } } },
-            { $addFields: { signIn: 0 } },
-          ],
-        },
-      },
-      { $group: { _id: '$_id', signIn: { $sum: '$signIn' }, signOut: { $sum: '$signOut' } } },
-      { $sort: { _id: 1 } },
-    ]);
-    return userHistory;
-  }
 }

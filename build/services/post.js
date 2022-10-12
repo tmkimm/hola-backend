@@ -41,6 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostService = void 0;
 var sanitize_html_1 = __importDefault(require("sanitize-html"));
+var PostFilterLog_1 = require("../models/PostFilterLog");
 var CustomError_1 = __importDefault(require("../CustomError"));
 var PostService = /** @class */ (function () {
     function PostService(postModel, userModel, notificationModel) {
@@ -58,6 +59,15 @@ var PostService = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.postModel.findPost(offset, limit, sort, language, period, isClosed, type, position)];
                     case 1:
                         posts = _a.sent();
+                        if (!language) return [3 /*break*/, 3];
+                        return [4 /*yield*/, PostFilterLog_1.PostFilterLog.create({
+                                viewDate: new Date(),
+                                language: language.split(','),
+                            })];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3:
                         sortPosts = this.sortLanguageByQueryParam(posts, language);
                         return [2 /*return*/, sortPosts];
                 }

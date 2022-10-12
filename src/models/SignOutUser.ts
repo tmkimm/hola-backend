@@ -13,7 +13,7 @@ export interface ISignOutUser {
 
 export interface ISignOutUserDocument extends ISignOutUser, Document {}
 
-export type IUserModel = Model<ISignOutUserDocument>;
+export type ISignOutUserModel = Model<ISignOutUserDocument>;
 
 const SignOutUserSchema = new Schema<ISignOutUserDocument>(
   {
@@ -36,5 +36,5 @@ const SignOutUserSchema = new Schema<ISignOutUserDocument>(
   },
 );
 
-const SignOutUser = model<ISignOutUserDocument, IUserModel>('SignOutUser', SignOutUserSchema);
+const SignOutUser = model<ISignOutUserDocument, ISignOutUserModel>('SignOutUser', SignOutUserSchema);
 export { SignOutUser };
