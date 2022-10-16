@@ -332,7 +332,7 @@ postSchema.statics.findComments = async function (id) {
 };
 
 postSchema.statics.deletePost = async function (id) {
-  await this.findOneAndUpdate({ _id: id }, { isDeleted: true });
+  await this.findOneAndUpdate({ _id: id }, { isDeleted: true, deleteDate: new Date() });
 };
 
 postSchema.statics.modifyPost = async function (id, post) {

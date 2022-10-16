@@ -295,7 +295,7 @@ postSchema.statics.deletePost = function (id) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, this.findOneAndUpdate({ _id: id }, { isDeleted: true })];
+                case 0: return [4 /*yield*/, this.findOneAndUpdate({ _id: id }, { isDeleted: true, deleteDate: new Date() })];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
