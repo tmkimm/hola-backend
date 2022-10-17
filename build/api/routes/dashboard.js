@@ -45,7 +45,7 @@ exports.default = (function (app) {
       dashboard에 관련된 Router를 정의한다.
       */
     app.use('/dashboard', route);
-    // 사용자 정보 데일리 엑션(현재 총 회원 수, 오늘 가입자, 오늘 탈퇴자)
+    // 사용자 정보 데일리(현재 총 회원 수, 오늘 가입자, 오늘 탈퇴자)
     route.get('/users/daily', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var DashboardServiceInstance, user;
         return __generator(this, function (_a) {
@@ -59,7 +59,7 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 일자별 회원 가입 현황(일자 / 신규 가입자 / 탈퇴자)
+    // 일자별 회원 가입 현황(일자, 신규 가입자, 탈퇴자)
     route.get('/users/history', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var DashboardServiceInstance, user;
         return __generator(this, function (_a) {
@@ -67,6 +67,34 @@ exports.default = (function (app) {
                 case 0:
                     DashboardServiceInstance = new index_1.DashboardService();
                     return [4 /*yield*/, DashboardServiceInstance.findUserHistory()];
+                case 1:
+                    user = _a.sent();
+                    return [2 /*return*/, res.status(200).json(user)];
+            }
+        });
+    }); }));
+    // 게시글 데일리(오늘 전체 글 조회 수, 등록된 글, 글 마감 수, 글 삭제 수 )
+    route.get('/posts/daily', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var DashboardServiceInstance, post;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    DashboardServiceInstance = new index_1.DashboardService();
+                    return [4 /*yield*/, DashboardServiceInstance.findDailyPost()];
+                case 1:
+                    post = _a.sent();
+                    return [2 /*return*/, res.status(200).json(post)];
+            }
+        });
+    }); }));
+    // 일자별 게시글 현황(일자, 등록된 글, 마감된 글, 삭제된 글)
+    route.get('/posts/history', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var DashboardServiceInstance, user;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    DashboardServiceInstance = new index_1.DashboardService();
+                    return [4 /*yield*/, DashboardServiceInstance.findPostHistory()];
                 case 1:
                     user = _a.sent();
                     return [2 /*return*/, res.status(200).json(user)];

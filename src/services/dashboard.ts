@@ -1,4 +1,6 @@
 import { User } from '../models/User';
+import { Post } from '../models/Post';
+
 import { SignOutUser } from '../models/SignOutUser';
 import { PostFilterLog } from '../models/PostFilterLog';
 
@@ -42,10 +44,51 @@ export class DashboardService {
     return userHistory;
   }
 
-  // { $project : { _id: 0, viewDate: 1, language: 1}},
-  // { $unwind : "$language"},
-  // { $group: { _id: "$language", cnt: { $sum : 1}}},
-  // { $sort : {cnt: 1}}
+  // 게시글 데일리(오늘 전체 글 조회 수, 등록된 글, 글 마감 수, 글 삭제 수 )
+  async findDailyPost() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let totalView = 0;
+    const totalViewSum = await Post.aggregate([
+      { $match: { createdAt: { $gte: today } } },
+      { $group: { _id: null, totalView: { $sum: '$views' } } },
+    ]);
+    if (totalViewSum && totalViewSum.length > 0 && totalViewSum[0].totalView) totalView = totalViewSum[0].totalView;
+    return {
+      totalView,
+    };
+  }
+
+  // 일자별 게시글 현황(일자 / 등록된 글 / 마감된 글 / 삭제된 글)
+  async findPostHistory() {
+    const today = new Date('09/01/2022');
+
+    const postHistory = await Post.aggregate([
+      { $match: { createdAt: { $gte: today } } },
+      { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, new: { $sum: 1 } } },
+      {
+        $unionWith: {
+          coll: 'posts',
+          pipeline: [
+            { $match: { closeDate: { $gte: today } } },
+            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$closeDate' } }, closed: { $sum: 1 } } },
+          ],
+        },
+      },
+      {
+        $unionWith: {
+          coll: 'posts',
+          pipeline: [
+            { $match: { deleteDate: { $gte: today } } },
+            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$deleteDate' } }, deleted: { $sum: 1 } } },
+          ],
+        },
+      },
+      { $group: { _id: '$_id', new: { $sum: '$new' }, closed: { $sum: '$closed' }, deleted: { $sum: '$deleted' } } },
+      { $sort: { _id: 1 } },
+    ]);
+    return postHistory;
+  }
 
   // 가장 많이 조회해 본 언어 필터
   async findPostFilterRank() {

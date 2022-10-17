@@ -38,6 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DashboardService = void 0;
 var User_1 = require("../models/User");
+var Post_1 = require("../models/Post");
 var SignOutUser_1 = require("../models/SignOutUser");
 var PostFilterLog_1 = require("../models/PostFilterLog");
 var DashboardService = /** @class */ (function () {
@@ -101,10 +102,70 @@ var DashboardService = /** @class */ (function () {
             });
         });
     };
-    // { $project : { _id: 0, viewDate: 1, language: 1}},
-    // { $unwind : "$language"},
-    // { $group: { _id: "$language", cnt: { $sum : 1}}},
-    // { $sort : {cnt: 1}}
+    // 게시글 데일리(오늘 전체 글 조회 수, 등록된 글, 글 마감 수, 글 삭제 수 )
+    DashboardService.prototype.findDailyPost = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var today, totalView, totalViewSum;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        totalView = 0;
+                        return [4 /*yield*/, Post_1.Post.aggregate([
+                                { $match: { createdAt: { $gte: today } } },
+                                { $group: { _id: null, totalView: { $sum: '$views' } } },
+                            ])];
+                    case 1:
+                        totalViewSum = _a.sent();
+                        if (totalViewSum && totalViewSum.length > 0 && totalViewSum[0].totalView)
+                            totalView = totalViewSum[0].totalView;
+                        return [2 /*return*/, {
+                                totalView: totalView,
+                            }];
+                }
+            });
+        });
+    };
+    // 일자별 게시글 현황(일자 / 등록된 글 / 마감된 글 / 삭제된 글)
+    DashboardService.prototype.findPostHistory = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var today, postHistory;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        today = new Date('09/01/2022');
+                        return [4 /*yield*/, Post_1.Post.aggregate([
+                                { $match: { createdAt: { $gte: today } } },
+                                { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, new: { $sum: 1 } } },
+                                {
+                                    $unionWith: {
+                                        coll: 'posts',
+                                        pipeline: [
+                                            { $match: { closeDate: { $gte: today } } },
+                                            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$closeDate' } }, closed: { $sum: 1 } } },
+                                        ],
+                                    },
+                                },
+                                {
+                                    $unionWith: {
+                                        coll: 'posts',
+                                        pipeline: [
+                                            { $match: { deleteDate: { $gte: today } } },
+                                            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$deleteDate' } }, deleted: { $sum: 1 } } },
+                                        ],
+                                    },
+                                },
+                                { $group: { _id: '$_id', new: { $sum: '$new' }, closed: { $sum: '$closed' }, deleted: { $sum: '$deleted' } } },
+                                { $sort: { _id: 1 } },
+                            ])];
+                    case 1:
+                        postHistory = _a.sent();
+                        return [2 /*return*/, postHistory];
+                }
+            });
+        });
+    };
     // 가장 많이 조회해 본 언어 필터
     DashboardService.prototype.findPostFilterRank = function () {
         return __awaiter(this, void 0, void 0, function () {
