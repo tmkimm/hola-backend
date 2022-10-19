@@ -71,30 +71,28 @@ var DashboardService = /** @class */ (function () {
         });
     };
     // 일자별 회원 가입 현황(일자 / 신규 가입자 / 탈퇴자)
-    DashboardService.prototype.findUserHistory = function () {
+    DashboardService.prototype.findUserHistory = function (startDate, endDate) {
         return __awaiter(this, void 0, void 0, function () {
-            var today, userHistory;
+            var userHistory;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        today = new Date('09/01/2022');
-                        return [4 /*yield*/, User_1.User.aggregate([
-                                { $match: { createdAt: { $gte: today } } },
-                                { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, signIn: { $sum: 1 } } },
-                                { $addFields: { signOut: 0 } },
-                                {
-                                    $unionWith: {
-                                        coll: 'signoutusers',
-                                        pipeline: [
-                                            { $match: { signOutDate: { $gte: today } } },
-                                            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$signOutDate' } }, signOut: { $sum: 1 } } },
-                                            { $addFields: { signIn: 0 } },
-                                        ],
-                                    },
+                    case 0: return [4 /*yield*/, User_1.User.aggregate([
+                            { $match: { createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
+                            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, signIn: { $sum: 1 } } },
+                            { $addFields: { signOut: 0 } },
+                            {
+                                $unionWith: {
+                                    coll: 'signoutusers',
+                                    pipeline: [
+                                        { $match: { signOutDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
+                                        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$signOutDate' } }, signOut: { $sum: 1 } } },
+                                        { $addFields: { signIn: 0 } },
+                                    ],
                                 },
-                                { $group: { _id: '$_id', signIn: { $sum: '$signIn' }, signOut: { $sum: '$signOut' } } },
-                                { $sort: { _id: 1 } },
-                            ])];
+                            },
+                            { $group: { _id: '$_id', signIn: { $sum: '$signIn' }, signOut: { $sum: '$signOut' } } },
+                            { $sort: { _id: 1 } },
+                        ])];
                     case 1:
                         userHistory = _a.sent();
                         return [2 /*return*/, userHistory];
@@ -128,37 +126,35 @@ var DashboardService = /** @class */ (function () {
         });
     };
     // 일자별 게시글 현황(일자 / 등록된 글 / 마감된 글 / 삭제된 글)
-    DashboardService.prototype.findPostHistory = function () {
+    DashboardService.prototype.findPostHistory = function (startDate, endDate) {
         return __awaiter(this, void 0, void 0, function () {
-            var today, postHistory;
+            var postHistory;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        today = new Date('09/01/2022');
-                        return [4 /*yield*/, Post_1.Post.aggregate([
-                                { $match: { createdAt: { $gte: today } } },
-                                { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, new: { $sum: 1 } } },
-                                {
-                                    $unionWith: {
-                                        coll: 'posts',
-                                        pipeline: [
-                                            { $match: { closeDate: { $gte: today } } },
-                                            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$closeDate' } }, closed: { $sum: 1 } } },
-                                        ],
-                                    },
+                    case 0: return [4 /*yield*/, Post_1.Post.aggregate([
+                            { $match: { createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
+                            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, new: { $sum: 1 } } },
+                            {
+                                $unionWith: {
+                                    coll: 'posts',
+                                    pipeline: [
+                                        { $match: { closeDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
+                                        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$closeDate' } }, closed: { $sum: 1 } } },
+                                    ],
                                 },
-                                {
-                                    $unionWith: {
-                                        coll: 'posts',
-                                        pipeline: [
-                                            { $match: { deleteDate: { $gte: today } } },
-                                            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$deleteDate' } }, deleted: { $sum: 1 } } },
-                                        ],
-                                    },
+                            },
+                            {
+                                $unionWith: {
+                                    coll: 'posts',
+                                    pipeline: [
+                                        { $match: { deleteDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
+                                        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$deleteDate' } }, deleted: { $sum: 1 } } },
+                                    ],
                                 },
-                                { $group: { _id: '$_id', new: { $sum: '$new' }, closed: { $sum: '$closed' }, deleted: { $sum: '$deleted' } } },
-                                { $sort: { _id: 1 } },
-                            ])];
+                            },
+                            { $group: { _id: '$_id', new: { $sum: '$new' }, closed: { $sum: '$closed' }, deleted: { $sum: '$deleted' } } },
+                            { $sort: { _id: 1 } },
+                        ])];
                     case 1:
                         postHistory = _a.sent();
                         return [2 /*return*/, postHistory];
@@ -167,20 +163,18 @@ var DashboardService = /** @class */ (function () {
         });
     };
     // 가장 많이 조회해 본 언어 필터
-    DashboardService.prototype.findPostFilterRank = function () {
+    DashboardService.prototype.findPostFilterRank = function (startDate, endDate) {
         return __awaiter(this, void 0, void 0, function () {
-            var today, userHistory;
+            var userHistory;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        today = new Date('09/01/2022');
-                        return [4 /*yield*/, PostFilterLog_1.PostFilterLog.aggregate([
-                                { $match: { viewDate: { $gte: today } } },
-                                { $project: { _id: 0, viewDate: 1, language: 1 } },
-                                { $unwind: '$language' },
-                                { $group: { _id: '$language', cnt: { $sum: 1 } } },
-                                { $sort: { cnt: 1 } },
-                            ])];
+                    case 0: return [4 /*yield*/, PostFilterLog_1.PostFilterLog.aggregate([
+                            { $match: { viewDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
+                            { $project: { _id: 0, viewDate: 1, language: 1 } },
+                            { $unwind: '$language' },
+                            { $group: { _id: '$language', cnt: { $sum: 1 } } },
+                            { $sort: { cnt: 1 } },
+                        ])];
                     case 1:
                         userHistory = _a.sent();
                         return [2 /*return*/, userHistory];

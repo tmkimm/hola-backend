@@ -21,18 +21,16 @@ export class DashboardService {
   }
 
   // 일자별 회원 가입 현황(일자 / 신규 가입자 / 탈퇴자)
-  async findUserHistory() {
-    const today = new Date('09/01/2022');
-
+  async findUserHistory(startDate: string, endDate: string) {
     const userHistory = await User.aggregate([
-      { $match: { createdAt: { $gte: today } } },
+      { $match: { createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
       { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, signIn: { $sum: 1 } } },
       { $addFields: { signOut: 0 } },
       {
         $unionWith: {
           coll: 'signoutusers',
           pipeline: [
-            { $match: { signOutDate: { $gte: today } } },
+            { $match: { signOutDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
             { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$signOutDate' } }, signOut: { $sum: 1 } } },
             { $addFields: { signIn: 0 } },
           ],
@@ -60,17 +58,15 @@ export class DashboardService {
   }
 
   // 일자별 게시글 현황(일자 / 등록된 글 / 마감된 글 / 삭제된 글)
-  async findPostHistory() {
-    const today = new Date('09/01/2022');
-
+  async findPostHistory(startDate: string, endDate: string) {
     const postHistory = await Post.aggregate([
-      { $match: { createdAt: { $gte: today } } },
+      { $match: { createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
       { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, new: { $sum: 1 } } },
       {
         $unionWith: {
           coll: 'posts',
           pipeline: [
-            { $match: { closeDate: { $gte: today } } },
+            { $match: { closeDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
             { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$closeDate' } }, closed: { $sum: 1 } } },
           ],
         },
@@ -79,7 +75,7 @@ export class DashboardService {
         $unionWith: {
           coll: 'posts',
           pipeline: [
-            { $match: { deleteDate: { $gte: today } } },
+            { $match: { deleteDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
             { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$deleteDate' } }, deleted: { $sum: 1 } } },
           ],
         },
@@ -91,11 +87,9 @@ export class DashboardService {
   }
 
   // 가장 많이 조회해 본 언어 필터
-  async findPostFilterRank() {
-    const today = new Date('09/01/2022');
-
+  async findPostFilterRank(startDate: string, endDate: string) {
     const userHistory = await PostFilterLog.aggregate([
-      { $match: { viewDate: { $gte: today } } },
+      { $match: { viewDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
       { $project: { _id: 0, viewDate: 1, language: 1 } },
       { $unwind: '$language' },
       { $group: { _id: '$language', cnt: { $sum: 1 } } },

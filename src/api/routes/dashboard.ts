@@ -24,8 +24,9 @@ export default (app: Router) => {
   route.get(
     '/users/history',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const { startDate, endDate } = req.query;
       const DashboardServiceInstance = new DashboardService();
-      const user = await DashboardServiceInstance.findUserHistory();
+      const user = await DashboardServiceInstance.findUserHistory(startDate, endDate);
       return res.status(200).json(user);
     }),
   );
@@ -44,8 +45,9 @@ export default (app: Router) => {
   route.get(
     '/posts/history',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const { startDate, endDate } = req.query;
       const DashboardServiceInstance = new DashboardService();
-      const user = await DashboardServiceInstance.findPostHistory();
+      const user = await DashboardServiceInstance.findPostHistory(startDate, endDate);
       return res.status(200).json(user);
     }),
   );
@@ -54,8 +56,9 @@ export default (app: Router) => {
   route.get(
     '/posts/filter-rank',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const { startDate, endDate } = req.query;
       const DashboardServiceInstance = new DashboardService();
-      const user = await DashboardServiceInstance.findPostFilterRank();
+      const user = await DashboardServiceInstance.findPostFilterRank(startDate, endDate);
       return res.status(200).json(user);
     }),
   );

@@ -61,14 +61,15 @@ exports.default = (function (app) {
     }); }));
     // 일자별 회원 가입 현황(일자, 신규 가입자, 탈퇴자)
     route.get('/users/history', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var DashboardServiceInstance, user;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var _a, startDate, endDate, DashboardServiceInstance, user;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
+                    _a = req.query, startDate = _a.startDate, endDate = _a.endDate;
                     DashboardServiceInstance = new index_1.DashboardService();
-                    return [4 /*yield*/, DashboardServiceInstance.findUserHistory()];
+                    return [4 /*yield*/, DashboardServiceInstance.findUserHistory(startDate, endDate)];
                 case 1:
-                    user = _a.sent();
+                    user = _b.sent();
                     return [2 /*return*/, res.status(200).json(user)];
             }
         });
@@ -89,28 +90,30 @@ exports.default = (function (app) {
     }); }));
     // 일자별 게시글 현황(일자, 등록된 글, 마감된 글, 삭제된 글)
     route.get('/posts/history', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var DashboardServiceInstance, user;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var _a, startDate, endDate, DashboardServiceInstance, user;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
+                    _a = req.query, startDate = _a.startDate, endDate = _a.endDate;
                     DashboardServiceInstance = new index_1.DashboardService();
-                    return [4 /*yield*/, DashboardServiceInstance.findPostHistory()];
+                    return [4 /*yield*/, DashboardServiceInstance.findPostHistory(startDate, endDate)];
                 case 1:
-                    user = _a.sent();
+                    user = _b.sent();
                     return [2 /*return*/, res.status(200).json(user)];
             }
         });
     }); }));
     // 가장 많이 조회해 본 언어 필터
     route.get('/posts/filter-rank', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var DashboardServiceInstance, user;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var _a, startDate, endDate, DashboardServiceInstance, user;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
+                    _a = req.query, startDate = _a.startDate, endDate = _a.endDate;
                     DashboardServiceInstance = new index_1.DashboardService();
-                    return [4 /*yield*/, DashboardServiceInstance.findPostFilterRank()];
+                    return [4 /*yield*/, DashboardServiceInstance.findPostFilterRank(startDate, endDate)];
                 case 1:
-                    user = _a.sent();
+                    user = _b.sent();
                     return [2 /*return*/, res.status(200).json(user)];
             }
         });
