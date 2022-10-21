@@ -5,9 +5,39 @@ import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 const route = Router();
 
 export default (app: Router) => {
-  /*
-    dashboard에 관련된 Router를 정의한다.
-    */
+  /**
+   * @swagger
+   * paths:
+   *   /product:
+   *    post:
+   *      tags: [제품]
+   *      summary: 제품의 명칭과 셀렉트, 카테고리를 POST요청
+   *      description: 제품의 국,영문 명칭과 셀렉트, 카테고리를 요청해서 관리자페이지에 랜더
+   *      parameters:
+   *        - name: productNameKO
+   *          in: body
+   *          description: 제품 국문 이름
+   *          enum: [연필 깍기, 명함]
+   *          example: 공구류
+   *        - name: productNameEN
+   *          in: body
+   *          description: 제품 영문 이름 이 부분이 나중에 url 끝부분이 됨
+   *          enum: [hotsource]
+   *          example: hotsource
+   *      responses:
+   *        200:
+   *          description: OK 들어 간 데이터가 다시 반환
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/Product'
+   *        400:
+   *          description: Invalid request
+   *        409:
+   *          description: Not have that kind of product
+   */
   app.use('/dashboard', route);
 
   // 사용자 정보 데일리(현재 총 회원 수, 오늘 가입자, 오늘 탈퇴자)
