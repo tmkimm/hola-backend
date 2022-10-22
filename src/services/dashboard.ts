@@ -10,13 +10,13 @@ export class DashboardService {
     const totalUser: number = await User.countDocuments();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const signUpCount: number = await User.countDocuments({ createdAt: { $gte: today } });
-    const signOutCount: number = await SignOutUser.countDocuments({ signOutDate: { $gte: today } });
+    const signUp: number = await User.countDocuments({ createdAt: { $gte: today } });
+    const signOut: number = await SignOutUser.countDocuments({ signOutDate: { $gte: today } });
 
     return {
       totalUser,
-      signUpCount,
-      signOutCount,
+      signUp,
+      signOut,
     };
   }
 
@@ -52,8 +52,15 @@ export class DashboardService {
       { $group: { _id: null, totalView: { $sum: '$views' } } },
     ]);
     if (totalViewSum && totalViewSum.length > 0 && totalViewSum[0].totalView) totalView = totalViewSum[0].totalView;
+
+    const created: number = await Post.countDocuments({ createdAt: { $gte: today } });
+    const closed: number = await Post.countDocuments({ closeDate: { $gte: today } });
+    const deleted: number = await Post.countDocuments({ deleteDate: { $gte: today } });
     return {
       totalView,
+      created,
+      closed,
+      deleted,
     };
   }
 
@@ -61,7 +68,7 @@ export class DashboardService {
   async findPostHistory(startDate: string, endDate: string) {
     const postHistory = await Post.aggregate([
       { $match: { createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
-      { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, new: { $sum: 1 } } },
+      { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, created: { $sum: 1 } } },
       {
         $unionWith: {
           coll: 'posts',
@@ -80,7 +87,14 @@ export class DashboardService {
           ],
         },
       },
-      { $group: { _id: '$_id', new: { $sum: '$new' }, closed: { $sum: '$closed' }, deleted: { $sum: '$deleted' } } },
+      {
+        $group: {
+          _id: '$_id',
+          created: { $sum: '$created' },
+          closed: { $sum: '$closed' },
+          deleted: { $sum: '$deleted' },
+        },
+      },
       { $sort: { _id: 1 } },
     ]);
     return postHistory;
@@ -92,8 +106,8 @@ export class DashboardService {
       { $match: { viewDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
       { $project: { _id: 0, viewDate: 1, language: 1 } },
       { $unwind: '$language' },
-      { $group: { _id: '$language', cnt: { $sum: 1 } } },
-      { $sort: { cnt: 1 } },
+      { $group: { _id: '$language', count: { $sum: 1 } } },
+      { $sort: { count: 1 } },
     ]);
     return userHistory;
   }

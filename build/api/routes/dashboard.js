@@ -43,39 +43,38 @@ var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**
      * @swagger
+     * tags:
+          - name: dashboard
+          description: 어드민용 대시보드
+     */
+    app.use('/dashboard', route);
+    /**
+     * @swagger
      * paths:
-     *   /product:
-     *    post:
-     *      tags: [제품]
-     *      summary: 제품의 명칭과 셀렉트, 카테고리를 POST요청
-     *      description: 제품의 국,영문 명칭과 셀렉트, 카테고리를 요청해서 관리자페이지에 랜더
-     *      parameters:
-     *        - name: productNameKO
-     *          in: body
-     *          description: 제품 국문 이름
-     *          enum: [연필 깍기, 명함]
-     *          example: 공구류
-     *        - name: productNameEN
-     *          in: body
-     *          description: 제품 영문 이름 이 부분이 나중에 url 끝부분이 됨
-     *          enum: [hotsource]
-     *          example: hotsource
+     *   /dashboard/users/daily:
+     *    get:
+     *      tags:
+     *        - dashboard
+     *      summary: 사용자 데일리 액션
+     *      description: 총 회원 수, 오늘 가입자, 오늘 탈퇴자 조회
      *      responses:
      *        200:
-     *          description: OK 들어 간 데이터가 다시 반환
+     *          description: successful operation
      *          content:
      *            application/json:
      *              schema:
-     *                type: array
-     *                items:
-     *                  $ref: '#/components/schemas/Product'
-     *        400:
-     *          description: Invalid request
-     *        409:
-     *          description: Not have that kind of product
+     *                type: object
+     *                properties:
+     *                  totalUser:
+     *                    type: integer
+     *                    description: 총 회원 수
+     *                  signUp:
+     *                    type: integer
+     *                    description: 오늘 가입자 수
+     *                  signOut:
+     *                    type: integer
+     *                    description: 오늘 탈퇴자 조회 수
      */
-    app.use('/dashboard', route);
-    // 사용자 정보 데일리(현재 총 회원 수, 오늘 가입자, 오늘 탈퇴자)
     route.get('/users/daily', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var DashboardServiceInstance, user;
         return __generator(this, function (_a) {
@@ -89,7 +88,54 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 일자별 회원 가입 현황(일자, 신규 가입자, 탈퇴자)
+    /**
+     * @swagger
+     * paths:
+     *   /dashboard/users/history:
+     *    get:
+     *      tags:
+     *        - dashboard
+     *      summary: 일자별 회원 가입 현황
+     *      description: 조회 기간에 해당되는 가입자 정보 집계
+     *      parameters:
+     *        - name: startDate
+     *          in: query
+     *          description: 조회 시작일
+     *          required: true
+     *          schema:
+     *            type: string
+     *            example: '2022-09-01'
+     *        - name: endDate
+     *          in: query
+     *          description: 조회 종료일
+     *          required: true
+     *          schema:
+     *            type: string
+     *            example: '2022-09-30'
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: array
+     *                items:
+     *                  type: object
+     *                  properties:
+     *                    _id:
+     *                      type: string
+     *                      description: 날짜
+     *                    signIn:
+     *                      type: integer
+     *                      description: 가입자 수
+     *                    signOut:
+     *                      type: integer
+     *                      description: 탈퇴자 수
+     *              example:
+     *              - _id: '2022-09-01'
+     *                signIn: 8
+     *                signOut: 3
+     */
     route.get('/users/history', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, startDate, endDate, DashboardServiceInstance, user;
         return __generator(this, function (_b) {
@@ -104,7 +150,36 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 게시글 데일리(오늘 전체 글 조회 수, 등록된 글, 글 마감 수, 글 삭제 수 )
+    /**
+     * @swagger
+     * paths:
+     *   /dashboard/posts/daily:
+     *    get:
+     *      tags:
+     *        - dashboard
+     *      summary: 게시글 데일리 액션
+     *      description: 총오늘 전체 글 조회 수, 등록된 글, 글 마감 수, 글 삭제 수 조회
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: object
+     *                properties:
+     *                  totalView:
+     *                    type: integer
+     *                    description: 총 조회수
+     *                  created:
+     *                    type: integer
+     *                    description: 등록된 글
+     *                  closed:
+     *                    type: integer
+     *                    description: 마감된 글
+     *                  deleted:
+     *                    type: integer
+     *                    description: 삭제된 글
+     */
     route.get('/posts/daily', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var DashboardServiceInstance, post;
         return __generator(this, function (_a) {
@@ -118,7 +193,58 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 일자별 게시글 현황(일자, 등록된 글, 마감된 글, 삭제된 글)
+    /**
+     * @swagger
+     * paths:
+     *   /dashboard/posts/history:
+     *    get:
+     *      tags:
+     *        - dashboard
+     *      summary: 일자별 게시글 현황
+     *      description: 조회 기간에 해당되는 게시글 정보 집계(일자, 등록된 글, 마감된 글, 삭제된 글)
+     *      parameters:
+     *        - name: startDate
+     *          in: query
+     *          description: 조회 시작일
+     *          required: true
+     *          schema:
+     *            type: string
+     *            example: '2022-09-01'
+     *        - name: endDate
+     *          in: query
+     *          description: 조회 종료일
+     *          required: true
+     *          schema:
+     *            type: string
+     *            example: '2022-09-30'
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: array
+     *                items:
+     *                  type: object
+     *                  properties:
+     *                    _id:
+     *                      type: string
+     *                      description: 날짜
+     *                    created:
+     *                      type: integer
+     *                      description: 등록된 글
+     *                    closed:
+     *                      type: integer
+     *                      description: 마감된 글
+     *                    deleted:
+     *                      type: integer
+     *                      description: 삭제된 글
+     *              example:
+     *              - _id: '2022-09-01'
+     *                created: 8
+     *                closed: 3
+     *                deleted: 3
+     */
     route.get('/posts/history', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, startDate, endDate, DashboardServiceInstance, user;
         return __generator(this, function (_b) {
@@ -133,6 +259,52 @@ exports.default = (function (app) {
             }
         });
     }); }));
+    /**
+     * @swagger
+     * paths:
+     *   /dashboard/posts/filter-rank:
+     *    get:
+     *      tags:
+     *        - dashboard
+     *      summary: 가장 많이 조회해 본 언어 필터
+     *      description: 조회 기간에 해당되는 언어 필터링 순위
+     *      parameters:
+     *        - name: startDate
+     *          in: query
+     *          description: 조회 시작일
+     *          required: true
+     *          schema:
+     *            type: string
+     *            example: '2022-09-01'
+     *        - name: endDate
+     *          in: query
+     *          description: 조회 종료일
+     *          required: true
+     *          schema:
+     *            type: string
+     *            example: '2022-09-30'
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: array
+     *                items:
+     *                  type: object
+     *                  properties:
+     *                    _id:
+     *                      type: string
+     *                      description: 언어
+     *                    count:
+     *                      type: integer
+     *                      description: 조회 수
+     *              example:
+     *              - _id: 'javascript'
+     *                count: 15
+     *              - _id: 'react'
+     *                count: 10
+     */
     // 가장 많이 조회해 본 언어 필터
     route.get('/posts/filter-rank', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, startDate, endDate, DashboardServiceInstance, user;

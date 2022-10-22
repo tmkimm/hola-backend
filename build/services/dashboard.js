@@ -47,7 +47,7 @@ var DashboardService = /** @class */ (function () {
     // 데일리 액션) 현재 총 회원 수, 오늘 가입자, 오늘 탈퇴자
     DashboardService.prototype.findDailyUser = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var totalUser, today, signUpCount, signOutCount;
+            var totalUser, today, signUp, signOut;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, User_1.User.countDocuments()];
@@ -57,14 +57,14 @@ var DashboardService = /** @class */ (function () {
                         today.setHours(0, 0, 0, 0);
                         return [4 /*yield*/, User_1.User.countDocuments({ createdAt: { $gte: today } })];
                     case 2:
-                        signUpCount = _a.sent();
+                        signUp = _a.sent();
                         return [4 /*yield*/, SignOutUser_1.SignOutUser.countDocuments({ signOutDate: { $gte: today } })];
                     case 3:
-                        signOutCount = _a.sent();
+                        signOut = _a.sent();
                         return [2 /*return*/, {
                                 totalUser: totalUser,
-                                signUpCount: signUpCount,
-                                signOutCount: signOutCount,
+                                signUp: signUp,
+                                signOut: signOut,
                             }];
                 }
             });
@@ -103,7 +103,7 @@ var DashboardService = /** @class */ (function () {
     // 게시글 데일리(오늘 전체 글 조회 수, 등록된 글, 글 마감 수, 글 삭제 수 )
     DashboardService.prototype.findDailyPost = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var today, totalView, totalViewSum;
+            var today, totalView, totalViewSum, created, closed, deleted;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -118,8 +118,20 @@ var DashboardService = /** @class */ (function () {
                         totalViewSum = _a.sent();
                         if (totalViewSum && totalViewSum.length > 0 && totalViewSum[0].totalView)
                             totalView = totalViewSum[0].totalView;
+                        return [4 /*yield*/, Post_1.Post.countDocuments({ createdAt: { $gte: today } })];
+                    case 2:
+                        created = _a.sent();
+                        return [4 /*yield*/, Post_1.Post.countDocuments({ closeDate: { $gte: today } })];
+                    case 3:
+                        closed = _a.sent();
+                        return [4 /*yield*/, Post_1.Post.countDocuments({ deleteDate: { $gte: today } })];
+                    case 4:
+                        deleted = _a.sent();
                         return [2 /*return*/, {
                                 totalView: totalView,
+                                created: created,
+                                closed: closed,
+                                deleted: deleted,
                             }];
                 }
             });
@@ -133,7 +145,7 @@ var DashboardService = /** @class */ (function () {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, Post_1.Post.aggregate([
                             { $match: { createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
-                            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, new: { $sum: 1 } } },
+                            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, created: { $sum: 1 } } },
                             {
                                 $unionWith: {
                                     coll: 'posts',
@@ -152,7 +164,14 @@ var DashboardService = /** @class */ (function () {
                                     ],
                                 },
                             },
-                            { $group: { _id: '$_id', new: { $sum: '$new' }, closed: { $sum: '$closed' }, deleted: { $sum: '$deleted' } } },
+                            {
+                                $group: {
+                                    _id: '$_id',
+                                    created: { $sum: '$created' },
+                                    closed: { $sum: '$closed' },
+                                    deleted: { $sum: '$deleted' },
+                                },
+                            },
                             { $sort: { _id: 1 } },
                         ])];
                     case 1:
@@ -172,8 +191,8 @@ var DashboardService = /** @class */ (function () {
                             { $match: { viewDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
                             { $project: { _id: 0, viewDate: 1, language: 1 } },
                             { $unwind: '$language' },
-                            { $group: { _id: '$language', cnt: { $sum: 1 } } },
-                            { $sort: { cnt: 1 } },
+                            { $group: { _id: '$language', count: { $sum: 1 } } },
+                            { $sort: { count: 1 } },
                         ])];
                     case 1:
                         userHistory = _a.sent();
