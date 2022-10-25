@@ -46,10 +46,13 @@ var Post_1 = require("../../models/Post");
 var Notification_1 = require("../../models/Notification");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
+    /**
+     * @swagger
+     * tags:
+          - name: posts
+            description: 글에 관련된 API
+     */
     /*
-      글에 관련된 Router를 정의한다.
-      등록 / 수정 / 삭제하려는 사용자의 정보는 Access Token을 이용하여 처리한다.
-      
       # GET /posts : 글 리스트 조회(pagenation, sort, query select)
       # POST /posts/ : 신규 글 등록
       # GET /posts/:id : 글 상세 정보 조회
@@ -60,7 +63,33 @@ exports.default = (function (app) {
       # DELETE /posts/likes/:id : 좋아요 삭제
       */
     app.use('/posts', route);
-    // 글 리스트 조회
+    /**
+     * @swagger
+     * paths:
+     *   /posts:
+     *    get:
+     *      tags:
+     *        - posts
+     *      summary: 글 리스트 조회(메인)
+     *      description: 메인 페이지에서 글 리스트를 조회한다.
+     *      parameters:
+     *        - name: language
+     *          in: query
+     *          description: 사용 언어
+     *          required: false
+     *          schema:
+     *            type: string
+     *          example: 'react,java'
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: array
+     *                items:
+     *                  $ref: '#/components/schemas/Post'
+     */
     route.get('/', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, offset, limit, sort, language, period, isClosed, type, position, PostServiceInstance, posts;
         return __generator(this, function (_b) {
@@ -172,7 +201,30 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 글 등록
+    /**
+     * @swagger
+     * paths:
+     *   /posts:
+     *    post:
+     *      tags:
+     *        - posts
+     *      summary: 글 등록
+     *      description: 신규 글을 등록한다.
+     *      requestBody:
+     *        content:
+     *          application/json:
+     *            schema:
+     *              $ref: '#/components/schemas/Post'
+     *      responses:
+     *        201:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: array
+     *                items:
+     *                  $ref: '#/components/schemas/Post'
+     */
     route.post('/', index_1.checkPost, index_1.isPostValid, index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var postDTO, userId, PostServiceInstance, post, error_1;
@@ -222,6 +274,27 @@ exports.default = (function (app) {
             }
         });
     }); }));
+    /**
+     * @swagger
+     * paths:
+     *   /posts:
+     *    delete:
+     *      tags:
+     *        - posts
+     *      summary: 글 삭제
+     *      description: 글을 삭제한다.
+     *      parameters:
+     *        - name: id
+     *          in: path
+     *          description: 글 Id
+     *          required: true
+     *          example: '60213d1c3126991a7cd1d287'
+     *          schema:
+     *            type: string
+     *      responses:
+     *        204:
+     *          description: successful operation
+     */
     // 글 삭제
     route.delete('/:id', index_1.isPostIdValid, index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, _a, tokenUserId, tokenType, PostServiceInstance;

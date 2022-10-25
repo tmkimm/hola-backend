@@ -7,7 +7,132 @@ export interface IReply {
   contnet: string;
   author: Types.ObjectId;
 }
-
+/**
+ * @swagger
+ *  components:
+ *  schemas:
+ *   Post:
+ *     properties:
+ *      _id:
+ *        type: string
+ *        description: 글 ID
+ *        example: '6355eee637ad670014118738'
+ *      author:
+ *        type: string
+ *        description: 글 등록자 정보
+ *        example: '634e1a1537ad67001410d1f4'
+ *      language:
+ *        type: array
+ *        items:
+ *          type: string
+ *        description: 사용 언어
+ *        example:
+ *          - react
+ *          - java
+ *      title:
+ *        type: string
+ *        description: 제목
+ *      content:
+ *        type: string
+ *        description: 내용
+ *      isDeleted:
+ *        type: boolean
+ *        description: 삭제 여부
+ *      isClosed:
+ *        type: boolean
+ *        description: 마감 여부
+ *      views:
+ *        type: number
+ *        description: 조회수
+ *        example: 219
+ *      likes:
+ *        type: array
+ *        description: 관심 등록한 사용자 리스트
+ *        items:
+ *          type: string
+ *        example:
+ *          - '634e1a1537ad67001410d1f4'
+ *          - '61063a70ed4b420bbcfa0b4b'
+ *      totalLikes:
+ *        type: number
+ *        description: 관심 등록 수
+ *        example: 2
+ *      type:
+ *        type: string
+ *        description: '모집 구분(1 : 프로젝트, 2: 스터디)'
+ *        example: '1'
+ *      recruits:
+ *        type: string
+ *        description: '모집인원(und: 인원 미정, 1, 2, 3, mo: 10명 이상)'
+ *        example: 'und'
+ *      onlineOrOffline:
+ *        type: string
+ *        description: '진행방식(on: 온라인/ off: 오프라인)'
+ *        example: 'on'
+ *      contactType:
+ *        type: string
+ *        description: '연락방법(ok: 오픈 카카오톡, em: 이메일, pk: 개인 카카오톡, gf: 구글폼)'
+ *        example: 'em'
+ *      contactPoint:
+ *        type: string
+ *        description: '연락링크'
+ *        example: 'https://open.kakao.com/o/sKdsLWGe'
+ *      expectedPeriod:
+ *        type: string
+ *        description: '예상 진행기간(und: 기간 미정, 1, 2, 3, mo: 장기)'
+ *        example: '3'
+ *      positions:
+ *        type: array
+ *        description: '포지션(FE: 프론트엔드, BE: 백엔드, DE: 디자이너, IOS: IOS, AND: 안드로이드, DEVOPS: DevOps, PM)'
+ *        items:
+ *          type: string
+ *        example:
+ *          - 'FE'
+ *          - 'BE'
+ *      createdAt:
+ *        type: string
+ *        description: 생성일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      startDate:
+ *        type: string
+ *        description: 시작예정일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      endDate:
+ *        type: string
+ *        description: 모집 마감일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      closeDate:
+ *        type: string
+ *        description: 마감처리일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      deleteDate:
+ *        type: string
+ *        description: 삭제일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      comments:
+ *        type: array
+ *        description: 댓글
+ *        items:
+ *          type: object
+ *          properties:
+ *            _id:
+ *             type: string
+ *             description: 댓글 id
+ *             example: '6355eee637ad670014118738'
+ *            author:
+ *             type: string
+ *             description: 작성자 id
+ *             example: '63574b3b37ad67001411ba50'
+ *            content:
+ *             type: string
+ *             description: 댓글 내용
+ *             example: '6355eee637ad670014118738'
+ */
 export interface IReplyDocument extends IReply, Document {}
 
 export type IReplyModel = Model<IReplyDocument>;

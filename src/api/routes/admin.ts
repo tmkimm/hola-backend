@@ -8,13 +8,66 @@ import { isPasswordValidWithAdmin } from '../middlewares/isPasswordValidWithAdmi
 const route = Router();
 
 export default (app: Router) => {
-  /*
-    글에 관련된 Router를 정의한다.
-    등록 / 수정 / 삭제하려는 사용자의 정보는 Access Token을 이용하여 처리한다.
-    */
+  /**
+   * @swagger
+   * tags:
+        - name: admin
+   */
   app.use('/admin', route);
 
-  // Admin 로그인
+  /**
+   * @swagger
+   * paths:
+   *   /admin/login:
+   *    post:
+   *      tags:
+   *        - admin
+   *      summary: Admin 로그인
+   *      description: admin 계정으로 로그인한다.
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                id:
+   *                  type: string
+   *                  description: admin id
+   *                password:
+   *                  type: string
+   *                  description: admin password
+   *              example:
+   *                id: "admin"
+   *                password: "pw"
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: object
+   *                properties:
+   *                  loginSuccess:
+   *                    type: boolean
+   *                    description: 로그인 성공 여부
+   *                  _id:
+   *                    type: string
+   *                    description: 사용자 id
+   *                  nickName:
+   *                    type: string
+   *                    description: 닉네임
+   *                  image:
+   *                    type: string
+   *                    description: 사용자 이미지
+   *                  accessToken:
+   *                    type: string
+   *                    description: access token
+   *                example:
+   *                  loginSuccess: true
+   *                  id: "63455237c1ddf6ff6c0d8d94"
+   *                  nickName: "hola"
+   *                  image: "default.png"
+   */
   route.post(
     '/login',
     isPasswordValidWithAdmin,
@@ -40,13 +93,4 @@ export default (app: Router) => {
       });
     }),
   );
-
-  // 어드민 등록
-  route.post('/', async function (req: Request, res: Response, next: NextFunction) {
-    const { rating, content } = req.body;
-
-    const FeedbackServiceInstance = new FeedbackService(FeedbackModel);
-    const feedback = await FeedbackServiceInstance.registerFeedback(rating, content);
-    return res.status(201).json(feedback);
-  });
 };
