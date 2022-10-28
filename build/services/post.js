@@ -93,8 +93,7 @@ var PostService = /** @class */ (function () {
             });
         });
     };
-    // 메인 화면에서 글를 추천한다.
-    // 4건 이하일 경우 무조건 다시 조회가 아니라, 해당 되는 건은 포함하고 나머지 건만 조회해야한다.
+    // 메인 화면에서 글를 추천한다.(미사용, 제거예정)
     PostService.prototype.recommendToUserFromMain = function (userId) {
         return __awaiter(this, void 0, void 0, function () {
             var sort, likeLanguages, limit, user, posts;
@@ -123,7 +122,6 @@ var PostService = /** @class */ (function () {
         });
     };
     // 글에서 글를 추천한다.
-    // 4건 이하일 경우 무조건 다시 조회가 아니라, 해당 되는 건은 포함하고 나머지 건만 조회해야함
     PostService.prototype.recommendToUserFromPost = function (postId, userId) {
         return __awaiter(this, void 0, void 0, function () {
             var sort, language, limit, post, posts;

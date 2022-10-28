@@ -9,6 +9,19 @@ import CustomError from '../../CustomError';
 const route = Router();
 
 export default (app: Router) => {
+  /**
+ * @swagger
+ *  components:
+ *    securitySchemes:
+ *      bearerAuth:
+ *        type: http
+ *        scheme: bearer
+ *        bearerFormat: JWT
+ *    responses:
+ *      UnauthorizedError:
+ *        description: Access token is missing or invalid
+ */
+
   /*
     권한에 관련된 Router를 정의한다.
     # GET /auth : Refresh Token을 이용해 Access Token 발급

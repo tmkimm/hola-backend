@@ -50,17 +50,46 @@ var Notification_1 = require("../../models/Notification");
 var CustomError_1 = __importDefault(require("../../CustomError"));
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
+    /**
+   * @swagger
+   * tags:
+        - name: comments
+          description: 댓글에 관련된 API
+   */
     /*
-      댓글에 관련된 Router를 정의한다.
-      등록 / 수정 / 삭제하려는 사용자의 정보는 Access Token을 이용하여 처리한다.
-  
-      # GET /posts/comments/:id : 글의 댓글 리스트 조회
       # POST /posts/comments : 신규 댓글 등록
       # PATCH /posts/comments/:id : 댓글 정보 수정
       # DELETE /posts/comments/:id : 댓글 삭제
       */
     app.use('/posts/comments', route);
     // 댓글 리스트 조회
+    /**
+     * @swagger
+     * paths:
+     *   /posts/comments/{id}:
+     *    get:
+     *      tags:
+     *        - comments
+     *      summary: 댓글 리스트 조회
+     *      description: 글의 댓글 리스트를 조회한다.
+     *      parameters:
+     *        - name: id
+     *          in: path
+     *          description: 글 Id
+     *          required: true
+     *          example: '635a91e837ad67001412321a'
+     *          schema:
+     *            type: string
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: array
+     *                items:
+     *                  $ref: '#/components/schemas/Comment'
+     */
     route.get('/:id', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, CommentServiceInstance, comments;
         return __generator(this, function (_a) {
@@ -78,7 +107,6 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 댓글 등록
     route.post('/', index_1.isAccessTokenValid, isPostIdValid_1.isPostIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, postId, content, nickName, userId, CommentServiceInstance, post;
         return __generator(this, function (_b) {

@@ -116,22 +116,22 @@ export interface IReply {
  *        example: "2021-01-30T08:30:00Z"
  *      comments:
  *        type: array
- *        description: 댓글
  *        items:
- *          type: object
- *          properties:
- *            _id:
- *             type: string
- *             description: 댓글 id
- *             example: '6355eee637ad670014118738'
- *            author:
- *             type: string
- *             description: 작성자 id
- *             example: '63574b3b37ad67001411ba50'
- *            content:
- *             type: string
- *             description: 댓글 내용
- *             example: '6355eee637ad670014118738'
+ *          $ref: '#/components/schemas/Comment'
+ *   Comment:
+ *     properties:
+ *      _id:
+ *        type: string
+ *        description: 댓글 ID
+ *        example: '6355eee637ad670014118738'
+ *      author:
+ *        type: string
+ *        description: 작성자 ID
+ *        example: '63574b3b37ad67001411ba50'
+ *      content:
+ *        type: string
+ *        description: 댓글 내용
+ *        example: '신청합니다!'
  */
 export interface IReplyDocument extends IReply, Document {}
 

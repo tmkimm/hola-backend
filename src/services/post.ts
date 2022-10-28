@@ -52,8 +52,7 @@ export class PostService {
     return posts;
   }
 
-  // 메인 화면에서 글를 추천한다.
-  // 4건 이하일 경우 무조건 다시 조회가 아니라, 해당 되는 건은 포함하고 나머지 건만 조회해야한다.
+  // 메인 화면에서 글를 추천한다.(미사용, 제거예정)
   async recommendToUserFromMain(userId: Types.ObjectId) {
     let sort;
     let likeLanguages = null;
@@ -71,7 +70,6 @@ export class PostService {
   }
 
   // 글에서 글를 추천한다.
-  // 4건 이하일 경우 무조건 다시 조회가 아니라, 해당 되는 건은 포함하고 나머지 건만 조회해야함
   async recommendToUserFromPost(postId: Types.ObjectId, userId: Types.ObjectId) {
     const sort = '-views';
     let language = null;

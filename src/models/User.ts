@@ -3,6 +3,82 @@ import { signJWT } from '../utills/jwt';
 import { Post as PostModel } from './Post';
 import { Notification as NotificationModel } from './Notification';
 
+/**
+ * @swagger
+ *  components:
+ *  schemas:
+ *   User:
+ *     properties:
+ *      _id:
+ *        type: string
+ *        description: 사용자 ID
+ *        example: '611dbf22739c10ccdbffad39'
+ *      idToken:
+ *        type: string
+ *        description: '사용자 토큰(Oauth용)'
+ *        example: '1856444309'
+ *      tokenType:
+ *        type: string
+ *        description: '로그인 종류(google, github, kakao, admin)'
+ *        example: 'google'
+ *      name:
+ *        type: string
+ *        description: 이름
+ *        example: '김올라'
+ *      nickName:
+ *        type: string
+ *        description: 이름
+ *        example: 'hola'
+ *      password:
+ *        type: string
+ *        description: 비밀번호(미사용)
+ *        example: '1234'
+ *      image:
+ *        type: string
+ *        description: '이미지 명(기본 : default.PNG)'
+ *        example: 'default.PNG'
+ *      likeLanguages:
+ *        type: array
+ *        items:
+ *          type: string
+ *        description: 관심 언어
+ *        example:
+ *          - react
+ *          - java
+ *      likePosts:
+ *        type: array
+ *        items:
+ *          type: string
+ *        description: 관심 등록 글(좋아요한 글)
+ *      readList:
+ *        type: array
+ *        items:
+ *          type: string
+ *        description: 읽은 글
+ *      position:
+ *        type: string
+ *        description: 직무
+ *      githubLink:
+ *        type: string
+ *        description: 깃허브 링크
+ *      blogLink:
+ *        type: string
+ *        description: 블로그 링크
+ *      aboutMe:
+ *        type: string
+ *        description: 자기소개
+ *      createdAt:
+ *        type: string
+ *        description: 생성일
+ *        format: date-time
+ *        example: "2022-01-30T08:30:00Z"
+ *      updatedAt:
+ *        type: string
+ *        description: 수정일
+ *        format: date-time
+ *        example: "2022-01-30T08:30:00Z"
+ */
+
 export interface IUser {
   _id: Types.ObjectId;
   idToken: string;
@@ -16,7 +92,6 @@ export interface IUser {
   likePosts: Types.ObjectId[] | undefined;
   readList: Types.ObjectId[] | undefined;
   position: string;
-  affiliation: string;
   githubLink: string;
   blogLink: string;
   aboutMe: string;
@@ -64,7 +139,6 @@ const userSchema = new Schema<IUserDocument>(
     likePosts: [{ type: Types.ObjectId, ref: 'Post' }],
     readList: [{ type: Types.ObjectId, ref: 'Post' }],
     position: { type: String, default: '' },
-    affiliation: { type: String, default: '' },
     githubLink: { type: String, default: '' },
     blogLink: { type: String, default: '' },
     aboutMe: { type: String, default: '' },
