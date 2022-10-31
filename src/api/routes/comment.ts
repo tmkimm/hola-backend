@@ -11,8 +11,7 @@ import CustomError from '../../CustomError';
 
 const route = Router();
 export default (app: Router) => {
-
-    /**
+  /**
    * @swagger
    * tags:
         - name: comments
@@ -54,7 +53,7 @@ export default (app: Router) => {
    *                type: array
    *                items:
    *                  $ref: '#/components/schemas/Comment'
-   */  
+   */
   route.get(
     '/:id',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
@@ -68,7 +67,51 @@ export default (app: Router) => {
       return res.status(200).json(comments);
     }),
   );
-  
+
+  /**
+   * @swagger
+   * paths:
+   *   /posts/comments:
+   *    post:
+   *      tags:
+   *        - comments
+   *      summary: 댓글 등록
+   *      description: '신규 댓글을 등록한다. 사용자 정보는 access token을 이용해 확인한다.'
+   *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: true
+   *          schema:
+   *            type: string
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                postId:
+   *                  type: string
+   *                  description : '글 Id'
+   *                  example: '610f3dac02f039c2d9d550d6'
+   *                content:
+   *                  type: string
+   *                  description : '댓글 내용'
+   *                  example: '지원했어요!'
+   *      responses:
+   *        201:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/Post'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          description: Post not found
+   */
   route.post(
     '/',
     isAccessTokenValid,
@@ -86,7 +129,52 @@ export default (app: Router) => {
     }),
   );
 
-  // 댓글 수정
+  // 댓글 수정.
+  /**
+   * @swagger
+   * paths:
+   *   /posts/comments/{id}:
+   *    patch:
+   *      tags:
+   *        - comments
+   *      summary: 댓글 수정
+   *      description: 댓글을 수정한다.
+   *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: true
+   *          schema:
+   *            type: string
+   *        - name: id
+   *          in: path
+   *          description: 글 Id
+   *          required: true
+   *          example: '635a91e837ad67001412321a'
+   *          schema:
+   *            type: string
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                content:
+   *                  type: string
+   *                  description : '댓글 내용'
+   *                  example: '지원했어요!'
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/Post'
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   */
   route.patch(
     '/:id',
     isAccessTokenValid,
@@ -102,7 +190,31 @@ export default (app: Router) => {
     }),
   );
 
-  // 댓글 삭제
+  /**
+   * @swagger
+   * paths:
+   *   /posts/comments/{id}:
+   *    delete:
+   *      tags:
+   *        - comments
+   *      summary: 댓글 삭제
+   *      description: 댓글을 삭제한다.
+   *      parameters:
+   *        - name: id
+   *          in: path
+   *          description: 댓글 Id
+   *          required: true
+   *          example: '60213d1c3126991a7cd1d287'
+   *          schema:
+   *            type: string
+   *      responses:
+   *        204:
+   *          description: successful operation
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          description: Post not found
+   */
   route.delete(
     '/:id',
     isAccessTokenValid,

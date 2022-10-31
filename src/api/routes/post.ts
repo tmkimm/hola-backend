@@ -511,7 +511,6 @@ export default (app: Router) => {
     }),
   );
 
-  
   /**
    * @swagger
    * paths:
@@ -549,7 +548,7 @@ export default (app: Router) => {
    *        401:
    *          $ref: '#/components/responses/UnauthorizedError'
    */
-   route.get(
+  route.get(
     '/:id/isLiked',
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
