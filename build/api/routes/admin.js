@@ -38,30 +38,96 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var index_1 = require("../../services/index");
-var Feedback_1 = require("../../models/Feedback");
+var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
+var User_1 = require("../../models/User");
+var isPasswordValidWithAdmin_1 = require("../middlewares/isPasswordValidWithAdmin");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
-    /*
-      글에 관련된 Router를 정의한다.
-      등록 / 수정 / 삭제하려는 사용자의 정보는 Access Token을 이용하여 처리한다.
-      */
-    app.use('/admnin', route);
-    // 어드민 등록
-    route.post('/', function (req, res, next) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, rating, content, FeedbackServiceInstance, feedback;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        _a = req.body, rating = _a.rating, content = _a.content;
-                        FeedbackServiceInstance = new index_1.FeedbackService(Feedback_1.Feedback);
-                        return [4 /*yield*/, FeedbackServiceInstance.registerFeedback(rating, content)];
-                    case 1:
-                        feedback = _b.sent();
-                        return [2 /*return*/, res.status(201).json(feedback)];
-                }
-            });
+    /**
+     * @swagger
+     * tags:
+          - name: admin
+     */
+    app.use('/admin', route);
+    /**
+     * @swagger
+     * paths:
+     *   /admin/login:
+     *    post:
+     *      tags:
+     *        - admin
+     *      summary: Admin 로그인
+     *      description: admin 계정으로 로그인한다.
+     *      requestBody:
+     *        content:
+     *          application/json:
+     *            schema:
+     *              type: object
+     *              properties:
+     *                id:
+     *                  type: string
+     *                  description: admin id
+     *                password:
+     *                  type: string
+     *                  description: admin password
+     *              example:
+     *                id: "admin"
+     *                password: "pw"
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: object
+     *                properties:
+     *                  loginSuccess:
+     *                    type: boolean
+     *                    description: 로그인 성공 여부
+     *                  _id:
+     *                    type: string
+     *                    description: 사용자 id
+     *                  nickName:
+     *                    type: string
+     *                    description: 닉네임
+     *                  image:
+     *                    type: string
+     *                    description: 사용자 이미지
+     *                  accessToken:
+     *                    type: string
+     *                    description: access token
+     *                example:
+     *                  loginSuccess: true
+     *                  id: "63455237c1ddf6ff6c0d8d94"
+     *                  nickName: "hola"
+     *                  image: "default.png"
+     */
+    route.post('/login', isPasswordValidWithAdmin_1.isPasswordValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var idToken, AuthServiceInstance, _a, _id, nickName, image, likeLanguages, accessToken, refreshToken;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    idToken = req.user.idToken;
+                    AuthServiceInstance = new index_1.AuthService(User_1.User);
+                    return [4 /*yield*/, AuthServiceInstance.SignIn(idToken)];
+                case 1:
+                    _a = _b.sent(), _id = _a._id, nickName = _a.nickName, image = _a.image, likeLanguages = _a.likeLanguages, accessToken = _a.accessToken, refreshToken = _a.refreshToken;
+                    res.cookie('R_AUTH', refreshToken, {
+                        sameSite: 'none',
+                        httpOnly: true,
+                        secure: true,
+                        maxAge: 1000 * 60 * 60 * 24 * 14, // 2 Week
+                    });
+                    return [2 /*return*/, res.status(200).json({
+                            loginSuccess: true,
+                            _id: _id,
+                            nickName: nickName,
+                            image: image,
+                            likeLanguages: likeLanguages,
+                            accessToken: accessToken,
+                        })];
+            }
         });
-    });
+    }); }));
 });
 //# sourceMappingURL=admin.js.map

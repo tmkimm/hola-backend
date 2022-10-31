@@ -41,6 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostService = void 0;
 var sanitize_html_1 = __importDefault(require("sanitize-html"));
+var PostFilterLog_1 = require("../models/PostFilterLog");
 var CustomError_1 = __importDefault(require("../CustomError"));
 var PostService = /** @class */ (function () {
     function PostService(postModel, userModel, notificationModel) {
@@ -58,6 +59,15 @@ var PostService = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.postModel.findPost(offset, limit, sort, language, period, isClosed, type, position)];
                     case 1:
                         posts = _a.sent();
+                        if (!language) return [3 /*break*/, 3];
+                        return [4 /*yield*/, PostFilterLog_1.PostFilterLog.create({
+                                viewDate: new Date(),
+                                language: language.split(','),
+                            })];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3:
                         sortPosts = this.sortLanguageByQueryParam(posts, language);
                         return [2 /*return*/, sortPosts];
                 }
@@ -83,8 +93,7 @@ var PostService = /** @class */ (function () {
             });
         });
     };
-    // 메인 화면에서 글를 추천한다.
-    // 4건 이하일 경우 무조건 다시 조회가 아니라, 해당 되는 건은 포함하고 나머지 건만 조회해야한다.
+    // 메인 화면에서 글를 추천한다.(미사용, 제거예정)
     PostService.prototype.recommendToUserFromMain = function (userId) {
         return __awaiter(this, void 0, void 0, function () {
             var sort, likeLanguages, limit, user, posts;
@@ -113,7 +122,6 @@ var PostService = /** @class */ (function () {
         });
     };
     // 글에서 글를 추천한다.
-    // 4건 이하일 경우 무조건 다시 조회가 아니라, 해당 되는 건은 포함하고 나머지 건만 조회해야함
     PostService.prototype.recommendToUserFromPost = function (postId, userId) {
         return __awaiter(this, void 0, void 0, function () {
             var sort, language, limit, post, posts;
@@ -245,12 +253,12 @@ var PostService = /** @class */ (function () {
         });
     };
     // 글 정보를 수정한다.
-    PostService.prototype.modifyPost = function (id, tokenUserId, post) {
+    PostService.prototype.modifyPost = function (id, tokenUserId, tokenType, post) {
         return __awaiter(this, void 0, void 0, function () {
             var cleanHTML, postRecord;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.checkPostAuthorization(id, tokenUserId)];
+                    case 0: return [4 /*yield*/, this.postModel.checkPostAuthorization(id, tokenUserId, tokenType)];
                     case 1:
                         _a.sent(); // 접근 권한 체크
                         if (post.content) {
@@ -268,11 +276,11 @@ var PostService = /** @class */ (function () {
         });
     };
     // 글를 삭제한다.
-    PostService.prototype.deletePost = function (id, tokenUserId) {
+    PostService.prototype.deletePost = function (id, tokenUserId, tokenType) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.checkPostAuthorization(id, tokenUserId)];
+                    case 0: return [4 /*yield*/, this.postModel.checkPostAuthorization(id, tokenUserId, tokenType)];
                     case 1:
                         _a.sent(); // 접근 권한 체크
                         return [4 /*yield*/, this.postModel.deletePost(id)];

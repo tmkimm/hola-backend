@@ -7,7 +7,132 @@ export interface IReply {
   contnet: string;
   author: Types.ObjectId;
 }
-
+/**
+ * @swagger
+ *  components:
+ *  schemas:
+ *   Post:
+ *     properties:
+ *      _id:
+ *        type: string
+ *        description: 글 ID
+ *        example: '6355eee637ad670014118738'
+ *      author:
+ *        type: string
+ *        description: 글 등록자 정보
+ *        example: '634e1a1537ad67001410d1f4'
+ *      language:
+ *        type: array
+ *        items:
+ *          type: string
+ *        description: 사용 언어
+ *        example:
+ *          - react
+ *          - java
+ *      title:
+ *        type: string
+ *        description: 제목
+ *      content:
+ *        type: string
+ *        description: 내용
+ *      isDeleted:
+ *        type: boolean
+ *        description: 삭제 여부
+ *      isClosed:
+ *        type: boolean
+ *        description: 마감 여부
+ *      views:
+ *        type: number
+ *        description: 조회수
+ *        example: 219
+ *      likes:
+ *        type: array
+ *        description: 관심 등록한 사용자 리스트
+ *        items:
+ *          type: string
+ *        example:
+ *          - '634e1a1537ad67001410d1f4'
+ *          - '61063a70ed4b420bbcfa0b4b'
+ *      totalLikes:
+ *        type: number
+ *        description: 관심 등록 수
+ *        example: 2
+ *      type:
+ *        type: string
+ *        description: '모집 구분(1 : 프로젝트, 2: 스터디)'
+ *        example: '1'
+ *      recruits:
+ *        type: string
+ *        description: '모집인원(und: 인원 미정, 1, 2, 3, mo: 10명 이상)'
+ *        example: 'und'
+ *      onlineOrOffline:
+ *        type: string
+ *        description: '진행방식(on: 온라인/ off: 오프라인)'
+ *        example: 'on'
+ *      contactType:
+ *        type: string
+ *        description: '연락방법(ok: 오픈 카카오톡, em: 이메일, pk: 개인 카카오톡, gf: 구글폼)'
+ *        example: 'em'
+ *      contactPoint:
+ *        type: string
+ *        description: '연락링크'
+ *        example: 'https://open.kakao.com/o/sKdsLWGe'
+ *      expectedPeriod:
+ *        type: string
+ *        description: '예상 진행기간(und: 기간 미정, 1, 2, 3, mo: 장기)'
+ *        example: '3'
+ *      positions:
+ *        type: array
+ *        description: '포지션(FE: 프론트엔드, BE: 백엔드, DE: 디자이너, IOS: IOS, AND: 안드로이드, DEVOPS: DevOps, PM)'
+ *        items:
+ *          type: string
+ *        example:
+ *          - 'FE'
+ *          - 'BE'
+ *      createdAt:
+ *        type: string
+ *        description: 생성일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      startDate:
+ *        type: string
+ *        description: 시작예정일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      endDate:
+ *        type: string
+ *        description: 모집 마감일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      closeDate:
+ *        type: string
+ *        description: 마감처리일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      deleteDate:
+ *        type: string
+ *        description: 삭제일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      comments:
+ *        type: array
+ *        items:
+ *          $ref: '#/components/schemas/Comment'
+ *   Comment:
+ *     properties:
+ *      _id:
+ *        type: string
+ *        description: 댓글 ID
+ *        example: '6355eee637ad670014118738'
+ *      author:
+ *        type: string
+ *        description: 작성자 ID
+ *        example: '63574b3b37ad67001411ba50'
+ *      content:
+ *        type: string
+ *        description: 댓글 내용
+ *        example: '신청합니다!'
+ */
 export interface IReplyDocument extends IReply, Document {}
 
 export type IReplyModel = Model<IReplyDocument>;
@@ -45,6 +170,8 @@ export interface IPost {
   positions: string[]; // 포지션
   createdAt: Date; // 등록일
   startDate: Date; // 시작예정일
+  closeDate: Date; // 마감일
+  deleteDate: Date; // 삭제일
 }
 export interface IPostDocument extends IPost, Document {}
 
@@ -92,8 +219,8 @@ export interface IPostModel extends Model<IPostDocument> {
   increaseView: (postId: Types.ObjectId) => void;
   findAuthorByCommentId: (commentId: Types.ObjectId) => Promise<Types.ObjectId | null>;
   findAuthorByReplyId: (replyId: Types.ObjectId) => Promise<Types.ObjectId | null>;
-  checkPostAuthorization: (postId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
-  checkCommentAuthorization: (commentId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
+  checkPostAuthorization: (postId: Types.ObjectId, tokenUserId: Types.ObjectId, tokenType: string) => void;
+  checkCommentAuthorization: (commentId: Types.ObjectId, tokenUserId: Types.ObjectId, tokenType: string) => void;
   checkReplyAuthorization: (replyId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
   autoClosing: () => void;
 }
@@ -145,6 +272,8 @@ const postSchema = new Schema<IPostDocument>(
     udemyLecture: { type: String, default: null }, // udemy 강의
     expectedPeriod: { type: String, default: null }, // 예상 종료일
     positions: { type: [String] },
+    closeDate: { type: Date, default: null }, //  마감일
+    deleteDate: { type: Date, default: null }, //  삭제일
   },
   {
     versionKey: false,
@@ -328,7 +457,7 @@ postSchema.statics.findComments = async function (id) {
 };
 
 postSchema.statics.deletePost = async function (id) {
-  await this.findOneAndUpdate({ _id: id }, { isDeleted: true });
+  await this.findOneAndUpdate({ _id: id }, { isDeleted: true, deleteDate: new Date() });
 };
 
 postSchema.statics.modifyPost = async function (id, post) {
@@ -468,18 +597,22 @@ postSchema.statics.findAuthorByReplyId = async function (replyId) {
 };
 
 // 글 수정 권한 체크
-postSchema.statics.checkPostAuthorization = async function (postId, tokenUserId) {
-  const post = await this.findOne({ _id: postId, author: tokenUserId });
-  if (!post) {
-    throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
+postSchema.statics.checkPostAuthorization = async function (postId, tokenUserId, tokenType) {
+  if (tokenType !== 'admin') {
+    const post = await this.findOne({ _id: postId, author: tokenUserId });
+    if (!post) {
+      throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
+    }
   }
 };
 
 // 댓글 수정 권한 체크
-postSchema.statics.checkCommentAuthorization = async function (commentId, tokenUserId) {
-  const post = await this.findOne({ comments: { $elemMatch: { _id: commentId, author: tokenUserId } } });
-  if (!post) {
-    throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
+postSchema.statics.checkCommentAuthorization = async function (commentId, tokenUserId, tokenType) {
+  if (tokenType !== 'admin') {
+    const post = await this.findOne({ comments: { $elemMatch: { _id: commentId, author: tokenUserId } } });
+    if (!post) {
+      throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
+    }
   }
 };
 

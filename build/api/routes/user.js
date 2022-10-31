@@ -47,6 +47,12 @@ var Post_1 = require("../../models/Post");
 var Notification_1 = require("../../models/Notification");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
+    /**
+   * @swagger
+   * tags:
+        - name: users
+          description: 사용자에 관련된 API
+   */
     app.use('/users', route);
     // s3 pre-sign url 발급
     route.post('/sign', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
@@ -65,7 +71,35 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 사용자 정보 조회
+    /**
+     * @swagger
+     * paths:
+     *   /users:
+     *    get:
+     *      tags:
+     *        - users
+     *      summary: 사용자 조회
+     *      description: 닉네임으로 사용자 정보를 조회한다.
+     *      parameters:
+     *        - name: nickName
+     *          in: query
+     *          description: 닉네임
+     *          required: true
+     *          schema:
+     *            type: string
+     *          example: 'hola!'
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: array
+     *                items:
+     *                  $ref: '#/components/schemas/User'
+     *        404:
+     *          description: parameter is incorrect
+     */
     route.get('/', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var nickName, UserServiceInstance, user;
         return __generator(this, function (_a) {
@@ -85,7 +119,35 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 사용자 정보 상세 보기
+    /**
+   * @swagger
+   * paths:
+   *   /users/{id}:
+   *    get:
+   *      tags:
+   *        - users
+   *      summary: 사용자 상세 정보 조회
+   *      description: '사용자의 상세 정보를 조회한다.'
+   *      parameters:
+   *        - name: id
+   *          in: path
+   *          description: 사용자 Id
+   *          required: true
+   *          example: '635a91e837ad67001412321a'
+   *          schema:
+   *            type: string
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/User'
+   *        404:
+   *          description: User not found
+   */
     route.get('/:id', index_2.isUserIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, UserServiceInstance, user;
         return __generator(this, function (_a) {
@@ -100,7 +162,81 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 사용자 정보 수정
+    // 
+    /**
+       * @swagger
+       * paths:
+       *   /users/{id}:
+       *    patch:
+       *      tags:
+       *        - users
+       *      summary: 사용자 정보 수정
+       *      description: 사용자 정보를 수정한다.
+       *      parameters:
+       *        - name: accessToken
+       *          in: header
+       *          description: access token
+       *          required: true
+       *          schema:
+       *            type: string
+       *        - name: id
+       *          in: path
+       *          description: 사용자 Id
+       *          required: true
+       *          example: '635a91e837ad67001412321a'
+       *          schema:
+       *            type: string
+       *      requestBody:
+       *        content:
+       *          application/json:
+       *            schema:
+       *              $ref: '#/components/schemas/User'
+       *      responses:
+       *        200:
+       *          description: successful operation
+       *          content:
+       *            application/json:
+       *              schema:
+       *                type: object
+       *                properties:
+       *                  _id:
+       *                    type: string
+       *                    description: 사용자 ID
+       *                    example: '61063af4ed4b420bbcfa0b4c'
+       *                  nickName:
+       *                    type: string
+       *                    description: 닉네임
+       *                    example: 'hola!'
+       *                  image:
+       *                    type: string
+       *                    description: 사용자 이미지 명
+       *                    example: 'default.PNG'
+       *                  accessToken:
+       *                    type: string
+       *                    description: access token
+       *                  isExists:
+       *                    type: boolean
+       *                    description: 닉네임 중복 여부
+       *                    example: false
+       *        400:
+       *          description: Nickname is duplicated.
+       *          content:
+       *            application/json:
+       *              schema:
+       *                type: object
+       *                properties:
+       *                  isExists:
+       *                    type: boolean
+       *                    description : 닉네임 중복 여부
+       *                    example: true
+       *                  message:
+       *                    type: string
+       *                    example: 'Nickname is duplicated.'
+       *        401:
+       *          $ref: '#/components/responses/UnauthorizedError'
+       *        404:
+       *          description: User not found
+       */
     route.patch('/:id', index_2.isUserIdValid, index_2.isAccessTokenValid, index_2.nickNameDuplicationCheck, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, tokenUserId, userDTO, UserServiceInstance, _a, userRecord, accessToken, refreshToken;
         return __generator(this, function (_b) {
@@ -129,7 +265,47 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 사용자 닉네임 중복 체크
+    /**
+     * @swagger
+     * paths:
+     *   /users/{id}/exists:
+     *    get:
+     *      tags:
+     *        - users
+     *      summary: 사용자 닉네임 중복 체크
+     *      description: 사용자 닉네임 중복 체크
+     *      parameters:
+     *        - name: id
+     *          in: path
+     *          description: 사용자 Id
+     *          required: true
+     *          example: '635a91e837ad67001412321a'
+     *          schema:
+     *            type: string
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: object
+     *                properties:
+     *                  isExists:
+     *                    type: boolean
+     *                    description : '닉네임 중복 여부(true: 중복)'
+     *                    example: isExists
+     *        400:
+     *          description: Nickname is duplicated.
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: object
+     *                properties:
+     *                  isExists:
+     *                    type: boolean
+     *                    description : '닉네임 중복 여부(true: 중복)'
+     *                    example: true
+     */
     route.get('/:id/exists', index_2.nickNameDuplicationCheck, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, res.status(200).json({
@@ -137,7 +313,37 @@ exports.default = (function (app) {
                 })];
         });
     }); }));
-    // 사용자 정보 삭제(회원탈퇴)
+    /**
+     * @swagger
+     * paths:
+     *   /users/{id}:
+     *    delete:
+     *      tags:
+     *        - users
+     *      summary: 회원 탈퇴
+     *      description: 사용자 정보 삭제
+     *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: true
+     *          schema:
+     *            type: string
+     *        - name: id
+     *          in: path
+     *          description: 사용자 Id
+     *          required: true
+     *          example: '60213d1c3126991a7cd1d287'
+     *          schema:
+     *            type: string
+     *      responses:
+     *        204:
+     *          description: successful operation
+     *        401:
+     *          $ref: '#/components/responses/UnauthorizedError'
+     *        404:
+     *          description: User not found
+     */
     route.delete('/:id', index_2.isUserIdValid, index_2.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, tokenUserId, UserServiceInstance;
         return __generator(this, function (_a) {
@@ -149,11 +355,43 @@ exports.default = (function (app) {
                     return [4 /*yield*/, UserServiceInstance.deleteUser(mongoose_1.Types.ObjectId(id), tokenUserId)];
                 case 1:
                     _a.sent();
-                    return [2 /*return*/, res.clearCookie('R_AUTH')];
+                    res.clearCookie('R_AUTH');
+                    return [2 /*return*/, res.status(204).json()];
             }
         });
     }); }));
-    // 사용자 관심 등록 리스트 조회
+    /**
+   * @swagger
+   * paths:
+   *   /users/likes/{id}:
+   *    get:
+   *      tags:
+   *        - users
+   *      summary: 사용자 관심 등록 리스트 조회
+   *      description: '관심 등록한 글들을 조회한다.'
+   *      parameters:
+   *        - name: id
+   *          in: path
+   *          description: 사용자 Id
+   *          required: true
+   *          example: '61fa3f1fea134800135696b4'
+   *          schema:
+   *            type: string
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: object
+   *                properties:
+   *                  likePosts:
+   *                    type: array
+   *                    items:
+   *                      $ref: '#/components/schemas/Post'
+   *        404:
+   *          description: User not found
+   */
     route.get('/likes/:id', index_2.isUserIdValid, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, UserServiceInstance, user;
         return __generator(this, function (_a) {
@@ -168,7 +406,38 @@ exports.default = (function (app) {
             }
         });
     }); });
-    // 사용자 읽은 목록  조회
+    /**
+     * @swagger
+     * paths:
+     *   /users/read-list/{id}:
+     *    get:
+     *      tags:
+     *        - users
+     *      summary: 사용자 읽은 목록  조회
+     *      description: '읽은 글들을 조회한다.'
+     *      parameters:
+     *        - name: id
+     *          in: path
+     *          description: 사용자 Id
+     *          required: true
+     *          example: '61fa3f1fea134800135696b4'
+     *          schema:
+     *            type: string
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: object
+     *                properties:
+     *                  readList:
+     *                    type: array
+     *                    items:
+     *                      $ref: '#/components/schemas/Post'
+     *        404:
+     *          description: User not found
+     */
     route.get('/read-list/:id', index_2.isUserIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, UserServiceInstance, user;
         return __generator(this, function (_a) {
@@ -183,7 +452,35 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 사용자 작성 글 목록 조회
+    /**
+     * @swagger
+     * paths:
+     *   /users/myPosts/{id}:
+     *    get:
+     *      tags:
+     *        - users
+     *      summary: 사용자 작성 글 목록 조회
+     *      description: '내가 작성한 글들을 조회한다.'
+     *      parameters:
+     *        - name: id
+     *          in: path
+     *          description: 사용자 Id
+     *          required: true
+     *          example: '610e8f2b6eb2018aceda978e'
+     *          schema:
+     *            type: string
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: array
+     *                items:
+     *                  $ref: '#/components/schemas/Post'
+     *        404:
+     *          description: User not found
+     */
     route.get('/myPosts/:id', index_2.isUserIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, UserServiceInstance, user;
         return __generator(this, function (_a) {

@@ -2,6 +2,8 @@ import sanitizeHtml from 'sanitize-html';
 import { Types } from 'mongoose';
 import { IPost, IPostModel, IPostDocument } from '../models/Post';
 import { INotificationModel } from '../models/Notification';
+import { PostFilterLog } from '../models/PostFilterLog';
+
 import { IUserModel } from '../models/User';
 import CustomError from '../CustomError';
 
@@ -25,7 +27,13 @@ export class PostService {
     position: string | null,
   ) {
     const posts = await this.postModel.findPost(offset, limit, sort, language, period, isClosed, type, position);
-
+    // 언어 필터링 로그 생성
+    if (language) {
+      await PostFilterLog.create({
+        viewDate: new Date(),
+        language: language.split(','),
+      });
+    }
     const sortPosts = this.sortLanguageByQueryParam(posts, language);
     return sortPosts;
   }
@@ -44,8 +52,7 @@ export class PostService {
     return posts;
   }
 
-  // 메인 화면에서 글를 추천한다.
-  // 4건 이하일 경우 무조건 다시 조회가 아니라, 해당 되는 건은 포함하고 나머지 건만 조회해야한다.
+  // 메인 화면에서 글를 추천한다.(미사용, 제거예정)
   async recommendToUserFromMain(userId: Types.ObjectId) {
     let sort;
     let likeLanguages = null;
@@ -63,7 +70,6 @@ export class PostService {
   }
 
   // 글에서 글를 추천한다.
-  // 4건 이하일 경우 무조건 다시 조회가 아니라, 해당 되는 건은 포함하고 나머지 건만 조회해야함
   async recommendToUserFromPost(postId: Types.ObjectId, userId: Types.ObjectId) {
     const sort = '-views';
     let language = null;
@@ -137,8 +143,8 @@ export class PostService {
   }
 
   // 글 정보를 수정한다.
-  async modifyPost(id: Types.ObjectId, tokenUserId: Types.ObjectId, post: IPost) {
-    await this.postModel.checkPostAuthorization(id, tokenUserId); // 접근 권한 체크
+  async modifyPost(id: Types.ObjectId, tokenUserId: Types.ObjectId, tokenType: string, post: IPost) {
+    await this.postModel.checkPostAuthorization(id, tokenUserId, tokenType); // 접근 권한 체크
     if (post.content) {
       const cleanHTML = sanitizeHtml(post.content, {
         allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
@@ -150,8 +156,8 @@ export class PostService {
   }
 
   // 글를 삭제한다.
-  async deletePost(id: Types.ObjectId, tokenUserId: Types.ObjectId) {
-    await this.postModel.checkPostAuthorization(id, tokenUserId); // 접근 권한 체크
+  async deletePost(id: Types.ObjectId, tokenUserId: Types.ObjectId, tokenType: string) {
+    await this.postModel.checkPostAuthorization(id, tokenUserId, tokenType); // 접근 권한 체크
     await this.postModel.deletePost(id);
     await this.notificationModel.deleteNotificationByPost(id); // 글 삭제 시 관련 알림 제거
   }

@@ -5,6 +5,7 @@ import { INotificationModel } from '../models/Notification';
 import { IPostModel } from '../models/Post';
 import config from '../config/index';
 import CustomError from '../CustomError';
+import { SignOutUser } from '../models/SignOutUser';
 
 export class UserService {
   constructor(
@@ -38,10 +39,24 @@ export class UserService {
     return { userRecord, accessToken, refreshToken };
   }
 
+  // 회원 탈퇴
   async deleteUser(id: Types.ObjectId, tokenUserId: Types.ObjectId) {
     if (id.toString() !== tokenUserId.toString())
       throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
-    await this.userModel.findOneAndDelete({ _id: id });
+    const user: IUserDocument | null = await this.userModel.findById(id);
+
+    if (user) {
+      // 탈퇴 유저 이력 생성
+      await SignOutUser.create({
+        idToken: user.idToken,
+        tokenType: user.tokenType,
+        nickName: user.nickName,
+        signInDate: user.createdAt,
+        signOutDate: new Date(),
+        userId: user._id,
+      });
+      await this.userModel.findOneAndDelete({ _id: id });
+    }
   }
 
   // 사용자가 관심 등록한 글 리스트를 조회한다.

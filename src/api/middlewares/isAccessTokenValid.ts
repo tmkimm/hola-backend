@@ -18,6 +18,7 @@ const isAccessTokenValid = asyncErrorWrapper(async function (req: Request, res: 
       req.user = {
         _id: user._id,
         nickName: user.nickName,
+        tokenType: user.tokenType,
       };
     }
     next();

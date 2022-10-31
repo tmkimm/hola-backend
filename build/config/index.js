@@ -27,5 +27,7 @@ exports.default = {
     SentryDsn: process.env.SENTRY_DSN,
     // Slack
     SlackWebhook: process.env.SLACK_WEBHOOK,
+    AdminId: process.env.ADMIN_ID,
+    AdminPassword: process.env.ADMIN_PASSWORD,
 };
 //# sourceMappingURL=index.js.map

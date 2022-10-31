@@ -65,7 +65,6 @@ var userSchema = new mongoose_1.Schema({
     likePosts: [{ type: mongoose_1.Types.ObjectId, ref: 'Post' }],
     readList: [{ type: mongoose_1.Types.ObjectId, ref: 'Post' }],
     position: { type: String, default: '' },
-    affiliation: { type: String, default: '' },
     githubLink: { type: String, default: '' },
     blogLink: { type: String, default: '' },
     aboutMe: { type: String, default: '' },

@@ -43,6 +43,7 @@ exports.UserService = void 0;
 var aws_sdk_1 = __importDefault(require("aws-sdk"));
 var index_1 = __importDefault(require("../config/index"));
 var CustomError_1 = __importDefault(require("../CustomError"));
+var SignOutUser_1 = require("../models/SignOutUser");
 var UserService = /** @class */ (function () {
     function UserService(postModel, userModel, notificationModel) {
         this.postModel = postModel;
@@ -101,17 +102,36 @@ var UserService = /** @class */ (function () {
             });
         });
     };
+    // 회원 탈퇴
     UserService.prototype.deleteUser = function (id, tokenUserId) {
         return __awaiter(this, void 0, void 0, function () {
+            var user;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         if (id.toString() !== tokenUserId.toString())
                             throw new CustomError_1.default('NotAuthenticatedError', 401, 'User does not match');
-                        return [4 /*yield*/, this.userModel.findOneAndDelete({ _id: id })];
+                        return [4 /*yield*/, this.userModel.findById(id)];
                     case 1:
+                        user = _a.sent();
+                        if (!user) return [3 /*break*/, 4];
+                        // 탈퇴 유저 이력 생성
+                        return [4 /*yield*/, SignOutUser_1.SignOutUser.create({
+                                idToken: user.idToken,
+                                tokenType: user.tokenType,
+                                nickName: user.nickName,
+                                signInDate: user.createdAt,
+                                signOutDate: new Date(),
+                                userId: user._id,
+                            })];
+                    case 2:
+                        // 탈퇴 유저 이력 생성
                         _a.sent();
-                        return [2 /*return*/];
+                        return [4 /*yield*/, this.userModel.findOneAndDelete({ _id: id })];
+                    case 3:
+                        _a.sent();
+                        _a.label = 4;
+                    case 4: return [2 /*return*/];
                 }
             });
         });

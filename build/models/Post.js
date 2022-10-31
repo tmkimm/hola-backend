@@ -82,6 +82,8 @@ var postSchema = new mongoose_1.Schema({
     udemyLecture: { type: String, default: null },
     expectedPeriod: { type: String, default: null },
     positions: { type: [String] },
+    closeDate: { type: Date, default: null },
+    deleteDate: { type: Date, default: null }, //  삭제일
 }, {
     versionKey: false,
     timestamps: true,
@@ -293,7 +295,7 @@ postSchema.statics.deletePost = function (id) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, this.findOneAndUpdate({ _id: id }, { isDeleted: true })];
+                case 0: return [4 /*yield*/, this.findOneAndUpdate({ _id: id }, { isDeleted: true, deleteDate: new Date() })];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -498,35 +500,41 @@ postSchema.statics.findAuthorByReplyId = function (replyId) {
     });
 };
 // 글 수정 권한 체크
-postSchema.statics.checkPostAuthorization = function (postId, tokenUserId) {
+postSchema.statics.checkPostAuthorization = function (postId, tokenUserId, tokenType) {
     return __awaiter(this, void 0, void 0, function () {
         var post;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, this.findOne({ _id: postId, author: tokenUserId })];
+                case 0:
+                    if (!(tokenType !== 'admin')) return [3 /*break*/, 2];
+                    return [4 /*yield*/, this.findOne({ _id: postId, author: tokenUserId })];
                 case 1:
                     post = _a.sent();
                     if (!post) {
                         throw new CustomError_1.default('NotAuthenticatedError', 401, 'User does not match');
                     }
-                    return [2 /*return*/];
+                    _a.label = 2;
+                case 2: return [2 /*return*/];
             }
         });
     });
 };
 // 댓글 수정 권한 체크
-postSchema.statics.checkCommentAuthorization = function (commentId, tokenUserId) {
+postSchema.statics.checkCommentAuthorization = function (commentId, tokenUserId, tokenType) {
     return __awaiter(this, void 0, void 0, function () {
         var post;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, this.findOne({ comments: { $elemMatch: { _id: commentId, author: tokenUserId } } })];
+                case 0:
+                    if (!(tokenType !== 'admin')) return [3 /*break*/, 2];
+                    return [4 /*yield*/, this.findOne({ comments: { $elemMatch: { _id: commentId, author: tokenUserId } } })];
                 case 1:
                     post = _a.sent();
                     if (!post) {
                         throw new CustomError_1.default('NotAuthenticatedError', 401, 'User does not match');
                     }
-                    return [2 /*return*/];
+                    _a.label = 2;
+                case 2: return [2 /*return*/];
             }
         });
     });

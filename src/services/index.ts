@@ -5,3 +5,4 @@ export { FeedbackService } from './feedback';
 export { NotificationService } from './notification';
 export { CommentService } from './comment';
 export { ReplyService } from './reply';
+export { DashboardService } from './dashboard';
