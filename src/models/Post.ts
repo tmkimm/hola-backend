@@ -430,25 +430,21 @@ postSchema.statics.findPostPagination = async function (
 
   // Pagenation
   // const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
+  // 최대 페이지 수 표현 필요
   const itemsPerPage = 3; // 한 페이지에 표현할 수
   let pagesToSkip = 0;
   let skip = 0;
   // skip할 페이지 계산
   if (isNumber(page) && isNumber(previousPage)) {
     pagesToSkip = Number(page) - Number(previousPage);
+    if (lastId && pagesToSkip !== 0) {
+      const sortOperator = pagesToSkip <= 0 ? '$gt' : '$lt';
+      query._id = { [sortOperator]: lastId };
+      // 실제 skip할 페이지 계산
+      if (pagesToSkip > 0) skip = Number(itemsPerPage * Math.abs(pagesToSkip - 1));
+      else if (pagesToSkip < 0) skip = Number(itemsPerPage * (Number(page) - 1));
+    }
   }
-  if (lastId && pagesToSkip !== 0) {
-    const sortOperator = pagesToSkip <= 0 ? '$gt' : '$lt';
-    query._id = { [sortOperator]: lastId };
-
-    // 실제 skip할 페이지 계산
-    if (pagesToSkip > 0) pagesToSkip += -1;
-
-    skip = Number(itemsPerPage * Math.abs(pagesToSkip));
-  }
-  // console.log(`typeof page : ${isNumber(page)}`);
-  // console.log(`typeof page : ${isNumber(previousPage)}`);
-  // console.log(`pagesToSkip : ${pagesToSkip}`);
 
   // 앞으로 갈때 skip 적용 시 lastId가 아닌 firstID로 가야하므로 itemsPerPage - 1 더 skip해야함
   const result = await this.find(query)
@@ -461,7 +457,6 @@ postSchema.statics.findPostPagination = async function (
       `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
     )
     .populate('author', 'nickName image');
-  console.log(`result count :${result.length}`);
 
   return result;
 };

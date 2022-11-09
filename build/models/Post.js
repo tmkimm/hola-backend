@@ -229,14 +229,15 @@ postSchema.statics.findPostPagination = function (page, previousPage, lastId, so
                     // skip할 페이지 계산
                     if ((0, isNumber_1.isNumber)(page) && (0, isNumber_1.isNumber)(previousPage)) {
                         pagesToSkip = Number(page) - Number(previousPage);
-                    }
-                    if (lastId && pagesToSkip !== 0) {
-                        sortOperator = pagesToSkip <= 0 ? '$gt' : '$lt';
-                        query._id = (_a = {}, _a[sortOperator] = lastId, _a);
-                        // 실제 skip할 페이지 계산
-                        if (pagesToSkip > 0)
-                            pagesToSkip += -1;
-                        skip = Number(itemsPerPage * Math.abs(pagesToSkip));
+                        if (lastId && pagesToSkip !== 0) {
+                            sortOperator = pagesToSkip <= 0 ? '$gt' : '$lt';
+                            query._id = (_a = {}, _a[sortOperator] = lastId, _a);
+                            // 실제 skip할 페이지 계산
+                            if (pagesToSkip > 0)
+                                skip = Number(itemsPerPage * Math.abs(pagesToSkip - 1));
+                            else if (pagesToSkip < 0)
+                                skip = Number(itemsPerPage * (Number(page) - 1));
+                        }
                     }
                     return [4 /*yield*/, this.find(query)
                             .where('isDeleted')
@@ -248,7 +249,6 @@ postSchema.statics.findPostPagination = function (page, previousPage, lastId, so
                             .populate('author', 'nickName image')];
                 case 1:
                     result = _b.sent();
-                    console.log("result count :".concat(result.length));
                     return [2 /*return*/, result];
             }
         });
