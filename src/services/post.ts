@@ -38,6 +38,41 @@ export class PostService {
     return sortPosts;
   }
 
+  // 리팩토링필요
+  // 메인 화면에서 글 리스트를 조회한다.
+  async findPostPagination(
+    page: string | null,
+    previousPage: string | null,
+    lastId: Types.ObjectId | string,
+    sort: string | null,
+    language: string | null,
+    period: number | null,
+    isClosed: string | null,
+    type: string | null,
+    position: string | null,
+  ) {
+    const posts = await this.postModel.findPostPagination(
+      page,
+      previousPage,
+      lastId,
+      sort,
+      language,
+      period,
+      isClosed,
+      type,
+      position,
+    );
+    // 언어 필터링 로그 생성
+    if (language) {
+      await PostFilterLog.create({
+        viewDate: new Date(),
+        language: language.split(','),
+      });
+    }
+    const sortPosts = this.sortLanguageByQueryParam(posts, language);
+    return sortPosts;
+  }
+
   // 선택한 언어가 리스트의 앞에 오도록 정렬
   async sortLanguageByQueryParam(posts: IPostDocument[], language: string | null) {
     if (typeof language !== 'string') return posts;

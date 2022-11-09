@@ -1,5 +1,6 @@
 import { Model, Schema, model, Types, Document } from 'mongoose';
 import CustomError from '../CustomError';
+import { isNumber } from '../utills/isNumber';
 // eslint-disable-next-line import/no-unresolved
 import { studyOrProjectCode, onlineOrOfflineCode, recruitsCode, expectedPeriodCode } from '../CommonCode';
 // 대댓글
@@ -179,6 +180,17 @@ export interface IPostModel extends Model<IPostDocument> {
   findPost: (
     offset: number | null,
     limit: number | null,
+    sort: string | null,
+    language: string | null,
+    period: number | null,
+    isClosed: string | null,
+    type: string | null,
+    position: string | null,
+  ) => Promise<IPostDocument[]>;
+  findPostPagination: (
+    page: string | null,
+    previousPage: string | null,
+    lastId: Types.ObjectId | string,
     sort: string | null,
     language: string | null,
     period: number | null,
@@ -368,6 +380,89 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
       `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
     )
     .populate('author', 'nickName image');
+  return result;
+};
+
+// 최신, 트레딩 조회
+postSchema.statics.findPostPagination = async function (
+  page: string | null,
+  previousPage: string | null,
+  lastId: Types.ObjectId | string,
+  sort,
+  language,
+  period,
+  isClosed,
+  type,
+  position,
+) {
+  let sortQuery = [];
+  // Sorting
+  if (sort) {
+    const sortableColumns = ['views', 'createdAt', 'totalLikes'];
+    sortQuery = sort.split(',').filter((value: string) => {
+      return sortableColumns.indexOf(value.substr(1, value.length)) !== -1 || sortableColumns.indexOf(value) !== -1;
+    });
+    sortQuery.push('-createdAt');
+  } else {
+    sortQuery.push('createdAt');
+  }
+  // Query
+  const query: any = {};
+
+  if (typeof language === 'string') query.language = { $in: language.split(',') };
+  if (typeof position === 'string') query.positions = { $in: position.split(',') };
+
+  if (typeof period === 'number' && !Number.isNaN(period)) {
+    const today = new Date();
+    query.createdAt = { $gte: today.setDate(today.getDate() - period) };
+  }
+
+  // 마감된 글 안보기 기능(false만 지원)
+  if (typeof isClosed === 'string' && !(isClosed === 'true')) {
+    query.isClosed = { $eq: isClosed === 'true' };
+  }
+
+  // 글 구분(0: 전체, 1: 프로젝트, 2: 스터디)
+  if (typeof type === 'string') {
+    if (type === '0') query.$or = [{ type: '1' }, { type: '2' }];
+    else query.type = { $eq: type };
+  }
+
+  // Pagenation
+  // const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
+  const itemsPerPage = 3; // 한 페이지에 표현할 수
+  let pagesToSkip = 0;
+  let skip = 0;
+  // skip할 페이지 계산
+  if (isNumber(page) && isNumber(previousPage)) {
+    pagesToSkip = Number(page) - Number(previousPage);
+  }
+  if (lastId && pagesToSkip !== 0) {
+    const sortOperator = pagesToSkip <= 0 ? '$gt' : '$lt';
+    query._id = { [sortOperator]: lastId };
+
+    // 실제 skip할 페이지 계산
+    if (pagesToSkip > 0) pagesToSkip += -1;
+
+    skip = Number(itemsPerPage * Math.abs(pagesToSkip));
+  }
+  // console.log(`typeof page : ${isNumber(page)}`);
+  // console.log(`typeof page : ${isNumber(previousPage)}`);
+  // console.log(`pagesToSkip : ${pagesToSkip}`);
+
+  // 앞으로 갈때 skip 적용 시 lastId가 아닌 firstID로 가야하므로 itemsPerPage - 1 더 skip해야함
+  const result = await this.find(query)
+    .where('isDeleted')
+    .equals(false)
+    .sort(sortQuery.join(' '))
+    .skip(skip)
+    .limit(Number(itemsPerPage))
+    .select(
+      `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
+    )
+    .populate('author', 'nickName image');
+  console.log(`result count :${result.length}`);
+
   return result;
 };
 // 사용자에게 추천 조회

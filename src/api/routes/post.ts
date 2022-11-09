@@ -111,6 +111,103 @@ export default (app: Router) => {
     }),
   );
 
+  /**
+   * @swagger
+   * paths:
+   *   /posts/pagination:
+   *    get:
+   *      tags:
+   *        - posts
+   *      summary: 글 리스트 조회(페이징)
+   *      description: 메인 페이지에서 글 리스트를 조회한다.
+   *      parameters:
+   *        - name: language
+   *          in: query
+   *          description: 사용 언어
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: 'react,java'
+   *        - name: offset
+   *          in: query
+   *          description: 건너뛸 개수
+   *          required: true
+   *          schema:
+   *            type: string
+   *          example: 00
+   *        - name: limit
+   *          in: query
+   *          description: 조회할 개수
+   *          required: true
+   *          schema:
+   *            type: string
+   *          example: 20
+   *        - name: sort
+   *          in: query
+   *          description: '정렬. 필드는 ,로 구분하며 +는 오름차순, -는 내림차순 '
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: '-createdAt,+views'
+   *        - name: position
+   *          in: query
+   *          description: '직군(FE: 프론트엔드, BE: 백엔드, DE: 디자이너, IOS: IOS, AND: 안드로이드, DEVOPS: DevOps, PM)'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: 'FE,IOS'
+   *        - name: type
+   *          in: query
+   *          description: '모집 구분(1 : 프로젝트, 2: 스터디)'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: '1'
+   *        - name: period
+   *          in: query
+   *          description: '조회 기간(일). 14일 경우 14일 이내의 글만 조회'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: 14
+   *        - name: isClosed
+   *          in: query
+   *          description: '마감여부(true, false)'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: true
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/Post'
+   */
+  route.get(
+    '/pagination',
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const { page, previousPage, lastId, sort, language, period, isClosed, type, position } = req.query;
+      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+      const posts = await PostServiceInstance.findPostPagination(
+        page,
+        previousPage,
+        lastId,
+        sort,
+        language,
+        period,
+        isClosed,
+        type,
+        position,
+      );
+
+      return res.status(200).json(posts);
+    }),
+  );
+
   // 메인에서의 글 추천(미사용, 제거예정)
   route.get(
     '/recommend',
