@@ -119,6 +119,13 @@ exports.default = (function (app) {
      *          schema:
      *            type: string
      *          example: true
+     *        - name: search
+     *          in: query
+     *          description: '검색'
+     *          required: false
+     *          schema:
+     *            type: string
+     *          example: '토이프로젝트'
      *      responses:
      *        200:
      *          description: successful operation
@@ -130,13 +137,13 @@ exports.default = (function (app) {
      *                  $ref: '#/components/schemas/Post'
      */
     route.get('/', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, offset, limit, sort, language, period, isClosed, type, position, PostServiceInstance, posts;
+        var _a, offset, limit, sort, language, period, isClosed, type, position, search, PostServiceInstance, posts;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    _a = req.query, offset = _a.offset, limit = _a.limit, sort = _a.sort, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position;
+                    _a = req.query, offset = _a.offset, limit = _a.limit, sort = _a.sort, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search;
                     PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findPost(offset, limit, sort, language, period, isClosed, type, position)];
+                    return [4 /*yield*/, PostServiceInstance.findPost(offset, limit, sort, language, period, isClosed, type, position, search)];
                 case 1:
                     posts = _b.sent();
                     return [2 /*return*/, res.status(200).json(posts)];
@@ -216,6 +223,13 @@ exports.default = (function (app) {
      *          schema:
      *            type: string
      *          example: true
+     *        - name: search
+     *          in: query
+     *          description: '검색'
+     *          required: false
+     *          schema:
+     *            type: string
+     *          example: '토이프로젝트'
      *      responses:
      *        200:
      *          description: successful operation
@@ -227,13 +241,13 @@ exports.default = (function (app) {
      *                  $ref: '#/components/schemas/Post'
      */
     route.get('/pagination', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, page, previousPage, lastId, sort, language, period, isClosed, type, position, PostServiceInstance, posts;
+        var _a, page, previousPage, lastId, sort, language, period, isClosed, type, position, search, PostServiceInstance, posts;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    _a = req.query, page = _a.page, previousPage = _a.previousPage, lastId = _a.lastId, sort = _a.sort, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position;
+                    _a = req.query, page = _a.page, previousPage = _a.previousPage, lastId = _a.lastId, sort = _a.sort, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search;
                     PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findPostPagination(page, previousPage, lastId, sort, language, period, isClosed, type, position)];
+                    return [4 /*yield*/, PostServiceInstance.findPostPagination(page, previousPage, lastId, sort, language, period, isClosed, type, position, search)];
                 case 1:
                     posts = _b.sent();
                     return [2 /*return*/, res.status(200).json(posts)];
@@ -285,6 +299,13 @@ exports.default = (function (app) {
      *          schema:
      *            type: string
      *          example: true
+     *        - name: search
+     *          in: query
+     *          description: '검색'
+     *          required: false
+     *          schema:
+     *            type: string
+     *          example: '토이프로젝트'
      *      responses:
      *        200:
      *          description: successful operation
@@ -299,13 +320,13 @@ exports.default = (function (app) {
      *                    example: 7
      */
     route.get('/last-page', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, language, period, isClosed, type, position, PostServiceInstance, lastPage;
+        var _a, language, period, isClosed, type, position, search, PostServiceInstance, lastPage;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    _a = req.query, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position;
+                    _a = req.query, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search;
                     PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findLastPage(language, period, isClosed, type, position)];
+                    return [4 /*yield*/, PostServiceInstance.findLastPage(language, period, isClosed, type, position, search)];
                 case 1:
                     lastPage = _b.sent();
                     return [2 /*return*/, res.status(200).json({

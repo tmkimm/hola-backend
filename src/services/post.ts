@@ -25,8 +25,9 @@ export class PostService {
     isClosed: string | null,
     type: string | null,
     position: string | null,
+    search: string | null,
   ) {
-    const posts = await this.postModel.findPost(offset, limit, sort, language, period, isClosed, type, position);
+    const posts = await this.postModel.findPost(offset, limit, sort, language, period, isClosed, type, position, search);
     // 언어 필터링 로그 생성
     if (language) {
       await PostFilterLog.create({
@@ -49,6 +50,7 @@ export class PostService {
     isClosed: string | null,
     type: string | null,
     position: string | null,
+    search: string | null,
   ) {
     const posts = await this.postModel.findPostPagination(
       page,
@@ -60,6 +62,7 @@ export class PostService {
       isClosed,
       type,
       position,
+      search,
     );
     // 언어 필터링 로그 생성
     if (language) {
@@ -79,6 +82,7 @@ export class PostService {
     isClosed: string | null,
     type: string | null,
     position: string | null,
+    search: string | null,
   ) {
     const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
     const totalCount = await this.postModel.countPost(
@@ -87,6 +91,7 @@ export class PostService {
       isClosed,
       type,
       position,
+      search,
     );
     const lastPage = Math.ceil(totalCount / itemsPerPage);
     return lastPage;

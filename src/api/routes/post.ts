@@ -90,6 +90,13 @@ export default (app: Router) => {
    *          schema:
    *            type: string
    *          example: true
+   *        - name: search
+   *          in: query
+   *          description: '검색'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: '토이프로젝트'
    *      responses:
    *        200:
    *          description: successful operation
@@ -103,9 +110,9 @@ export default (app: Router) => {
   route.get(
     '/',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { offset, limit, sort, language, period, isClosed, type, position } = req.query;
+      const { offset, limit, sort, language, period, isClosed, type, position, search } = req.query;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const posts = await PostServiceInstance.findPost(offset, limit, sort, language, period, isClosed, type, position);
+      const posts = await PostServiceInstance.findPost(offset, limit, sort, language, period, isClosed, type, position, search);
 
       return res.status(200).json(posts);
     }),
@@ -184,6 +191,13 @@ export default (app: Router) => {
    *          schema:
    *            type: string
    *          example: true
+   *        - name: search
+   *          in: query
+   *          description: '검색'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: '토이프로젝트'
    *      responses:
    *        200:
    *          description: successful operation
@@ -197,7 +211,7 @@ export default (app: Router) => {
   route.get(
     '/pagination',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { page, previousPage, lastId, sort, language, period, isClosed, type, position } = req.query;
+      const { page, previousPage, lastId, sort, language, period, isClosed, type, position, search } = req.query;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
       const posts = await PostServiceInstance.findPostPagination(
         page,
@@ -209,6 +223,7 @@ export default (app: Router) => {
         isClosed,
         type,
         position,
+        search,
       );
 
       return res.status(200).json(posts);
@@ -259,6 +274,13 @@ export default (app: Router) => {
    *          schema:
    *            type: string
    *          example: true
+   *        - name: search
+   *          in: query
+   *          description: '검색'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: '토이프로젝트'
    *      responses:
    *        200:
    *          description: successful operation
@@ -275,7 +297,7 @@ export default (app: Router) => {
    route.get(
     '/last-page',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { language, period, isClosed, type, position } = req.query;
+      const { language, period, isClosed, type, position, search } = req.query;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
       const lastPage = await PostServiceInstance.findLastPage(
         language,
@@ -283,6 +305,7 @@ export default (app: Router) => {
         isClosed,
         type,
         position,
+        search
       );
 
       return res.status(200).json({ 

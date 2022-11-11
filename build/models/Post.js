@@ -128,7 +128,7 @@ postSchema.virtual('totalComments').get(function () {
     return this.comments.length;
 });
 // 조회 query 생성
-var makeFindPostQuery = function (language, period, isClosed, type, position) {
+var makeFindPostQuery = function (language, period, isClosed, type, position, search) {
     // Query
     var query = {};
     if (typeof language === 'string')
@@ -151,10 +151,14 @@ var makeFindPostQuery = function (language, period, isClosed, type, position) {
         else
             query.type = { $eq: type };
     }
+    // 텍스트 검색
+    if (typeof search === 'string') {
+        query.$text = { $search: search };
+    }
     return query;
 };
 // 최신, 트레딩 조회
-postSchema.statics.findPost = function (offset, limit, sort, language, period, isClosed, type, position) {
+postSchema.statics.findPost = function (offset, limit, sort, language, period, isClosed, type, position, search) {
     return __awaiter(this, void 0, void 0, function () {
         var offsetQuery, limitQuery, sortQuery, sortableColumns_1, query, result;
         return __generator(this, function (_a) {
@@ -174,7 +178,7 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                     else {
                         sortQuery.push('createdAt');
                     }
-                    query = makeFindPostQuery(language, period, isClosed, type, position);
+                    query = makeFindPostQuery(language, period, isClosed, type, position, search);
                     return [4 /*yield*/, this.find(query)
                             .where('isDeleted')
                             .equals(false)
@@ -191,7 +195,7 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
     });
 };
 // 최신, 트레딩 조회
-postSchema.statics.findPostPagination = function (page, previousPage, lastId, sort, language, period, isClosed, type, position) {
+postSchema.statics.findPostPagination = function (page, previousPage, lastId, sort, language, period, isClosed, type, position, search) {
     return __awaiter(this, void 0, void 0, function () {
         var sortQuery, sortableColumns_2, query, itemsPerPage, pagesToSkip, skip, sortOperator, result;
         var _a;
@@ -210,7 +214,7 @@ postSchema.statics.findPostPagination = function (page, previousPage, lastId, so
                     else {
                         sortQuery.push('createdAt');
                     }
-                    query = makeFindPostQuery(language, period, isClosed, type, position);
+                    query = makeFindPostQuery(language, period, isClosed, type, position, search);
                     itemsPerPage = 4 * 6;
                     pagesToSkip = 0;
                     skip = 0;
@@ -245,13 +249,13 @@ postSchema.statics.findPostPagination = function (page, previousPage, lastId, so
     });
 };
 // 최신, 트레딩 조회
-postSchema.statics.countPost = function (language, period, isClosed, type, position) {
+postSchema.statics.countPost = function (language, period, isClosed, type, position, search) {
     return __awaiter(this, void 0, void 0, function () {
         var query, count;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    query = makeFindPostQuery(language, period, isClosed, type, position);
+                    query = makeFindPostQuery(language, period, isClosed, type, position, search);
                     return [4 /*yield*/, this.countDocuments(query)];
                 case 1:
                     count = _a.sent();

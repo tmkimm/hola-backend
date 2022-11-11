@@ -186,6 +186,7 @@ export interface IPostModel extends Model<IPostDocument> {
     isClosed: string | null,
     type: string | null,
     position: string | null,
+    search: string | null,
   ) => Promise<IPostDocument[]>;
   findPostPagination: (
     page: string | null,
@@ -197,6 +198,7 @@ export interface IPostModel extends Model<IPostDocument> {
     isClosed: string | null,
     type: string | null,
     position: string | null,
+    search: string | null,
   ) => Promise<IPostDocument[]>;
   countPost: (
     language: string | null,
@@ -204,6 +206,7 @@ export interface IPostModel extends Model<IPostDocument> {
     isClosed: string | null,
     type: string | null,
     position: string | null,
+    search: string | null,
   ) => Promise<number>;
   findPostRecommend: (
     sort: string | null,
@@ -342,7 +345,7 @@ postSchema.virtual('totalComments').get(function (this: IPost) {
 });
 
 // 조회 query 생성
-let makeFindPostQuery = (language: string | null, period: string | null, isClosed: string | null, type: string | null, position: string | null) => {
+let makeFindPostQuery = (language: string | null, period: string | null, isClosed: string | null, type: string | null, position: string | null, search: string | null) => {
   // Query
   const query: any = {};
 
@@ -365,11 +368,16 @@ let makeFindPostQuery = (language: string | null, period: string | null, isClose
     if (type === '0') query.$or = [{ type: '1' }, { type: '2' }];
     else query.type = { $eq: type };
   }
+
+  // 텍스트 검색
+  if (typeof search === 'string') {
+    query.$text = { $search : search}
+  }
   return query;
 }
 
 // 최신, 트레딩 조회
-postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed, type, position) {
+postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed, type, position, search) {
   // Pagenation
   const offsetQuery = parseInt(offset, 10) || 0;
   const limitQuery = parseInt(limit, 10) || 20;
@@ -386,7 +394,7 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     sortQuery.push('createdAt');
   }
   // Query
-  let query = makeFindPostQuery(language, period, isClosed, type, position);  // 조회 query 생성
+  let query = makeFindPostQuery(language, period, isClosed, type, position, search);  // 조회 query 생성
   const result = await this.find(query)
     .where('isDeleted')
     .equals(false)
@@ -411,6 +419,7 @@ postSchema.statics.findPostPagination = async function (
   isClosed,
   type,
   position,
+  search,
 ) {
   let sortQuery = [];
   // Sorting
@@ -423,7 +432,7 @@ postSchema.statics.findPostPagination = async function (
   } else {
     sortQuery.push('createdAt');
   }
-  let query = makeFindPostQuery(language, period, isClosed, type, position);  // 조회 query 생성
+  let query = makeFindPostQuery(language, period, isClosed, type, position, search);  // 조회 query 생성
   // Pagenation
   const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
   let pagesToSkip = 0;
@@ -462,8 +471,9 @@ postSchema.statics.countPost = async function (
   isClosed,
   type,
   position,
+  search,
 ) {
-  let query = makeFindPostQuery(language, period, isClosed, type, position);  // 조회 query 생성
+  let query = makeFindPostQuery(language, period, isClosed, type, position, search);  // 조회 query 생성
   const count  = await this.countDocuments(query);
   return count;
 };
