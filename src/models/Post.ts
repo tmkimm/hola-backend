@@ -1,4 +1,4 @@
-import { Model, Schema, model, Types, Document } from 'mongoose';
+import { Model, Schema, model, Types, Document, QueryCursor } from 'mongoose';
 import CustomError from '../CustomError';
 import { isNumber } from '../utills/isNumber';
 // eslint-disable-next-line import/no-unresolved
@@ -198,6 +198,13 @@ export interface IPostModel extends Model<IPostDocument> {
     type: string | null,
     position: string | null,
   ) => Promise<IPostDocument[]>;
+  countPost: (
+    language: string | null,
+    period: number | null,
+    isClosed: string | null,
+    type: string | null,
+    position: string | null,
+  ) => Promise<number>;
   findPostRecommend: (
     sort: string | null,
     language: string[] | null,
@@ -333,6 +340,34 @@ postSchema.virtual('state').get(function (this: IPost) {
 postSchema.virtual('totalComments').get(function (this: IPost) {
   return this.comments.length;
 });
+
+// 조회 query 생성
+let makeFindPostQuery = (language: string | null, period: string | null, isClosed: string | null, type: string | null, position: string | null) => {
+  // Query
+  const query: any = {};
+
+  if (typeof language === 'string') query.language = { $in: language.split(',') };
+  if (typeof position === 'string') query.positions = { $in: position.split(',') };
+
+  if (typeof period === 'number' && !Number.isNaN(period)) {
+    const today = new Date();
+    query.createdAt = { $gte: today.setDate(today.getDate() - period) };
+  }
+
+  // 마감된 글 안보기 기능(false만 지원)
+  if (typeof isClosed === 'string' && !(isClosed === 'true')) {
+    query.isClosed = { $eq: isClosed === 'true' };
+  } 
+
+  query.isDeleted = { $eq: false };
+  // 글 구분(0: 전체, 1: 프로젝트, 2: 스터디)
+  if (typeof type === 'string') {
+    if (type === '0') query.$or = [{ type: '1' }, { type: '2' }];
+    else query.type = { $eq: type };
+  }
+  return query;
+}
+
 // 최신, 트레딩 조회
 postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed, type, position) {
   // Pagenation
@@ -351,25 +386,7 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     sortQuery.push('createdAt');
   }
   // Query
-  const query: any = {};
-  if (typeof language === 'string') query.language = { $in: language.split(',') };
-  if (typeof position === 'string') query.positions = { $in: position.split(',') };
-
-  if (typeof period === 'number' && !Number.isNaN(period)) {
-    const today = new Date();
-    query.createdAt = { $gte: today.setDate(today.getDate() - period) };
-  }
-
-  // 마감된 글 안보기 기능(false만 지원)
-  if (typeof isClosed === 'string' && !(isClosed === 'true')) {
-    query.isClosed = { $eq: isClosed === 'true' };
-  }
-
-  // 글 구분(0: 전체, 1: 프로젝트, 2: 스터디)
-  if (typeof type === 'string') {
-    if (type === '0') query.$or = [{ type: '1' }, { type: '2' }];
-    else query.type = { $eq: type };
-  }
+  let query = makeFindPostQuery(language, period, isClosed, type, position);  // 조회 query 생성
   const result = await this.find(query)
     .where('isDeleted')
     .equals(false)
@@ -406,32 +423,9 @@ postSchema.statics.findPostPagination = async function (
   } else {
     sortQuery.push('createdAt');
   }
-  // Query
-  const query: any = {};
-
-  if (typeof language === 'string') query.language = { $in: language.split(',') };
-  if (typeof position === 'string') query.positions = { $in: position.split(',') };
-
-  if (typeof period === 'number' && !Number.isNaN(period)) {
-    const today = new Date();
-    query.createdAt = { $gte: today.setDate(today.getDate() - period) };
-  }
-
-  // 마감된 글 안보기 기능(false만 지원)
-  if (typeof isClosed === 'string' && !(isClosed === 'true')) {
-    query.isClosed = { $eq: isClosed === 'true' };
-  }
-
-  // 글 구분(0: 전체, 1: 프로젝트, 2: 스터디)
-  if (typeof type === 'string') {
-    if (type === '0') query.$or = [{ type: '1' }, { type: '2' }];
-    else query.type = { $eq: type };
-  }
-
+  let query = makeFindPostQuery(language, period, isClosed, type, position);  // 조회 query 생성
   // Pagenation
-  // const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
-  // 최대 페이지 수 표현 필요
-  const itemsPerPage = 3; // 한 페이지에 표현할 수
+  const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
   let pagesToSkip = 0;
   let skip = 0;
   // skip할 페이지 계산
@@ -448,8 +442,6 @@ postSchema.statics.findPostPagination = async function (
 
   // 앞으로 갈때 skip 적용 시 lastId가 아닌 firstID로 가야하므로 itemsPerPage - 1 더 skip해야함
   const result = await this.find(query)
-    .where('isDeleted')
-    .equals(false)
     .sort(sortQuery.join(' '))
     .skip(skip)
     .limit(Number(itemsPerPage))
@@ -457,9 +449,25 @@ postSchema.statics.findPostPagination = async function (
       `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
     )
     .populate('author', 'nickName image');
-
-  return result;
+//  const total = await this.countDocuments(query);
+//  const lastPage = Math.ceil(total / itemsPerPage);
+  return { 
+    result
+  };
 };
+// 최신, 트레딩 조회
+postSchema.statics.countPost = async function (
+  language,
+  period,
+  isClosed,
+  type,
+  position,
+) {
+  let query = makeFindPostQuery(language, period, isClosed, type, position);  // 조회 query 생성
+  const count  = await this.countDocuments(query);
+  return count;
+};
+
 // 사용자에게 추천 조회
 postSchema.statics.findPostRecommend = async function (sort, language, postId, userId, limit) {
   let sortQuery = [];

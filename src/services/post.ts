@@ -38,7 +38,6 @@ export class PostService {
     return sortPosts;
   }
 
-  // 리팩토링필요
   // 메인 화면에서 글 리스트를 조회한다.
   async findPostPagination(
     page: string | null,
@@ -73,6 +72,25 @@ export class PostService {
     return sortPosts;
   }
 
+  // Pagination을 위해 마지막 페이지를 구한다.
+  async findLastPage(
+    language: string | null,
+    period: number | null,
+    isClosed: string | null,
+    type: string | null,
+    position: string | null,
+  ) {
+    const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
+    const totalCount = await this.postModel.countPost(
+      language,
+      period,
+      isClosed,
+      type,
+      position,
+    );
+    const lastPage = Math.ceil(totalCount / itemsPerPage);
+    return lastPage;
+  }
   // 선택한 언어가 리스트의 앞에 오도록 정렬
   async sortLanguageByQueryParam(posts: IPostDocument[], language: string | null) {
     if (typeof language !== 'string') return posts;

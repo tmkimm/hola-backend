@@ -74,7 +74,6 @@ var PostService = /** @class */ (function () {
             });
         });
     };
-    // 리팩토링필요
     // 메인 화면에서 글 리스트를 조회한다.
     PostService.prototype.findPostPagination = function (page, previousPage, lastId, sort, language, period, isClosed, type, position) {
         return __awaiter(this, void 0, void 0, function () {
@@ -95,6 +94,23 @@ var PostService = /** @class */ (function () {
                     case 3:
                         sortPosts = this.sortLanguageByQueryParam(posts, language);
                         return [2 /*return*/, sortPosts];
+                }
+            });
+        });
+    };
+    // Pagination을 위해 마지막 페이지를 구한다.
+    PostService.prototype.findLastPage = function (language, period, isClosed, type, position) {
+        return __awaiter(this, void 0, void 0, function () {
+            var itemsPerPage, totalCount, lastPage;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        itemsPerPage = 4 * 6;
+                        return [4 /*yield*/, this.postModel.countPost(language, period, isClosed, type, position)];
+                    case 1:
+                        totalCount = _a.sent();
+                        lastPage = Math.ceil(totalCount / itemsPerPage);
+                        return [2 /*return*/, lastPage];
                 }
             });
         });
