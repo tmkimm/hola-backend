@@ -345,7 +345,14 @@ postSchema.virtual('totalComments').get(function (this: IPost) {
 });
 
 // 조회 query 생성
-let makeFindPostQuery = (language: string | null, period: string | null, isClosed: string | null, type: string | null, position: string | null, search: string | null) => {
+const makeFindPostQuery = (
+  language: string | null,
+  period: string | null,
+  isClosed: string | null,
+  type: string | null,
+  position: string | null,
+  search: string | null,
+) => {
   // Query
   const query: any = {};
 
@@ -360,7 +367,7 @@ let makeFindPostQuery = (language: string | null, period: string | null, isClose
   // 마감된 글 안보기 기능(false만 지원)
   if (typeof isClosed === 'string' && !(isClosed === 'true')) {
     query.isClosed = { $eq: isClosed === 'true' };
-  } 
+  }
 
   query.isDeleted = { $eq: false };
   // 글 구분(0: 전체, 1: 프로젝트, 2: 스터디)
@@ -371,10 +378,10 @@ let makeFindPostQuery = (language: string | null, period: string | null, isClose
 
   // 텍스트 검색
   if (typeof search === 'string') {
-    query.$text = { $search : search}
+    query.$text = { $search: search };
   }
   return query;
-}
+};
 
 // 최신, 트레딩 조회
 postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed, type, position, search) {
@@ -394,7 +401,7 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     sortQuery.push('createdAt');
   }
   // Query
-  let query = makeFindPostQuery(language, period, isClosed, type, position, search);  // 조회 query 생성
+  const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
   const result = await this.find(query)
     .where('isDeleted')
     .equals(false)
@@ -432,7 +439,7 @@ postSchema.statics.findPostPagination = async function (
   } else {
     sortQuery.push('createdAt');
   }
-  let query = makeFindPostQuery(language, period, isClosed, type, position, search);  // 조회 query 생성
+  const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
   // Pagenation
   const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
   let pagesToSkip = 0;
@@ -458,23 +465,16 @@ postSchema.statics.findPostPagination = async function (
       `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
     )
     .populate('author', 'nickName image');
-//  const total = await this.countDocuments(query);
-//  const lastPage = Math.ceil(total / itemsPerPage);
-  return { 
-    result
+  //  const total = await this.countDocuments(query);
+  //  const lastPage = Math.ceil(total / itemsPerPage);
+  return {
+    result,
   };
 };
 // 최신, 트레딩 조회
-postSchema.statics.countPost = async function (
-  language,
-  period,
-  isClosed,
-  type,
-  position,
-  search,
-) {
-  let query = makeFindPostQuery(language, period, isClosed, type, position, search);  // 조회 query 생성
-  const count  = await this.countDocuments(query);
+postSchema.statics.countPost = async function (language, period, isClosed, type, position, search) {
+  const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
+  const count = await this.countDocuments(query);
   return count;
 };
 

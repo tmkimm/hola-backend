@@ -242,7 +242,7 @@ postSchema.statics.findPostPagination = function (page, previousPage, lastId, so
                     //  const total = await this.countDocuments(query);
                     //  const lastPage = Math.ceil(total / itemsPerPage);
                     return [2 /*return*/, {
-                            result: result
+                            result: result,
                         }];
             }
         });
