@@ -325,18 +325,23 @@ postSchema.virtual('hashTag').get(function (this: IPost) {
 
 // 글 상태(뱃지)
 postSchema.virtual('state').get(function (this: IPost) {
-  let state = '';
+  const state = [];
+
+  // 스터디, 프로젝트 구분1 : 프로젝트, 2: 스터디
+  state.push(this.type);
+  // 글 상태
   const today: Date = new Date();
   const daysAgo: Date = new Date();
   const millisecondDay: number = 1000 * 60 * 60 * 24;
   daysAgo.setDate(today.getDate() - 3); // 오늘에서 3일전
   // 1. 3일 이내에 등록된 글이면 최신 글
   // 2. 3일 이내 글이면 마감 임박
-  // 3. 일 조회수가 50 이상이면 인기
-  if (this.createdAt > daysAgo) state = 'new';
+  // 3. 일 조회수가 40 이상이면 인기
+  if (this.createdAt > daysAgo) state.push('new');
   else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
-    state = 'deadline';
-  else if (Math.abs(this.views / ((this.createdAt.getTime() - today.getTime()) / millisecondDay)) >= 40) state = 'hot';
+    state.push('deadline');
+  else if (Math.abs(this.views / ((this.createdAt.getTime() - today.getTime()) / millisecondDay)) >= 40)
+    state.push('hot');
   return state;
 });
 
