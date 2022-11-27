@@ -108,9 +108,7 @@ postSchema.virtual('hashTag').get(function () {
 });
 // 글 상태(뱃지)
 postSchema.virtual('state').get(function () {
-    var state = [];
-    // 스터디, 프로젝트 구분1 : 프로젝트, 2: 스터디
-    state.push(this.type);
+    var state = '';
     // 글 상태
     var today = new Date();
     var daysAgo = new Date();
@@ -120,11 +118,11 @@ postSchema.virtual('state').get(function () {
     // 2. 3일 이내 글이면 마감 임박
     // 3. 일 조회수가 40 이상이면 인기
     if (this.createdAt > daysAgo)
-        state.push('new');
+        state = 'new';
     else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
-        state.push('deadline');
+        state = 'deadline';
     else if (Math.abs(this.views / ((this.createdAt.getTime() - today.getTime()) / millisecondDay)) >= 40)
-        state.push('hot');
+        state = 'hot';
     return state;
 });
 postSchema.virtual('totalComments').get(function () {

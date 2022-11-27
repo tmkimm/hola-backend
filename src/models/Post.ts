@@ -90,6 +90,14 @@ export interface IReply {
  *        example:
  *          - 'FE'
  *          - 'BE'
+ *      state:
+ *        type: string
+ *        description: '글 상태(new : 신규글, deadline : 마감임박, hot:인기)'
+ *        items:
+ *          type: string
+ *        example:
+ *          - '1'
+ *          - 'new'
  *      createdAt:
  *        type: string
  *        description: 생성일
@@ -325,10 +333,8 @@ postSchema.virtual('hashTag').get(function (this: IPost) {
 
 // 글 상태(뱃지)
 postSchema.virtual('state').get(function (this: IPost) {
-  const state = [];
+  let state = '';
 
-  // 스터디, 프로젝트 구분1 : 프로젝트, 2: 스터디
-  state.push(this.type);
   // 글 상태
   const today: Date = new Date();
   const daysAgo: Date = new Date();
@@ -337,11 +343,10 @@ postSchema.virtual('state').get(function (this: IPost) {
   // 1. 3일 이내에 등록된 글이면 최신 글
   // 2. 3일 이내 글이면 마감 임박
   // 3. 일 조회수가 40 이상이면 인기
-  if (this.createdAt > daysAgo) state.push('new');
+  if (this.createdAt > daysAgo) state = 'new';
   else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
-    state.push('deadline');
-  else if (Math.abs(this.views / ((this.createdAt.getTime() - today.getTime()) / millisecondDay)) >= 40)
-    state.push('hot');
+    state = 'deadline';
+  else if (Math.abs(this.views / ((this.createdAt.getTime() - today.getTime()) / millisecondDay)) >= 40) state = 'hot';
   return state;
 });
 
