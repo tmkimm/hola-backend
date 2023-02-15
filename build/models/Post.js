@@ -43,8 +43,6 @@ exports.Post = void 0;
 var mongoose_1 = require("mongoose");
 var CustomError_1 = __importDefault(require("../CustomError"));
 var isNumber_1 = require("../utills/isNumber");
-// eslint-disable-next-line import/no-unresolved
-var CommonCode_1 = require("../CommonCode");
 // 대댓글 스키마
 var replySchema = new mongoose_1.Schema({
     content: String,
@@ -90,21 +88,6 @@ var postSchema = new mongoose_1.Schema({
     timestamps: true,
     toObject: { virtuals: true },
     toJSON: { virtuals: true },
-});
-// 해시태그
-postSchema.virtual('hashTag').get(function () {
-    var hashTag = [];
-    if (this.type && Object.prototype.hasOwnProperty.call(CommonCode_1.studyOrProjectCode, this.type))
-        hashTag.push(CommonCode_1.studyOrProjectCode[this.type]);
-    if (this.onlineOrOffline && Object.prototype.hasOwnProperty.call(CommonCode_1.onlineOrOfflineCode, this.onlineOrOffline))
-        hashTag.push(CommonCode_1.onlineOrOfflineCode[this.onlineOrOffline]);
-    if (this.recruits && this.recruits !== "und" && Object.prototype.hasOwnProperty.call(CommonCode_1.recruitsCode, this.recruits))
-        hashTag.push(CommonCode_1.recruitsCode[this.recruits]);
-    if (this.expectedPeriod &&
-        this.expectedPeriod !== "und" &&
-        Object.prototype.hasOwnProperty.call(CommonCode_1.expectedPeriodCode, this.expectedPeriod))
-        hashTag.push(CommonCode_1.expectedPeriodCode[this.expectedPeriod]);
-    return hashTag;
 });
 // 글 상태(뱃지)
 postSchema.virtual('state').get(function () {
@@ -186,7 +169,7 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                             .sort(sortQuery.join(' '))
                             .skip(Number(offsetQuery))
                             .limit(Number(limitQuery))
-                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
+                            .select("title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
                             .populate('author', 'nickName image')];
                 case 1:
                     result = _a.sent();
@@ -236,7 +219,7 @@ postSchema.statics.findPostPagination = function (page, previousPage, lastId, so
                             .sort(sortQuery.join(' '))
                             .skip(skip)
                             .limit(Number(itemsPerPage))
-                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
+                            .select("title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
                             .populate('author', 'nickName image')];
                 case 1:
                     result = _b.sent();

@@ -313,24 +313,6 @@ const postSchema = new Schema<IPostDocument>(
   },
 );
 
-// 해시태그
-postSchema.virtual('hashTag').get(function (this: IPost) {
-  const hashTag: Array<string> = [];
-  if (this.type && Object.prototype.hasOwnProperty.call(studyOrProjectCode, this.type))
-    hashTag.push(studyOrProjectCode[this.type]);
-  if (this.onlineOrOffline && Object.prototype.hasOwnProperty.call(onlineOrOfflineCode, this.onlineOrOffline))
-    hashTag.push(onlineOrOfflineCode[this.onlineOrOffline]);
-  if (this.recruits && this.recruits !== `und` && Object.prototype.hasOwnProperty.call(recruitsCode, this.recruits))
-    hashTag.push(recruitsCode[this.recruits]);
-  if (
-    this.expectedPeriod &&
-    this.expectedPeriod !== `und` &&
-    Object.prototype.hasOwnProperty.call(expectedPeriodCode, this.expectedPeriod)
-  )
-    hashTag.push(expectedPeriodCode[this.expectedPeriod]);
-  return hashTag;
-});
-
 // 글 상태(뱃지)
 postSchema.virtual('state').get(function (this: IPost) {
   let state = '';
@@ -419,7 +401,7 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     .skip(Number(offsetQuery))
     .limit(Number(limitQuery))
     .select(
-      `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
+      `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
     )
     .populate('author', 'nickName image');
   return result;
@@ -472,7 +454,7 @@ postSchema.statics.findPostPagination = async function (
     .skip(skip)
     .limit(Number(itemsPerPage))
     .select(
-      `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
+      `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
     )
     .populate('author', 'nickName image');
   //  const total = await this.countDocuments(query);
