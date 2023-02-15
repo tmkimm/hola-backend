@@ -43,5 +43,5 @@ var expectedPeriodCode = {
     mo: '장기',
 };
 exports.expectedPeriodCode = expectedPeriodCode;
-var positionsCode = ['FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM'];
+var positionsCode = ['ALL', 'FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM'];
 //# sourceMappingURL=CommonCode.js.map

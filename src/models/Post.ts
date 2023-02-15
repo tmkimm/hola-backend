@@ -321,14 +321,15 @@ postSchema.virtual('state').get(function (this: IPost) {
   const today: Date = new Date();
   const daysAgo: Date = new Date();
   const millisecondDay: number = 1000 * 60 * 60 * 24;
-  daysAgo.setDate(today.getDate() - 3); // 오늘에서 3일전
+  daysAgo.setDate(today.getDate() - 1); // 24시간 이내
   // 1. 3일 이내에 등록된 글이면 최신 글
   // 2. 3일 이내 글이면 마감 임박
-  // 3. 일 조회수가 40 이상이면 인기
+  // 3. 일 조회수가 60 이상이면 인기
   if (this.createdAt > daysAgo) state = 'new';
   else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
     state = 'deadline';
-  else if (Math.abs(this.views / ((this.createdAt.getTime() - today.getTime()) / millisecondDay)) >= 40) state = 'hot';
+  else if (Math.abs(this.views / Math.ceil((today.getTime() - this.createdAt.getTime()) / millisecondDay)) >= 60)
+    state = 'hot';
   return state;
 });
 
