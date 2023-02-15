@@ -27,7 +27,17 @@ export class PostService {
     position: string | null,
     search: string | null,
   ) {
-    const posts = await this.postModel.findPost(offset, limit, sort, language, period, isClosed, type, position, search);
+    const posts = await this.postModel.findPost(
+      offset,
+      limit,
+      sort,
+      language,
+      period,
+      isClosed,
+      type,
+      position,
+      search,
+    );
     // 언어 필터링 로그 생성
     if (language) {
       await PostFilterLog.create({
@@ -85,17 +95,11 @@ export class PostService {
     search: string | null,
   ) {
     const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
-    const totalCount = await this.postModel.countPost(
-      language,
-      period,
-      isClosed,
-      type,
-      position,
-      search,
-    );
+    const totalCount = await this.postModel.countPost(language, period, isClosed, type, position, search);
     const lastPage = Math.ceil(totalCount / itemsPerPage);
     return lastPage;
   }
+
   // 선택한 언어가 리스트의 앞에 오도록 정렬
   async sortLanguageByQueryParam(posts: IPostDocument[], language: string | null) {
     if (typeof language !== 'string') return posts;

@@ -64,7 +64,7 @@ export default (app: Router) => {
    *          example: '-createdAt,+views'
    *        - name: position
    *          in: query
-   *          description: '직군(FE: 프론트엔드, BE: 백엔드, DE: 디자이너, IOS: IOS, AND: 안드로이드, DEVOPS: DevOps, PM)'
+   *          description: '직군(ALL: 전체, FE: 프론트엔드, BE: 백엔드, DE: 디자이너, IOS: IOS, AND: 안드로이드, DEVOPS: DevOps, PM)'
    *          required: false
    *          schema:
    *            type: string
@@ -112,7 +112,17 @@ export default (app: Router) => {
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { offset, limit, sort, language, period, isClosed, type, position, search } = req.query;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const posts = await PostServiceInstance.findPost(offset, limit, sort, language, period, isClosed, type, position, search);
+      const posts = await PostServiceInstance.findPost(
+        offset,
+        limit,
+        sort,
+        language,
+        period,
+        isClosed,
+        type,
+        position,
+        search,
+      );
 
       return res.status(200).json(posts);
     }),
@@ -294,22 +304,15 @@ export default (app: Router) => {
    *                    description : '전체 페이지 수'
    *                    example: 7
    */
-   route.get(
+  route.get(
     '/last-page',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { language, period, isClosed, type, position, search } = req.query;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const lastPage = await PostServiceInstance.findLastPage(
-        language,
-        period,
-        isClosed,
-        type,
-        position,
-        search
-      );
+      const lastPage = await PostServiceInstance.findLastPage(language, period, isClosed, type, position, search);
 
-      return res.status(200).json({ 
-        lastPage
+      return res.status(200).json({
+        lastPage,
       });
     }),
   );

@@ -349,7 +349,7 @@ const makeFindPostQuery = (
   const query: any = {};
 
   if (typeof language === 'string') query.language = { $in: language.split(',') };
-  if (typeof position === 'string') query.positions = { $in: position.split(',') };
+  if (typeof position === 'string' && position && position !== 'ALL') query.positions = position;
 
   if (typeof period === 'number' && !Number.isNaN(period)) {
     const today = new Date();

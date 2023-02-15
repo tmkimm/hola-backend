@@ -117,8 +117,8 @@ var makeFindPostQuery = function (language, period, isClosed, type, position, se
     var query = {};
     if (typeof language === 'string')
         query.language = { $in: language.split(',') };
-    if (typeof position === 'string')
-        query.positions = { $in: position.split(',') };
+    if (typeof position === 'string' && position && position !== 'ALL')
+        query.positions = position;
     if (typeof period === 'number' && !Number.isNaN(period)) {
         var today = new Date();
         query.createdAt = { $gte: today.setDate(today.getDate() - period) };

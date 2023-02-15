@@ -93,7 +93,7 @@ exports.default = (function (app) {
      *          example: '-createdAt,+views'
      *        - name: position
      *          in: query
-     *          description: '직군(FE: 프론트엔드, BE: 백엔드, DE: 디자이너, IOS: IOS, AND: 안드로이드, DEVOPS: DevOps, PM)'
+     *          description: '직군(ALL: 전체, FE: 프론트엔드, BE: 백엔드, DE: 디자이너, IOS: IOS, AND: 안드로이드, DEVOPS: DevOps, PM)'
      *          required: false
      *          schema:
      *            type: string
@@ -330,7 +330,7 @@ exports.default = (function (app) {
                 case 1:
                     lastPage = _b.sent();
                     return [2 /*return*/, res.status(200).json({
-                            lastPage: lastPage
+                            lastPage: lastPage,
                         })];
             }
         });
