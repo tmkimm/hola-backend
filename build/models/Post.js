@@ -42,8 +42,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Post = void 0;
 var mongoose_1 = require("mongoose");
 var CustomError_1 = __importDefault(require("../CustomError"));
-// eslint-disable-next-line import/no-unresolved
-var CommonCode_1 = require("../CommonCode");
+var isNumber_1 = require("../utills/isNumber");
 // 대댓글 스키마
 var replySchema = new mongoose_1.Schema({
     content: String,
@@ -82,52 +81,70 @@ var postSchema = new mongoose_1.Schema({
     udemyLecture: { type: String, default: null },
     expectedPeriod: { type: String, default: null },
     positions: { type: [String] },
+    closeDate: { type: Date, default: null },
+    deleteDate: { type: Date, default: null }, //  삭제일
 }, {
     versionKey: false,
     timestamps: true,
     toObject: { virtuals: true },
     toJSON: { virtuals: true },
 });
-// 해시태그
-postSchema.virtual('hashTag').get(function () {
-    var hashTag = [];
-    if (this.type && Object.prototype.hasOwnProperty.call(CommonCode_1.studyOrProjectCode, this.type))
-        hashTag.push(CommonCode_1.studyOrProjectCode[this.type]);
-    if (this.onlineOrOffline && Object.prototype.hasOwnProperty.call(CommonCode_1.onlineOrOfflineCode, this.onlineOrOffline))
-        hashTag.push(CommonCode_1.onlineOrOfflineCode[this.onlineOrOffline]);
-    if (this.recruits && this.recruits !== "und" && Object.prototype.hasOwnProperty.call(CommonCode_1.recruitsCode, this.recruits))
-        hashTag.push(CommonCode_1.recruitsCode[this.recruits]);
-    if (this.expectedPeriod &&
-        this.expectedPeriod !== "und" &&
-        Object.prototype.hasOwnProperty.call(CommonCode_1.expectedPeriodCode, this.expectedPeriod))
-        hashTag.push(CommonCode_1.expectedPeriodCode[this.expectedPeriod]);
-    return hashTag;
-});
 // 글 상태(뱃지)
 postSchema.virtual('state').get(function () {
     var state = '';
+    // 글 상태
     var today = new Date();
     var daysAgo = new Date();
     var millisecondDay = 1000 * 60 * 60 * 24;
-    daysAgo.setDate(today.getDate() - 3); // 오늘에서 3일전
+    daysAgo.setDate(today.getDate() - 1); // 24시간 이내
     // 1. 3일 이내에 등록된 글이면 최신 글
     // 2. 3일 이내 글이면 마감 임박
-    // 3. 일 조회수가 50 이상이면 인기
+    // 3. 일 조회수가 60 이상이면 인기
     if (this.createdAt > daysAgo)
         state = 'new';
     else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
         state = 'deadline';
-    else if (Math.abs(this.views / ((this.createdAt.getTime() - today.getTime()) / millisecondDay)) >= 40)
+    else if (Math.abs(this.views / Math.ceil((today.getTime() - this.createdAt.getTime()) / millisecondDay)) >= 60)
         state = 'hot';
     return state;
 });
 postSchema.virtual('totalComments').get(function () {
     return this.comments.length;
 });
+// 조회 query 생성
+var makeFindPostQuery = function (language, period, isClosed, type, position, search) {
+    // Query
+    var query = {};
+    if (typeof language === 'string')
+        query.language = { $in: language.split(',') };
+    if (typeof position === 'string' && position && position !== 'ALL')
+        query.positions = position;
+    if (typeof period === 'number' && !Number.isNaN(period)) {
+        var today = new Date();
+        query.createdAt = { $gte: today.setDate(today.getDate() - period) };
+    }
+    // 마감된 글 안보기 기능(false만 지원)
+    if (typeof isClosed === 'string' && !(isClosed === 'true')) {
+        query.isClosed = { $eq: isClosed === 'true' };
+    }
+    query.isDeleted = { $eq: false };
+    // 글 구분(0: 전체, 1: 프로젝트, 2: 스터디)
+    if (typeof type === 'string') {
+        if (type === '0')
+            query.$or = [{ type: '1' }, { type: '2' }];
+        else
+            query.type = { $eq: type };
+    }
+    // 텍스트 검색
+    if (typeof search === 'string') {
+        query.$text = { $search: search };
+    }
+    return query;
+};
 // 최신, 트레딩 조회
-postSchema.statics.findPost = function (offset, limit, sort, language, period, isClosed, type, position) {
+postSchema.statics.findPost = function (offset, limit, sort, language, period, isClosed, type, position, search) {
     return __awaiter(this, void 0, void 0, function () {
-        var offsetQuery, limitQuery, sortQuery, sortableColumns_1, query, today, result;
+        var offsetQuery, limitQuery, sortQuery, sortableColumns_1, query, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -145,33 +162,14 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                     else {
                         sortQuery.push('createdAt');
                     }
-                    query = {};
-                    if (typeof language === 'string')
-                        query.language = { $in: language.split(',') };
-                    if (typeof position === 'string')
-                        query.positions = { $in: position.split(',') };
-                    if (typeof period === 'number' && !Number.isNaN(period)) {
-                        today = new Date();
-                        query.createdAt = { $gte: today.setDate(today.getDate() - period) };
-                    }
-                    // 마감된 글 안보기 기능(false만 지원)
-                    if (typeof isClosed === 'string' && !(isClosed === 'true')) {
-                        query.isClosed = { $eq: isClosed === 'true' };
-                    }
-                    // 글 구분(0: 전체, 1: 프로젝트, 2: 스터디)
-                    if (typeof type === 'string') {
-                        if (type === '0')
-                            query.$or = [{ type: '1' }, { type: '2' }];
-                        else
-                            query.type = { $eq: type };
-                    }
+                    query = makeFindPostQuery(language, period, isClosed, type, position, search);
                     return [4 /*yield*/, this.find(query)
                             .where('isDeleted')
                             .equals(false)
                             .sort(sortQuery.join(' '))
                             .skip(Number(offsetQuery))
                             .limit(Number(limitQuery))
-                            .select("title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
+                            .select("title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
                             .populate('author', 'nickName image')];
                 case 1:
                     result = _a.sent();
@@ -180,12 +178,13 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
         });
     });
 };
-// 사용자에게 추천 조회
-postSchema.statics.findPostRecommend = function (sort, language, postId, userId, limit) {
+// 최신, 트레딩 조회
+postSchema.statics.findPostPagination = function (page, previousPage, lastId, sort, language, period, isClosed, type, position, search) {
     return __awaiter(this, void 0, void 0, function () {
-        var sortQuery, sortableColumns_2, query, today, posts, notInPostIdArr, shortPosts;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var sortQuery, sortableColumns_2, query, itemsPerPage, pagesToSkip, skip, sortOperator, result;
+        var _a;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
                     sortQuery = [];
                     // Sorting
@@ -193,6 +192,75 @@ postSchema.statics.findPostRecommend = function (sort, language, postId, userId,
                         sortableColumns_2 = ['views', 'createdAt', 'totalLikes'];
                         sortQuery = sort.split(',').filter(function (value) {
                             return sortableColumns_2.indexOf(value.substr(1, value.length)) !== -1 || sortableColumns_2.indexOf(value) !== -1;
+                        });
+                        sortQuery.push('-createdAt');
+                    }
+                    else {
+                        sortQuery.push('createdAt');
+                    }
+                    query = makeFindPostQuery(language, period, isClosed, type, position, search);
+                    itemsPerPage = 4 * 6;
+                    pagesToSkip = 0;
+                    skip = 0;
+                    // skip할 페이지 계산
+                    if ((0, isNumber_1.isNumber)(page) && (0, isNumber_1.isNumber)(previousPage)) {
+                        pagesToSkip = Number(page) - Number(previousPage);
+                        if (lastId && pagesToSkip !== 0) {
+                            sortOperator = pagesToSkip <= 0 ? '$gt' : '$lt';
+                            query._id = (_a = {}, _a[sortOperator] = lastId, _a);
+                            // 실제 skip할 페이지 계산
+                            if (pagesToSkip > 0)
+                                skip = Number(itemsPerPage * Math.abs(pagesToSkip - 1));
+                            else if (pagesToSkip < 0)
+                                skip = Number(itemsPerPage * (Number(page) - 1));
+                        }
+                    }
+                    return [4 /*yield*/, this.find(query)
+                            .sort(sortQuery.join(' '))
+                            .skip(skip)
+                            .limit(Number(itemsPerPage))
+                            .select("title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
+                            .populate('author', 'nickName image')];
+                case 1:
+                    result = _b.sent();
+                    //  const total = await this.countDocuments(query);
+                    //  const lastPage = Math.ceil(total / itemsPerPage);
+                    return [2 /*return*/, {
+                            result: result,
+                        }];
+            }
+        });
+    });
+};
+// 최신, 트레딩 조회
+postSchema.statics.countPost = function (language, period, isClosed, type, position, search) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query, count;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = makeFindPostQuery(language, period, isClosed, type, position, search);
+                    return [4 /*yield*/, this.countDocuments(query)];
+                case 1:
+                    count = _a.sent();
+                    return [2 /*return*/, count];
+            }
+        });
+    });
+};
+// 사용자에게 추천 조회
+postSchema.statics.findPostRecommend = function (sort, language, postId, userId, limit) {
+    return __awaiter(this, void 0, void 0, function () {
+        var sortQuery, sortableColumns_3, query, today, posts, notInPostIdArr, shortPosts;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    sortQuery = [];
+                    // Sorting
+                    if (sort) {
+                        sortableColumns_3 = ['views', 'createdAt', 'totalLikes'];
+                        sortQuery = sort.split(',').filter(function (value) {
+                            return sortableColumns_3.indexOf(value.substr(1, value.length)) !== -1 || sortableColumns_3.indexOf(value) !== -1;
                         });
                     }
                     else {
@@ -293,7 +361,7 @@ postSchema.statics.deletePost = function (id) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, this.findOneAndUpdate({ _id: id }, { isDeleted: true })];
+                case 0: return [4 /*yield*/, this.findOneAndUpdate({ _id: id }, { isDeleted: true, deleteDate: new Date() })];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -498,35 +566,41 @@ postSchema.statics.findAuthorByReplyId = function (replyId) {
     });
 };
 // 글 수정 권한 체크
-postSchema.statics.checkPostAuthorization = function (postId, tokenUserId) {
+postSchema.statics.checkPostAuthorization = function (postId, tokenUserId, tokenType) {
     return __awaiter(this, void 0, void 0, function () {
         var post;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, this.findOne({ _id: postId, author: tokenUserId })];
+                case 0:
+                    if (!(tokenType !== 'admin')) return [3 /*break*/, 2];
+                    return [4 /*yield*/, this.findOne({ _id: postId, author: tokenUserId })];
                 case 1:
                     post = _a.sent();
                     if (!post) {
                         throw new CustomError_1.default('NotAuthenticatedError', 401, 'User does not match');
                     }
-                    return [2 /*return*/];
+                    _a.label = 2;
+                case 2: return [2 /*return*/];
             }
         });
     });
 };
 // 댓글 수정 권한 체크
-postSchema.statics.checkCommentAuthorization = function (commentId, tokenUserId) {
+postSchema.statics.checkCommentAuthorization = function (commentId, tokenUserId, tokenType) {
     return __awaiter(this, void 0, void 0, function () {
         var post;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, this.findOne({ comments: { $elemMatch: { _id: commentId, author: tokenUserId } } })];
+                case 0:
+                    if (!(tokenType !== 'admin')) return [3 /*break*/, 2];
+                    return [4 /*yield*/, this.findOne({ comments: { $elemMatch: { _id: commentId, author: tokenUserId } } })];
                 case 1:
                     post = _a.sent();
                     if (!post) {
                         throw new CustomError_1.default('NotAuthenticatedError', 401, 'User does not match');
                     }
-                    return [2 /*return*/];
+                    _a.label = 2;
+                case 2: return [2 /*return*/];
             }
         });
     });

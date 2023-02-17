@@ -1,5 +1,6 @@
-import { Model, Schema, model, Types, Document } from 'mongoose';
+import { Model, Schema, model, Types, Document, QueryCursor } from 'mongoose';
 import CustomError from '../CustomError';
+import { isNumber } from '../utills/isNumber';
 // eslint-disable-next-line import/no-unresolved
 import { studyOrProjectCode, onlineOrOfflineCode, recruitsCode, expectedPeriodCode } from '../CommonCode';
 // 대댓글
@@ -7,7 +8,140 @@ export interface IReply {
   contnet: string;
   author: Types.ObjectId;
 }
-
+/**
+ * @swagger
+ *  components:
+ *  schemas:
+ *   Post:
+ *     properties:
+ *      _id:
+ *        type: string
+ *        description: 글 ID
+ *        example: '6355eee637ad670014118738'
+ *      author:
+ *        type: string
+ *        description: 글 등록자 정보
+ *        example: '634e1a1537ad67001410d1f4'
+ *      language:
+ *        type: array
+ *        items:
+ *          type: string
+ *        description: 사용 언어
+ *        example:
+ *          - react
+ *          - java
+ *      title:
+ *        type: string
+ *        description: 제목
+ *      content:
+ *        type: string
+ *        description: 내용
+ *      isDeleted:
+ *        type: boolean
+ *        description: 삭제 여부
+ *      isClosed:
+ *        type: boolean
+ *        description: 마감 여부
+ *      views:
+ *        type: number
+ *        description: 조회수
+ *        example: 219
+ *      likes:
+ *        type: array
+ *        description: 관심 등록한 사용자 리스트
+ *        items:
+ *          type: string
+ *        example:
+ *          - '634e1a1537ad67001410d1f4'
+ *          - '61063a70ed4b420bbcfa0b4b'
+ *      totalLikes:
+ *        type: number
+ *        description: 관심 등록 수
+ *        example: 2
+ *      type:
+ *        type: string
+ *        description: '모집 구분(1 : 프로젝트, 2: 스터디)'
+ *        example: '1'
+ *      recruits:
+ *        type: string
+ *        description: '모집인원(und: 인원 미정, 1, 2, 3, mo: 10명 이상)'
+ *        example: 'und'
+ *      onlineOrOffline:
+ *        type: string
+ *        description: '진행방식(on: 온라인/ off: 오프라인)'
+ *        example: 'on'
+ *      contactType:
+ *        type: string
+ *        description: '연락방법(ok: 오픈 카카오톡, em: 이메일, pk: 개인 카카오톡, gf: 구글폼)'
+ *        example: 'em'
+ *      contactPoint:
+ *        type: string
+ *        description: '연락링크'
+ *        example: 'https://open.kakao.com/o/sKdsLWGe'
+ *      expectedPeriod:
+ *        type: string
+ *        description: '예상 진행기간(und: 기간 미정, 1, 2, 3, mo: 장기)'
+ *        example: '3'
+ *      positions:
+ *        type: array
+ *        description: '포지션(FE: 프론트엔드, BE: 백엔드, DE: 디자이너, IOS: IOS, AND: 안드로이드, DEVOPS: DevOps, PM)'
+ *        items:
+ *          type: string
+ *        example:
+ *          - 'FE'
+ *          - 'BE'
+ *      state:
+ *        type: string
+ *        description: '글 상태(new : 신규글, deadline : 마감임박, hot:인기)'
+ *        items:
+ *          type: string
+ *        example:
+ *          - '1'
+ *          - 'new'
+ *      createdAt:
+ *        type: string
+ *        description: 생성일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      startDate:
+ *        type: string
+ *        description: 시작예정일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      endDate:
+ *        type: string
+ *        description: 모집 마감일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      closeDate:
+ *        type: string
+ *        description: 마감처리일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      deleteDate:
+ *        type: string
+ *        description: 삭제일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      comments:
+ *        type: array
+ *        items:
+ *          $ref: '#/components/schemas/Comment'
+ *   Comment:
+ *     properties:
+ *      _id:
+ *        type: string
+ *        description: 댓글 ID
+ *        example: '6355eee637ad670014118738'
+ *      author:
+ *        type: string
+ *        description: 작성자 ID
+ *        example: '63574b3b37ad67001411ba50'
+ *      content:
+ *        type: string
+ *        description: 댓글 내용
+ *        example: '신청합니다!'
+ */
 export interface IReplyDocument extends IReply, Document {}
 
 export type IReplyModel = Model<IReplyDocument>;
@@ -45,6 +179,8 @@ export interface IPost {
   positions: string[]; // 포지션
   createdAt: Date; // 등록일
   startDate: Date; // 시작예정일
+  closeDate: Date; // 마감일
+  deleteDate: Date; // 삭제일
 }
 export interface IPostDocument extends IPost, Document {}
 
@@ -58,7 +194,28 @@ export interface IPostModel extends Model<IPostDocument> {
     isClosed: string | null,
     type: string | null,
     position: string | null,
+    search: string | null,
   ) => Promise<IPostDocument[]>;
+  findPostPagination: (
+    page: string | null,
+    previousPage: string | null,
+    lastId: Types.ObjectId | string,
+    sort: string | null,
+    language: string | null,
+    period: number | null,
+    isClosed: string | null,
+    type: string | null,
+    position: string | null,
+    search: string | null,
+  ) => Promise<IPostDocument[]>;
+  countPost: (
+    language: string | null,
+    period: number | null,
+    isClosed: string | null,
+    type: string | null,
+    position: string | null,
+    search: string | null,
+  ) => Promise<number>;
   findPostRecommend: (
     sort: string | null,
     language: string[] | null,
@@ -92,8 +249,8 @@ export interface IPostModel extends Model<IPostDocument> {
   increaseView: (postId: Types.ObjectId) => void;
   findAuthorByCommentId: (commentId: Types.ObjectId) => Promise<Types.ObjectId | null>;
   findAuthorByReplyId: (replyId: Types.ObjectId) => Promise<Types.ObjectId | null>;
-  checkPostAuthorization: (postId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
-  checkCommentAuthorization: (commentId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
+  checkPostAuthorization: (postId: Types.ObjectId, tokenUserId: Types.ObjectId, tokenType: string) => void;
+  checkCommentAuthorization: (commentId: Types.ObjectId, tokenUserId: Types.ObjectId, tokenType: string) => void;
   checkReplyAuthorization: (replyId: Types.ObjectId, tokenUserId: Types.ObjectId) => void;
   autoClosing: () => void;
 }
@@ -145,6 +302,8 @@ const postSchema = new Schema<IPostDocument>(
     udemyLecture: { type: String, default: null }, // udemy 강의
     expectedPeriod: { type: String, default: null }, // 예상 종료일
     positions: { type: [String] },
+    closeDate: { type: Date, default: null }, //  마감일
+    deleteDate: { type: Date, default: null }, //  삭제일
   },
   {
     versionKey: false,
@@ -154,46 +313,71 @@ const postSchema = new Schema<IPostDocument>(
   },
 );
 
-// 해시태그
-postSchema.virtual('hashTag').get(function (this: IPost) {
-  const hashTag: Array<string> = [];
-  if (this.type && Object.prototype.hasOwnProperty.call(studyOrProjectCode, this.type))
-    hashTag.push(studyOrProjectCode[this.type]);
-  if (this.onlineOrOffline && Object.prototype.hasOwnProperty.call(onlineOrOfflineCode, this.onlineOrOffline))
-    hashTag.push(onlineOrOfflineCode[this.onlineOrOffline]);
-  if (this.recruits && this.recruits !== `und` && Object.prototype.hasOwnProperty.call(recruitsCode, this.recruits))
-    hashTag.push(recruitsCode[this.recruits]);
-  if (
-    this.expectedPeriod &&
-    this.expectedPeriod !== `und` &&
-    Object.prototype.hasOwnProperty.call(expectedPeriodCode, this.expectedPeriod)
-  )
-    hashTag.push(expectedPeriodCode[this.expectedPeriod]);
-  return hashTag;
-});
-
 // 글 상태(뱃지)
 postSchema.virtual('state').get(function (this: IPost) {
   let state = '';
+
+  // 글 상태
   const today: Date = new Date();
   const daysAgo: Date = new Date();
   const millisecondDay: number = 1000 * 60 * 60 * 24;
-  daysAgo.setDate(today.getDate() - 3); // 오늘에서 3일전
+  daysAgo.setDate(today.getDate() - 1); // 24시간 이내
   // 1. 3일 이내에 등록된 글이면 최신 글
   // 2. 3일 이내 글이면 마감 임박
-  // 3. 일 조회수가 50 이상이면 인기
+  // 3. 일 조회수가 60 이상이면 인기
   if (this.createdAt > daysAgo) state = 'new';
   else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
     state = 'deadline';
-  else if (Math.abs(this.views / ((this.createdAt.getTime() - today.getTime()) / millisecondDay)) >= 40) state = 'hot';
+  else if (Math.abs(this.views / Math.ceil((today.getTime() - this.createdAt.getTime()) / millisecondDay)) >= 60)
+    state = 'hot';
   return state;
 });
 
 postSchema.virtual('totalComments').get(function (this: IPost) {
   return this.comments.length;
 });
+
+// 조회 query 생성
+const makeFindPostQuery = (
+  language: string | null,
+  period: string | null,
+  isClosed: string | null,
+  type: string | null,
+  position: string | null,
+  search: string | null,
+) => {
+  // Query
+  const query: any = {};
+
+  if (typeof language === 'string') query.language = { $in: language.split(',') };
+  if (typeof position === 'string' && position && position !== 'ALL') query.positions = position;
+
+  if (typeof period === 'number' && !Number.isNaN(period)) {
+    const today = new Date();
+    query.createdAt = { $gte: today.setDate(today.getDate() - period) };
+  }
+
+  // 마감된 글 안보기 기능(false만 지원)
+  if (typeof isClosed === 'string' && !(isClosed === 'true')) {
+    query.isClosed = { $eq: isClosed === 'true' };
+  }
+
+  query.isDeleted = { $eq: false };
+  // 글 구분(0: 전체, 1: 프로젝트, 2: 스터디)
+  if (typeof type === 'string') {
+    if (type === '0') query.$or = [{ type: '1' }, { type: '2' }];
+    else query.type = { $eq: type };
+  }
+
+  // 텍스트 검색
+  if (typeof search === 'string') {
+    query.$text = { $search: search };
+  }
+  return query;
+};
+
 // 최신, 트레딩 조회
-postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed, type, position) {
+postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed, type, position, search) {
   // Pagenation
   const offsetQuery = parseInt(offset, 10) || 0;
   const limitQuery = parseInt(limit, 10) || 20;
@@ -210,25 +394,7 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     sortQuery.push('createdAt');
   }
   // Query
-  const query: any = {};
-  if (typeof language === 'string') query.language = { $in: language.split(',') };
-  if (typeof position === 'string') query.positions = { $in: position.split(',') };
-
-  if (typeof period === 'number' && !Number.isNaN(period)) {
-    const today = new Date();
-    query.createdAt = { $gte: today.setDate(today.getDate() - period) };
-  }
-
-  // 마감된 글 안보기 기능(false만 지원)
-  if (typeof isClosed === 'string' && !(isClosed === 'true')) {
-    query.isClosed = { $eq: isClosed === 'true' };
-  }
-
-  // 글 구분(0: 전체, 1: 프로젝트, 2: 스터디)
-  if (typeof type === 'string') {
-    if (type === '0') query.$or = [{ type: '1' }, { type: '2' }];
-    else query.type = { $eq: type };
-  }
+  const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
   const result = await this.find(query)
     .where('isDeleted')
     .equals(false)
@@ -236,11 +402,75 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     .skip(Number(offsetQuery))
     .limit(Number(limitQuery))
     .select(
-      `title views comments likes language isClosed totalLikes hashtag startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
+      `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
     )
     .populate('author', 'nickName image');
   return result;
 };
+
+// 최신, 트레딩 조회
+postSchema.statics.findPostPagination = async function (
+  page: string | null,
+  previousPage: string | null,
+  lastId: Types.ObjectId | string,
+  sort,
+  language,
+  period,
+  isClosed,
+  type,
+  position,
+  search,
+) {
+  let sortQuery = [];
+  // Sorting
+  if (sort) {
+    const sortableColumns = ['views', 'createdAt', 'totalLikes'];
+    sortQuery = sort.split(',').filter((value: string) => {
+      return sortableColumns.indexOf(value.substr(1, value.length)) !== -1 || sortableColumns.indexOf(value) !== -1;
+    });
+    sortQuery.push('-createdAt');
+  } else {
+    sortQuery.push('createdAt');
+  }
+  const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
+  // Pagenation
+  const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
+  let pagesToSkip = 0;
+  let skip = 0;
+  // skip할 페이지 계산
+  if (isNumber(page) && isNumber(previousPage)) {
+    pagesToSkip = Number(page) - Number(previousPage);
+    if (lastId && pagesToSkip !== 0) {
+      const sortOperator = pagesToSkip <= 0 ? '$gt' : '$lt';
+      query._id = { [sortOperator]: lastId };
+      // 실제 skip할 페이지 계산
+      if (pagesToSkip > 0) skip = Number(itemsPerPage * Math.abs(pagesToSkip - 1));
+      else if (pagesToSkip < 0) skip = Number(itemsPerPage * (Number(page) - 1));
+    }
+  }
+
+  // 앞으로 갈때 skip 적용 시 lastId가 아닌 firstID로 가야하므로 itemsPerPage - 1 더 skip해야함
+  const result = await this.find(query)
+    .sort(sortQuery.join(' '))
+    .skip(skip)
+    .limit(Number(itemsPerPage))
+    .select(
+      `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
+    )
+    .populate('author', 'nickName image');
+  //  const total = await this.countDocuments(query);
+  //  const lastPage = Math.ceil(total / itemsPerPage);
+  return {
+    result,
+  };
+};
+// 최신, 트레딩 조회
+postSchema.statics.countPost = async function (language, period, isClosed, type, position, search) {
+  const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
+  const count = await this.countDocuments(query);
+  return count;
+};
+
 // 사용자에게 추천 조회
 postSchema.statics.findPostRecommend = async function (sort, language, postId, userId, limit) {
   let sortQuery = [];
@@ -328,7 +558,7 @@ postSchema.statics.findComments = async function (id) {
 };
 
 postSchema.statics.deletePost = async function (id) {
-  await this.findOneAndUpdate({ _id: id }, { isDeleted: true });
+  await this.findOneAndUpdate({ _id: id }, { isDeleted: true, deleteDate: new Date() });
 };
 
 postSchema.statics.modifyPost = async function (id, post) {
@@ -468,18 +698,22 @@ postSchema.statics.findAuthorByReplyId = async function (replyId) {
 };
 
 // 글 수정 권한 체크
-postSchema.statics.checkPostAuthorization = async function (postId, tokenUserId) {
-  const post = await this.findOne({ _id: postId, author: tokenUserId });
-  if (!post) {
-    throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
+postSchema.statics.checkPostAuthorization = async function (postId, tokenUserId, tokenType) {
+  if (tokenType !== 'admin') {
+    const post = await this.findOne({ _id: postId, author: tokenUserId });
+    if (!post) {
+      throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
+    }
   }
 };
 
 // 댓글 수정 권한 체크
-postSchema.statics.checkCommentAuthorization = async function (commentId, tokenUserId) {
-  const post = await this.findOne({ comments: { $elemMatch: { _id: commentId, author: tokenUserId } } });
-  if (!post) {
-    throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
+postSchema.statics.checkCommentAuthorization = async function (commentId, tokenUserId, tokenType) {
+  if (tokenType !== 'admin') {
+    const post = await this.findOne({ comments: { $elemMatch: { _id: commentId, author: tokenUserId } } });
+    if (!post) {
+      throw new CustomError('NotAuthenticatedError', 401, 'User does not match');
+    }
   }
 };
 

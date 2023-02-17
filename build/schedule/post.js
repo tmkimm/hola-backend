@@ -55,6 +55,7 @@ function autoClosing() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    if (!(process.env.NODE_ENV === 'production')) return [3 /*break*/, 2];
                     rule = new node_schedule_1.default.RecurrenceRule();
                     rule.hour = 0;
                     rule.tz = 'Asia/Seoul';
@@ -75,7 +76,8 @@ function autoClosing() {
                         })];
                 case 1:
                     job = _a.sent();
-                    return [2 /*return*/];
+                    _a.label = 2;
+                case 2: return [2 /*return*/];
             }
         });
     });

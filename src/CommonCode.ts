@@ -44,6 +44,6 @@ const expectedPeriodCode: CommonCodeType = {
   mo: '장기',
 };
 
-const positionsCode: string[] = ['FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM'];
+const positionsCode: string[] = ['ALL', 'FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM'];
 
 export { studyOrProjectCode, onlineOrOfflineCode, recruitsCode, contactTypeCode, expectedPeriodCode };

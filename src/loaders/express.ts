@@ -2,9 +2,13 @@ import express from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJSDoc from 'swagger-jsdoc';
+import expressBasicAuth from 'express-basic-auth';
 import config from '../config/index';
 import routes from '../api/index';
 import schedule from '../schedule/index';
+import swaggerOption from '../swagger/swagger';
 
 export default (app: express.Application) => {
   type StaticOrigin = boolean | string | RegExp | (boolean | string | RegExp)[];
@@ -35,6 +39,19 @@ export default (app: express.Application) => {
 
   // API Route 설정
   app.use(config.api.prefix, routes());
+
+  app.use(
+    ['/api-docs'],
+    expressBasicAuth({
+      challenge: true,
+      users: {
+        [config.AdminId]: config.AdminPassword,
+      },
+    }),
+  );
+  // Swagger
+  const specs = swaggerJSDoc(swaggerOption);
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
   // 스케줄러 실행
   schedule();

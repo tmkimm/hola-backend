@@ -45,18 +45,105 @@ var User_1 = require("../../models/User");
 var Notification_1 = require("../../models/Notification");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
-    /*
-      로그인에 관련된 Router를 정의한다.
-      로그인 시 각 소셜 로그인 Oauth 서버를 통해 올바른 토큰인지 확인한다.(idToken)
-      # POST /login/signup : 로그인 후 회원 가입
-      # POST /login/google : Oauth 구글 로그인
-      # POST /login/github : Oauth 깃 로그인
-      # POST /login/kakao : Oauth 카카오 로그인
-      */
+    /**
+   * @swagger
+   * tags:
+        - name: login
+          description: 로그인에 관련된 API
+   */
     app.use('/login', route);
-    // Oauth2.0 로그인
-    // isTokenValidWithGoogle : 클라이언트에게 전달받은 idToken을 이용해 유효성 검증 후 사용자 정보를 가져온다.
-    route.post('/', index_2.isTokenValidWithOauth, index_2.autoSignUp, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    /**
+     * @swagger
+     *  components:
+     *  schemas:
+     *    loginSuccess:
+     *      properties:
+     *        _id:
+     *          type: string
+     *          description: 사용자 ID
+     *          example: '61063af4ed4b420bbcfa0b4c'
+     *        nickName:
+     *          type: string
+     *          description: 닉네임
+     *          example: 'hola!'
+     *        image:
+     *          type: string
+     *          description: 사용자 이미지 명
+     *          example: 'default.PNG'
+     *        accessToken:
+     *          type: string
+     *          description: access token
+     *        loginSuccess:
+     *          type: boolean
+     *          description: 로그인 성공 여부
+     *          example: true
+     *        likeLanguages:
+     *          type: array
+     *          description: 관심 등록 언어
+     *          items:
+     *            type: string
+     *    SignUpRequired:
+     *      properties:
+     *        _id:
+     *          type: string
+     *          description: 사용자 ID
+     *          example: '61063af4ed4b420bbcfa0b4c'
+     *        loginSuccess:
+     *          type: boolean
+     *          description: 로그인 성공 여부(false일 경우 회원가입 필요)
+     *          example: false
+     *        message:
+     *          type: string
+     *          description: 메시지
+     *          example: '회원 가입을 진행해야 합니다.'
+     *    nickNameDuplicate:
+     *      properties:
+     *        isExists::
+     *          type: boolean
+     *          description: '닉네임 중복 여부(true: 중복)'
+     *          example: true
+     *        message:
+     *          type: string
+     *          description: 메시지
+     *          example: 'Nickname is duplicated'
+     */
+    /**
+     * @swagger
+     * paths:
+     *   /login:
+     *    post:
+     *      tags:
+     *        - login
+     *      summary: 로그인(Oauth 2.0)
+     *      description: '소셜 로그인(google, gitgub, kakao)'
+     *      requestBody:
+     *        content:
+     *          application/json:
+     *            schema:
+     *              type: object
+     *              properties:
+     *                loginType:
+     *                  type: string
+     *                  description : '로그인 종류(google, gitgub, kakao)'
+     *                  example: 'github'
+     *                code:
+     *                  type: string
+     *                  description : '클라이언트에게 전달받은 idToken'
+     *                  example: '12412lnklsnadlkfja'
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                oneOf:
+     *                  - $ref: '#/components/schemas/loginSuccess'
+     *                  - $ref: '#/components/schemas/SignUpRequired'
+     *        400:
+     *          description: Oauth parameter is Invalid
+     */
+    route.post('/', index_2.isTokenValidWithOauth, // 클라이언트에게 전달받은 idToken을 이용해 유효성 검증 후 사용자 정보를 가져온다.
+    index_2.autoSignUp, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var idToken, AuthServiceInstance, _a, _id, nickName, image, likeLanguages, accessToken, refreshToken;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -83,9 +170,34 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 회원 가입
-    // - 로그인 시 회원 정보가 Insert되므로 회원 가입 시 정보를 수정한다.
-    // - 회원 가입 완료 시 Refresh Token과 Access Token이 발급된다.
+    /**
+     * @swagger
+     * paths:
+     *   /login/signup:
+     *    post:
+     *      tags:
+     *        - login
+     *      summary: 회원 가입
+     *      description: '로그인 시 회원 정보가 Insert되므로 회원 가입 시 정보를 수정한다. 회원 가입 완료 시 Refresh Token과 Access Token이 발급된다.'
+     *      requestBody:
+     *        content:
+     *          application/json:
+     *            schema:
+     *              $ref: '#/components/schemas/User'
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                oneOf:
+     *                  - $ref: '#/components/schemas/loginSuccess'
+     *                  - $ref: '#/components/schemas/nickNameDuplicate'
+     *        400:
+     *          description: Oauth parameter is Invalid
+     *        404:
+     *          description: User not found
+     */
     route.post('/signup', index_2.nickNameDuplicationCheck, index_2.isUserIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, userDTO, UserServiceInstance, userRecord, AuthServiceInstance, _a, accessToken, refreshToken;
         return __generator(this, function (_b) {

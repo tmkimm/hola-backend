@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReplyService = exports.CommentService = exports.NotificationService = exports.FeedbackService = exports.UserService = exports.PostService = exports.AuthService = void 0;
+exports.DashboardService = exports.ReplyService = exports.CommentService = exports.NotificationService = exports.FeedbackService = exports.UserService = exports.PostService = exports.AuthService = void 0;
 var auth_1 = require("./auth");
 Object.defineProperty(exports, "AuthService", { enumerable: true, get: function () { return auth_1.AuthService; } });
 var post_1 = require("./post");
@@ -15,4 +15,6 @@ var comment_1 = require("./comment");
 Object.defineProperty(exports, "CommentService", { enumerable: true, get: function () { return comment_1.CommentService; } });
 var reply_1 = require("./reply");
 Object.defineProperty(exports, "ReplyService", { enumerable: true, get: function () { return reply_1.ReplyService; } });
+var dashboard_1 = require("./dashboard");
+Object.defineProperty(exports, "DashboardService", { enumerable: true, get: function () { return dashboard_1.DashboardService; } });
 //# sourceMappingURL=index.js.map

@@ -22,15 +22,15 @@ export class CommentService {
   }
 
   // 댓글을 수정한다.
-  async modifyComment(comment: ICommentDocument, tokenUserId: Types.ObjectId) {
-    await this.postModel.checkCommentAuthorization(comment._id, tokenUserId);
+  async modifyComment(comment: ICommentDocument, tokenUserId: Types.ObjectId, tokenType: string) {
+    await this.postModel.checkCommentAuthorization(comment._id, tokenUserId, tokenType);
     const commentRecord = await this.postModel.modifyComment(comment);
     return commentRecord;
   }
 
   // 댓글을 삭제한다.
-  async deleteComment(commentId: Types.ObjectId, userId: Types.ObjectId) {
-    await this.postModel.checkCommentAuthorization(commentId, userId);
+  async deleteComment(commentId: Types.ObjectId, userId: Types.ObjectId, tokenType: string) {
+    await this.postModel.checkCommentAuthorization(commentId, userId, tokenType);
 
     const postRecord = await this.postModel.deleteComment(commentId);
     // await this.notificationModel.deleteNotification(commentId); // 알림 삭제

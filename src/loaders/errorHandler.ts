@@ -12,7 +12,12 @@ export default (app: express.Application) => {
     Sentry.Handlers.errorHandler({
       shouldHandleError(error: Error) {
         // is Custom Error
-        if (error.message !== `jwt malformed` && error.message !== `jwt expired` && !(`type` in error)) {
+        if (
+          error.message !== `jwt malformed` &&
+          error.message !== `jwt expired` &&
+          !(`type` in error) &&
+          process.env.NODE_ENV === 'production'
+        ) {
           const webhook = new IncomingWebhook(config.SlackWebhook);
           webhook
             .send({

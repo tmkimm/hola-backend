@@ -8,6 +8,8 @@ import feedback from './routes/feedback';
 import commment from './routes/comment';
 import reply from './routes/reply';
 import notifications from './routes/notifications';
+import admin from './routes/admin';
+import dashboard from './routes/dashboard';
 
 export default () => {
   const app = Router();
@@ -20,5 +22,7 @@ export default () => {
   commment(app);
   reply(app);
   notifications(app);
+  admin(app);
+  dashboard(app);
   return app;
 };
