@@ -415,13 +415,12 @@ export default (app: Router) => {
    */
   route.get(
     '/:id',
-    isPostIdValid,
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const postId = req.params.id;
       const { _id: userId } = req.user as IUser;
-
       const readList = req.cookies.RVIEW;
+
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
       const post = await PostServiceInstance.findPostDetail(Types.ObjectId(postId));
       const { updateReadList, isAlreadyRead } = await PostServiceInstance.increaseView(

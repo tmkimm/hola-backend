@@ -23,9 +23,13 @@ export const getUserIdByAccessToken = asyncErrorWrapper(async (req: Request, res
     try {
       const decodedUser = await verifyJWT(getToken(authorization as string));
       if (!isValidAccessToken(decodedUser)) throw new CustomError('JsonWebTokenError', 401, 'Invaild Token');
-      const user = await User.findByIdToken(decodedUser.idToken);
-      if (user) {
-        userId = user._id;
+      if ('_id' in decodedUser) {
+        userId = decodedUser._id;
+      } else {
+        const user = await User.findByIdToken(decodedUser.idToken);
+        if (user) {
+          userId = user._id;
+        }
       }
     } catch (err) {}
   }

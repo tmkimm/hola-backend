@@ -190,7 +190,7 @@ userSchema.statics.findByNickName = async function (nickName) {
 };
 
 userSchema.methods.generateAccessToken = async function () {
-  const accessToken = await signJWT({ nickName: this.nickName, idToken: this.idToken }, '1h');
+  const accessToken = await signJWT({ nickName: this.nickName, idToken: this.idToken, _id: this._id }, '1h');
 
   return accessToken;
 };

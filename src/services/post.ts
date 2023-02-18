@@ -151,7 +151,6 @@ export class PostService {
   async increaseView(postId: Types.ObjectId, userId: Types.ObjectId, readList: string) {
     let isAlreadyRead = true;
     let updateReadList = readList;
-
     // 조회수 중복 증가 방지
     if (readList === undefined || (typeof readList === 'string' && readList.indexOf(postId.toString()) === -1)) {
       if (userId) await Promise.all([this.userModel.addReadList(postId, userId), this.postModel.increaseView(postId)]);
@@ -167,10 +166,8 @@ export class PostService {
   // 상세 글 정보를 조회한다.
   // 로그인된 사용자일 경우 읽은 목록을 추가한다.
   async findPostDetail(postId: Types.ObjectId) {
-    const posts = await this.postModel
-      .findById(postId)
-      .populate('author', 'nickName image')
-      .populate('comments.author', 'nickName image');
+    const posts = await this.postModel.findById(postId).populate('author', 'nickName image');
+    if (!posts) throw new CustomError('NotFoundError', 404, 'Post not found');
     return posts;
   }
 

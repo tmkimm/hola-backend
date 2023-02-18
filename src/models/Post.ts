@@ -667,14 +667,11 @@ postSchema.statics.deleteLike = async function (postId, userId) {
 
 // 조회수 증가
 postSchema.statics.increaseView = async function (postId) {
-  await this.findOneAndUpdate(
-    { _id: postId },
-    {
-      $inc: {
-        views: 1,
-      },
+  await this.findByIdAndUpdate(postId, {
+    $inc: {
+      views: 1,
     },
-  );
+  });
 };
 
 // 댓글 등록한 사용자 아이디 조회
