@@ -77,9 +77,11 @@ export class UserService {
   async findReadList(id: Types.ObjectId) {
     const readList = await ReadPosts.find({ userId: id }).populate({
       path: 'postId',
+      select: `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
       match: { isDeleted: false },
       options: { sort: { createdAt: -1 } },
     });
+
     return readList;
   }
 

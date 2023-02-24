@@ -11,7 +11,7 @@ import { Notification as NotificationModel } from '../../models/Notification';
 const route = Router();
 
 export default (app: Router) => {
-    /**
+  /**
    * @swagger
    * tags:
         - name: users
@@ -78,7 +78,7 @@ export default (app: Router) => {
     }),
   );
 
-    /**
+  /**
    * @swagger
    * paths:
    *   /users/{id}:
@@ -120,8 +120,8 @@ export default (app: Router) => {
     }),
   );
 
-  // 
-/**
+  //
+  /**
    * @swagger
    * paths:
    *   /users/{id}:
@@ -229,7 +229,6 @@ export default (app: Router) => {
     }),
   );
 
-
   /**
    * @swagger
    * paths:
@@ -280,7 +279,7 @@ export default (app: Router) => {
       });
     }),
   );
-  
+
   /**
    * @swagger
    * paths:
@@ -327,7 +326,7 @@ export default (app: Router) => {
     }),
   );
 
-    /**
+  /**
    * @swagger
    * paths:
    *   /users/likes/{id}:
@@ -351,7 +350,7 @@ export default (app: Router) => {
    *            application/json:
    *              schema:
    *                type: object
-   *                properties: 
+   *                properties:
    *                  likePosts:
    *                    type: array
    *                    items:
@@ -389,15 +388,12 @@ export default (app: Router) => {
    *          content:
    *            application/json:
    *              schema:
-   *                type: object
-   *                properties: 
-   *                  readList:
-   *                    type: array
-   *                    items:
-   *                      $ref: '#/components/schemas/Post'
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/Post'
    *        404:
    *          description: User not found
-   */  
+   */
   route.get(
     '/read-list/:id',
     isUserIdValid,
@@ -437,7 +433,7 @@ export default (app: Router) => {
    *                  $ref: '#/components/schemas/Post'
    *        404:
    *          description: User not found
-   */  
+   */
   route.get(
     '/myPosts/:id',
     isUserIdValid,

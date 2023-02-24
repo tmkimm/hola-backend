@@ -54,7 +54,7 @@ var PostService = /** @class */ (function () {
     // 메인 화면에서 글 리스트를 조회한다.
     PostService.prototype.findPost = function (offset, limit, sort, language, period, isClosed, type, position, search) {
         return __awaiter(this, void 0, void 0, function () {
-            var posts, sortPosts;
+            var posts;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.postModel.findPost(offset, limit, sort, language, period, isClosed, type, position, search)];
@@ -68,9 +68,7 @@ var PostService = /** @class */ (function () {
                     case 2:
                         _a.sent();
                         _a.label = 3;
-                    case 3:
-                        sortPosts = this.sortLanguageByQueryParam(posts, language);
-                        return [2 /*return*/, sortPosts];
+                    case 3: return [2 /*return*/, posts];
                 }
             });
         });
@@ -78,7 +76,7 @@ var PostService = /** @class */ (function () {
     // 메인 화면에서 글 리스트를 조회한다.
     PostService.prototype.findPostPagination = function (page, previousPage, lastId, sort, language, period, isClosed, type, position, search) {
         return __awaiter(this, void 0, void 0, function () {
-            var posts, sortPosts;
+            var posts;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.postModel.findPostPagination(page, previousPage, lastId, sort, language, period, isClosed, type, position, search)];
@@ -92,9 +90,7 @@ var PostService = /** @class */ (function () {
                     case 2:
                         _a.sent();
                         _a.label = 3;
-                    case 3:
-                        sortPosts = this.sortLanguageByQueryParam(posts, language);
-                        return [2 /*return*/, sortPosts];
+                    case 3: return [2 /*return*/, posts];
                 }
             });
         });
@@ -113,25 +109,6 @@ var PostService = /** @class */ (function () {
                         lastPage = Math.ceil(totalCount / itemsPerPage);
                         return [2 /*return*/, lastPage];
                 }
-            });
-        });
-    };
-    // 선택한 언어가 리스트의 앞에 오도록 정렬
-    PostService.prototype.sortLanguageByQueryParam = function (posts, language) {
-        return __awaiter(this, void 0, void 0, function () {
-            var paramLanguage, i;
-            return __generator(this, function (_a) {
-                if (typeof language !== 'string')
-                    return [2 /*return*/, posts];
-                paramLanguage = language.split(',');
-                for (i = 0; i < posts.length; i += 1) {
-                    posts[i].language.sort(function (a, b) {
-                        if (paramLanguage.indexOf(b) !== -1)
-                            return 1;
-                        return -1;
-                    });
-                }
-                return [2 /*return*/, posts];
             });
         });
     };

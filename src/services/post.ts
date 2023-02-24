@@ -47,8 +47,7 @@ export class PostService {
         language: language.split(','),
       });
     }
-    const sortPosts = this.sortLanguageByQueryParam(posts, language);
-    return sortPosts;
+    return posts;
   }
 
   // 메인 화면에서 글 리스트를 조회한다.
@@ -83,8 +82,7 @@ export class PostService {
         language: language.split(','),
       });
     }
-    const sortPosts = this.sortLanguageByQueryParam(posts, language);
-    return sortPosts;
+    return posts;
   }
 
   // Pagination을 위해 마지막 페이지를 구한다.
@@ -100,20 +98,6 @@ export class PostService {
     const totalCount = await this.postModel.countPost(language, period, isClosed, type, position, search);
     const lastPage = Math.ceil(totalCount / itemsPerPage);
     return lastPage;
-  }
-
-  // 선택한 언어가 리스트의 앞에 오도록 정렬
-  async sortLanguageByQueryParam(posts: IPostDocument[], language: string | null) {
-    if (typeof language !== 'string') return posts;
-
-    const paramLanguage = language.split(',');
-    for (let i = 0; i < posts.length; i += 1) {
-      posts[i].language.sort(function (a, b) {
-        if (paramLanguage.indexOf(b) !== -1) return 1;
-        return -1;
-      });
-    }
-    return posts;
   }
 
   // 메인 화면에서 글를 추천한다.(미사용, 제거예정)
