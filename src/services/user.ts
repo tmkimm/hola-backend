@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 import AWS from 'aws-sdk';
 import { IUserDocument, IUserModel } from '../models/User';
+import { ReadPosts } from '../models/ReadPosts';
 import { INotificationModel } from '../models/Notification';
 import { IPostModel } from '../models/Post';
 import config from '../config/index';
@@ -74,14 +75,11 @@ export class UserService {
 
   // 사용자의 읽은 목록을 조회한다.
   async findReadList(id: Types.ObjectId) {
-    const readList = await this.userModel
-      .findById(id)
-      .populate({
-        path: 'readList',
-        match: { isDeleted: false },
-        options: { sort: { createdAt: -1 } },
-      })
-      .select('readList');
+    const readList = await ReadPosts.find({ userId: id }).populate({
+      path: 'postId',
+      match: { isDeleted: false },
+      options: { sort: { createdAt: -1 } },
+    });
     return readList;
   }
 

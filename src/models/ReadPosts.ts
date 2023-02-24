@@ -10,11 +10,15 @@ export interface IReadPostsDocument extends IReadPosts, Document {}
 
 export type IReadPostsModel = Model<IReadPostsDocument>;
 
-const ReadPostsSchema = new Schema<IReadPostsDocument>({
-  viewDate: Date,
-  userId: { type: Types.ObjectId, ref: 'Post' },
-  postId: { type: Types.ObjectId, ref: 'Post' },
-});
+const ReadPostsSchema = new Schema<IReadPostsDocument>(
+  {
+    userId: { type: Types.ObjectId, ref: 'User' },
+    postId: { type: Types.ObjectId, ref: 'Post' },
+  },
+  {
+    timestamps: true,
+  },
+);
 
 const ReadPosts = model<IReadPostsDocument, IReadPostsModel>('ReadPosts', ReadPostsSchema);
 export { ReadPosts };

@@ -3,6 +3,8 @@ import { Types } from 'mongoose';
 import { IPost, IPostModel, IPostDocument } from '../models/Post';
 import { INotificationModel } from '../models/Notification';
 import { PostFilterLog } from '../models/PostFilterLog';
+import { ReadPosts } from '../models/ReadPosts';
+import { LikePosts } from '../models/LikePosts';
 
 import { IUserModel } from '../models/User';
 import CustomError from '../CustomError';
@@ -153,7 +155,14 @@ export class PostService {
     let updateReadList = readList;
     // 조회수 중복 증가 방지
     if (readList === undefined || (typeof readList === 'string' && readList.indexOf(postId.toString()) === -1)) {
-      if (userId) await Promise.all([this.userModel.addReadList(postId, userId), this.postModel.increaseView(postId)]);
+      if (userId)
+        await Promise.all([
+          await ReadPosts.create({
+            userId,
+            postId,
+          }),
+          this.postModel.increaseView(postId),
+        ]);
       else await this.postModel.increaseView(postId); // 조회수 증가
 
       if (readList === undefined) updateReadList = `${postId}`;

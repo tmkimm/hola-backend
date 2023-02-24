@@ -59,26 +59,30 @@ exports.getUserIdByAccessToken = (0, asyncErrorWrapper_1.asyncErrorWrapper)(func
         switch (_a.label) {
             case 0:
                 authorization = req.headers.authorization;
-                if (!hasTokenByAuthHeaders(authorization)) return [3 /*break*/, 5];
+                if (!hasTokenByAuthHeaders(authorization)) return [3 /*break*/, 7];
                 _a.label = 1;
             case 1:
-                _a.trys.push([1, 4, , 5]);
+                _a.trys.push([1, 6, , 7]);
                 return [4 /*yield*/, (0, jwt_1.verifyJWT)(getToken(authorization))];
             case 2:
                 decodedUser = _a.sent();
                 if (!(0, jwt_1.isValidAccessToken)(decodedUser))
                     throw new CustomError_1.default('JsonWebTokenError', 401, 'Invaild Token');
-                return [4 /*yield*/, User_1.User.findByIdToken(decodedUser.idToken)];
-            case 3:
+                if (!('_id' in decodedUser)) return [3 /*break*/, 3];
+                userId = decodedUser._id;
+                return [3 /*break*/, 5];
+            case 3: return [4 /*yield*/, User_1.User.findByIdToken(decodedUser.idToken)];
+            case 4:
                 user = _a.sent();
                 if (user) {
                     userId = user._id;
                 }
-                return [3 /*break*/, 5];
-            case 4:
+                _a.label = 5;
+            case 5: return [3 /*break*/, 7];
+            case 6:
                 err_1 = _a.sent();
-                return [3 /*break*/, 5];
-            case 5:
+                return [3 /*break*/, 7];
+            case 7:
                 req.user = { _id: userId };
                 next();
                 return [2 /*return*/];

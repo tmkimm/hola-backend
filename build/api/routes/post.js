@@ -184,7 +184,7 @@ exports.default = (function (app) {
      *        - name: lastId
      *          in: query
      *          description: 조회된 리스트의 마지막 ID
-     *          required: true
+     *          required: false
      *          schema:
      *            type: string
      *          example: '62f4999837ad67001405a6dd'
@@ -435,7 +435,7 @@ exports.default = (function (app) {
      *        404:
      *          description: Post not found
      */
-    route.get('/:id', index_1.isPostIdValid, index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/:id', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var postId, userId, readList, PostServiceInstance, post, _a, updateReadList, isAlreadyRead, untilMidnight;
         return __generator(this, function (_b) {
             switch (_b.label) {

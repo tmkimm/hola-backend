@@ -41,6 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 var aws_sdk_1 = __importDefault(require("aws-sdk"));
+var ReadPosts_1 = require("../models/ReadPosts");
 var index_1 = __importDefault(require("../config/index"));
 var CustomError_1 = __importDefault(require("../CustomError"));
 var SignOutUser_1 = require("../models/SignOutUser");
@@ -163,14 +164,11 @@ var UserService = /** @class */ (function () {
             var readList;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.userModel
-                            .findById(id)
-                            .populate({
-                            path: 'readList',
+                    case 0: return [4 /*yield*/, ReadPosts_1.ReadPosts.find({ userId: id }).populate({
+                            path: 'postId',
                             match: { isDeleted: false },
                             options: { sort: { createdAt: -1 } },
-                        })
-                            .select('readList')];
+                        })];
                     case 1:
                         readList = _a.sent();
                         return [2 /*return*/, readList];

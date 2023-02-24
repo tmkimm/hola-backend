@@ -160,7 +160,7 @@ userSchema.methods.generateAccessToken = function () {
         var accessToken;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, (0, jwt_1.signJWT)({ nickName: this.nickName, idToken: this.idToken }, '1h')];
+                case 0: return [4 /*yield*/, (0, jwt_1.signJWT)({ nickName: this.nickName, idToken: this.idToken, _id: this._id }, '1h')];
                 case 1:
                     accessToken = _a.sent();
                     return [2 /*return*/, accessToken];

@@ -162,7 +162,7 @@ export default (app: Router) => {
    *        - name: lastId
    *          in: query
    *          description: 조회된 리스트의 마지막 ID
-   *          required: true
+   *          required: false
    *          schema:
    *            type: string
    *          example: '62f4999837ad67001405a6dd'

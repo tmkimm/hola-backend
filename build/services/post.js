@@ -42,6 +42,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostService = void 0;
 var sanitize_html_1 = __importDefault(require("sanitize-html"));
 var PostFilterLog_1 = require("../models/PostFilterLog");
+var ReadPosts_1 = require("../models/ReadPosts");
 var CustomError_1 = __importDefault(require("../CustomError"));
 var PostService = /** @class */ (function () {
     function PostService(postModel, userModel, notificationModel) {
@@ -191,30 +192,38 @@ var PostService = /** @class */ (function () {
     // 조회수 증가
     PostService.prototype.increaseView = function (postId, userId, readList) {
         return __awaiter(this, void 0, void 0, function () {
-            var isAlreadyRead, updateReadList;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var isAlreadyRead, updateReadList, _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
                         isAlreadyRead = true;
                         updateReadList = readList;
-                        if (!(readList === undefined || (typeof readList === 'string' && readList.indexOf(postId.toString()) === -1))) return [3 /*break*/, 5];
-                        if (!userId) return [3 /*break*/, 2];
-                        return [4 /*yield*/, Promise.all([this.userModel.addReadList(postId, userId), this.postModel.increaseView(postId)])];
-                    case 1:
-                        _a.sent();
-                        return [3 /*break*/, 4];
-                    case 2: return [4 /*yield*/, this.postModel.increaseView(postId)];
-                    case 3:
-                        _a.sent(); // 조회수 증가
-                        _a.label = 4;
+                        if (!(readList === undefined || (typeof readList === 'string' && readList.indexOf(postId.toString()) === -1))) return [3 /*break*/, 6];
+                        if (!userId) return [3 /*break*/, 3];
+                        _b = (_a = Promise).all;
+                        return [4 /*yield*/, ReadPosts_1.ReadPosts.create({
+                                userId: userId,
+                                postId: postId,
+                            })];
+                    case 1: return [4 /*yield*/, _b.apply(_a, [[
+                                _c.sent(),
+                                this.postModel.increaseView(postId)
+                            ]])];
+                    case 2:
+                        _c.sent();
+                        return [3 /*break*/, 5];
+                    case 3: return [4 /*yield*/, this.postModel.increaseView(postId)];
                     case 4:
+                        _c.sent(); // 조회수 증가
+                        _c.label = 5;
+                    case 5:
                         if (readList === undefined)
                             updateReadList = "".concat(postId);
                         else
                             updateReadList = "".concat(readList, "|").concat(postId);
                         isAlreadyRead = false;
-                        _a.label = 5;
-                    case 5: return [2 /*return*/, { updateReadList: updateReadList, isAlreadyRead: isAlreadyRead }];
+                        _c.label = 6;
+                    case 6: return [2 /*return*/, { updateReadList: updateReadList, isAlreadyRead: isAlreadyRead }];
                 }
             });
         });
@@ -226,12 +235,11 @@ var PostService = /** @class */ (function () {
             var posts;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel
-                            .findById(postId)
-                            .populate('author', 'nickName image')
-                            .populate('comments.author', 'nickName image')];
+                    case 0: return [4 /*yield*/, this.postModel.findById(postId).populate('author', 'nickName image')];
                     case 1:
                         posts = _a.sent();
+                        if (!posts)
+                            throw new CustomError_1.default('NotFoundError', 404, 'Post not found');
                         return [2 /*return*/, posts];
                 }
             });
