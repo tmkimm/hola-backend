@@ -15,7 +15,9 @@ export default (app: Router) => {
    */
   app.use('/admin', route);
 
+  // #region Admin 로그인
   /**
+   *
    * @swagger
    * paths:
    *   /admin/login:
@@ -68,6 +70,7 @@ export default (app: Router) => {
    *                  nickName: "hola"
    *                  image: "default.png"
    */
+  // #endregion
   route.post(
     '/login',
     isPasswordValidWithAdmin,

@@ -251,6 +251,32 @@ postSchema.statics.countPost = function (language, period, isClosed, type, posit
         });
     });
 };
+// 인기글 조회
+postSchema.statics.findPopularPosts = function (postId, userId) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query, today, posts;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = {};
+                    today = new Date();
+                    query.createdAt = { $gte: today.setDate(today.getDate() - 14) };
+                    // 현재 읽고 있는 글은 제외하고 조회
+                    query._id = { $ne: postId };
+                    // 사용자가 작성한 글 제외하고 조회
+                    if (userId)
+                        query.author = { $ne: userId };
+                    // 마감글, 인기글 제외
+                    query.isDeleted = { $eq: false };
+                    query.isClosed = { $eq: false };
+                    return [4 /*yield*/, this.find(query).sort('-views').limit(10).select('title').lean()];
+                case 1:
+                    posts = _a.sent();
+                    return [2 /*return*/, posts];
+            }
+        });
+    });
+};
 // 사용자에게 추천 조회
 postSchema.statics.findPostRecommend = function (sort, language, postId, userId, limit) {
     return __awaiter(this, void 0, void 0, function () {

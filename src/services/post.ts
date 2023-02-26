@@ -100,7 +100,13 @@ export class PostService {
     return lastPage;
   }
 
-  // 메인 화면에서 글를 추천한다.(미사용, 제거예정)
+  // 인기글 조회
+  async findPopularPosts(postId: Types.ObjectId, userId: Types.ObjectId) {
+    const posts = await this.postModel.findPopularPosts(postId, userId);
+    return posts;
+  }
+
+  // 메인 화면에서 글를 추천한다.(현재 미사용, 제거예정)
   async recommendToUserFromMain(userId: Types.ObjectId) {
     let sort;
     let likeLanguages = null;

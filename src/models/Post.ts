@@ -216,6 +216,7 @@ export interface IPostModel extends Model<IPostDocument> {
     position: string | null,
     search: string | null,
   ) => Promise<number>;
+  findPopularPosts: (postId: Types.ObjectId | null, userId: Types.ObjectId | null) => Promise<IPostDocument[]>;
   findPostRecommend: (
     sort: string | null,
     language: string[] | null,
@@ -474,6 +475,30 @@ postSchema.statics.countPost = async function (language, period, isClosed, type,
   const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
   const count = await this.countDocuments(query);
   return count;
+};
+
+// 인기글 조회
+postSchema.statics.findPopularPosts = async function (postId, userId) {
+  // Query
+  const query: any = {};
+
+  // 14일 이내 조회
+  const today = new Date();
+  query.createdAt = { $gte: today.setDate(today.getDate() - 14) };
+
+  // 현재 읽고 있는 글은 제외하고 조회
+  query._id = { $ne: postId };
+
+  // 사용자가 작성한 글 제외하고 조회
+  if (userId) query.author = { $ne: userId };
+
+  // 마감글, 인기글 제외
+  query.isDeleted = { $eq: false };
+  query.isClosed = { $eq: false };
+
+  const posts = await this.find(query).sort('-views').limit(10).select('title').lean();
+
+  return posts;
 };
 
 // 사용자에게 추천 조회

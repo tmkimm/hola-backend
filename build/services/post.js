@@ -113,7 +113,21 @@ var PostService = /** @class */ (function () {
             });
         });
     };
-    // 메인 화면에서 글를 추천한다.(미사용, 제거예정)
+    // 인기글 조회
+    PostService.prototype.findPopularPosts = function (postId, userId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var posts;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.postModel.findPopularPosts(postId, userId)];
+                    case 1:
+                        posts = _a.sent();
+                        return [2 /*return*/, posts];
+                }
+            });
+        });
+    };
+    // 메인 화면에서 글를 추천한다.(현재 미사용, 제거예정)
     PostService.prototype.recommendToUserFromMain = function (userId) {
         return __awaiter(this, void 0, void 0, function () {
             var sort, likeLanguages, limit, user, posts;

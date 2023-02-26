@@ -49,7 +49,9 @@ exports.default = (function (app) {
           - name: admin
      */
     app.use('/admin', route);
+    // #region Admin 로그인
     /**
+     *
      * @swagger
      * paths:
      *   /admin/login:
@@ -102,6 +104,7 @@ exports.default = (function (app) {
      *                  nickName: "hola"
      *                  image: "default.png"
      */
+    // #endregion
     route.post('/login', isPasswordValidWithAdmin_1.isPasswordValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var idToken, AuthServiceInstance, _a, _id, nickName, image, likeLanguages, accessToken, refreshToken;
         return __generator(this, function (_b) {
