@@ -214,9 +214,16 @@ export default (app: Router) => {
    *          content:
    *            application/json:
    *              schema:
-   *                type: array
-   *                items:
-   *                  $ref: '#/components/schemas/Post'
+   *                type: object
+   *                properties:
+   *                  lastPage:
+   *                    type: number
+   *                    description : '전체 페이지 수'
+   *                    example: 7
+   *                  posts:
+   *                    type: array
+   *                    items:
+   *                      $ref: '#/components/schemas/Post'
    */
   route.get(
     '/pagination',

@@ -433,10 +433,16 @@ postSchema.statics.findPostPagination = async function (
     sortQuery.push('createdAt');
   }
   const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
+
   // Pagenation
   const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
   let pagesToSkip = 0;
   let skip = 0;
+
+  // Get last page
+  const count = await this.countDocuments(query);
+  const lastPage = Math.ceil(count / itemsPerPage);
+
   // skip할 페이지 계산
   if (isNumber(page) && isNumber(previousPage)) {
     pagesToSkip = Number(page) - Number(previousPage);
@@ -449,8 +455,7 @@ postSchema.statics.findPostPagination = async function (
     }
   }
 
-  // 앞으로 갈때 skip 적용 시 lastId가 아닌 firstID로 가야하므로 itemsPerPage - 1 더 skip해야함
-  const result = await this.find(query)
+  const posts = await this.find(query)
     .sort(sortQuery.join(' '))
     .skip(skip)
     .limit(Number(itemsPerPage))
@@ -458,10 +463,10 @@ postSchema.statics.findPostPagination = async function (
       `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
     )
     .populate('author', 'nickName image');
-  //  const total = await this.countDocuments(query);
-  //  const lastPage = Math.ceil(total / itemsPerPage);
+
   return {
-    result,
+    posts,
+    lastPage,
   };
 };
 // 최신, 트레딩 조회

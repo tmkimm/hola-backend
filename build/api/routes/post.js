@@ -236,9 +236,16 @@ exports.default = (function (app) {
      *          content:
      *            application/json:
      *              schema:
-     *                type: array
-     *                items:
-     *                  $ref: '#/components/schemas/Post'
+     *                type: object
+     *                properties:
+     *                  lastPage:
+     *                    type: number
+     *                    description : '전체 페이지 수'
+     *                    example: 7
+     *                  posts:
+     *                    type: array
+     *                    items:
+     *                      $ref: '#/components/schemas/Post'
      */
     route.get('/pagination', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, page, previousPage, lastId, sort, language, period, isClosed, type, position, search, PostServiceInstance, posts;

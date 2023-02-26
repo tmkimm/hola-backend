@@ -166,6 +166,7 @@ var UserService = /** @class */ (function () {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, ReadPosts_1.ReadPosts.find({ userId: id }).populate({
                             path: 'postId',
+                            select: "title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt",
                             match: { isDeleted: false },
                             options: { sort: { createdAt: -1 } },
                         })];

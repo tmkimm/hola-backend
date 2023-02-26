@@ -181,7 +181,7 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
 // 최신, 트레딩 조회
 postSchema.statics.findPostPagination = function (page, previousPage, lastId, sort, language, period, isClosed, type, position, search) {
     return __awaiter(this, void 0, void 0, function () {
-        var sortQuery, sortableColumns_2, query, itemsPerPage, pagesToSkip, skip, sortOperator, result;
+        var sortQuery, sortableColumns_2, query, itemsPerPage, pagesToSkip, skip, count, lastPage, sortOperator, posts;
         var _a;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -202,6 +202,10 @@ postSchema.statics.findPostPagination = function (page, previousPage, lastId, so
                     itemsPerPage = 4 * 6;
                     pagesToSkip = 0;
                     skip = 0;
+                    return [4 /*yield*/, this.countDocuments(query)];
+                case 1:
+                    count = _b.sent();
+                    lastPage = Math.ceil(count / itemsPerPage);
                     // skip할 페이지 계산
                     if ((0, isNumber_1.isNumber)(page) && (0, isNumber_1.isNumber)(previousPage)) {
                         pagesToSkip = Number(page) - Number(previousPage);
@@ -221,12 +225,11 @@ postSchema.statics.findPostPagination = function (page, previousPage, lastId, so
                             .limit(Number(itemsPerPage))
                             .select("title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
                             .populate('author', 'nickName image')];
-                case 1:
-                    result = _b.sent();
-                    //  const total = await this.countDocuments(query);
-                    //  const lastPage = Math.ceil(total / itemsPerPage);
+                case 2:
+                    posts = _b.sent();
                     return [2 /*return*/, {
-                            result: result,
+                            posts: posts,
+                            lastPage: lastPage,
                         }];
             }
         });
