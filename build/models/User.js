@@ -181,43 +181,6 @@ userSchema.methods.generateRefreshToken = function () {
         });
     });
 };
-userSchema.statics.addLikePost = function (postId, userId) {
-    return __awaiter(this, void 0, void 0, function () {
-        var result;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, this.findByIdAndUpdate({ _id: userId }, {
-                        $push: {
-                            likePosts: {
-                                _id: postId,
-                            },
-                        },
-                    }, {
-                        new: true,
-                        upsert: true,
-                    })];
-                case 1:
-                    result = _a.sent();
-                    return [2 /*return*/, result];
-            }
-        });
-    });
-};
-userSchema.statics.deleteLikePost = function (postId, userId) {
-    return __awaiter(this, void 0, void 0, function () {
-        var deleteRecord;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, this.findOneAndUpdate({ _id: userId }, {
-                        $pull: { likePosts: postId },
-                    })];
-                case 1:
-                    deleteRecord = _a.sent();
-                    return [2 /*return*/, deleteRecord];
-            }
-        });
-    });
-};
 userSchema.statics.addReadList = function (postId, userId) {
     return __awaiter(this, void 0, void 0, function () {
         var isPostExists;

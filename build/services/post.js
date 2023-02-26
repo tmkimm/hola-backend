@@ -43,6 +43,7 @@ exports.PostService = void 0;
 var sanitize_html_1 = __importDefault(require("sanitize-html"));
 var PostFilterLog_1 = require("../models/PostFilterLog");
 var ReadPosts_1 = require("../models/ReadPosts");
+var LikePosts_1 = require("../models/LikePosts");
 var CustomError_1 = __importDefault(require("../CustomError"));
 var PostService = /** @class */ (function () {
     function PostService(postModel, userModel, notificationModel) {
@@ -330,7 +331,7 @@ var PostService = /** @class */ (function () {
                     case 1:
                         _a = _b.sent(), post = _a.post, isLikeExist = _a.isLikeExist;
                         if (!!isLikeExist) return [3 /*break*/, 3];
-                        return [4 /*yield*/, this.userModel.addLikePost(postId, userId)];
+                        return [4 /*yield*/, LikePosts_1.LikePosts.add(postId, userId)];
                     case 2:
                         _b.sent();
                         _b.label = 3;
@@ -349,7 +350,7 @@ var PostService = /** @class */ (function () {
                     case 1:
                         _a = _b.sent(), post = _a.post, isLikeExist = _a.isLikeExist;
                         if (!isLikeExist) return [3 /*break*/, 3];
-                        return [4 /*yield*/, this.userModel.deleteLikePost(postId, userId)];
+                        return [4 /*yield*/, LikePosts_1.LikePosts.delete(postId, userId)];
                     case 2:
                         _b.sent();
                         _b.label = 3;

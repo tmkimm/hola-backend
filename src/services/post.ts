@@ -218,7 +218,7 @@ export class PostService {
   async addLike(postId: Types.ObjectId, userId: Types.ObjectId) {
     const { post, isLikeExist } = await this.postModel.addLike(postId, userId);
     if (!isLikeExist) {
-      await this.userModel.addLikePost(postId, userId);
+      await LikePosts.add(postId, userId);
       // await this.notificationModel.registerNotification(postId, post.author, userId, 'like');   // 알림 등록
     }
     return post;
@@ -228,7 +228,7 @@ export class PostService {
   async deleteLike(postId: Types.ObjectId, userId: Types.ObjectId) {
     const { post, isLikeExist } = await this.postModel.deleteLike(postId, userId);
     if (isLikeExist) {
-      await this.userModel.deleteLikePost(postId, userId);
+      await LikePosts.delete(postId, userId);
       // await this.notificationModel.deleteNotification(postId, post.author, userId, 'like');   // 알림 삭제
     }
     return post;

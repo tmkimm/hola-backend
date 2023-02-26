@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import AWS from 'aws-sdk';
 import { IUserDocument, IUserModel } from '../models/User';
 import { ReadPosts } from '../models/ReadPosts';
+import { LikePosts } from '../models/LikePosts';
 import { INotificationModel } from '../models/Notification';
 import { IPostModel } from '../models/Post';
 import config from '../config/index';
@@ -62,15 +63,16 @@ export class UserService {
 
   // 사용자가 관심 등록한 글 리스트를 조회한다.
   async findUserLikes(id: Types.ObjectId) {
-    const userLikes = await this.userModel
-      .findById(id)
-      .populate({
-        path: 'likePosts',
-        match: { isDeleted: false },
-        options: { sort: { createdAt: -1 } },
-      })
-      .select('likePosts');
-    return userLikes;
+    const likePosts = await LikePosts.find({ userId: id }).populate({
+      path: 'postId',
+      select: `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
+      match: { isDeleted: false },
+      options: { sort: { createdAt: -1 } },
+    });
+    const result = likePosts.map((i) => {
+      return i.postId;
+    });
+    return result;
   }
 
   // 사용자의 읽은 목록을 조회한다.
@@ -82,7 +84,10 @@ export class UserService {
       options: { sort: { createdAt: -1 } },
     });
 
-    return readList;
+    const result = readList.map((i) => {
+      return i.postId;
+    });
+    return result;
   }
 
   // 사용자의 작성 목록을 조회한다.
