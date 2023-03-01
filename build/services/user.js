@@ -41,6 +41,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 var aws_sdk_1 = __importDefault(require("aws-sdk"));
+var ReadPosts_1 = require("../models/ReadPosts");
+var LikePosts_1 = require("../models/LikePosts");
 var index_1 = __importDefault(require("../config/index"));
 var CustomError_1 = __importDefault(require("../CustomError"));
 var SignOutUser_1 = require("../models/SignOutUser");
@@ -139,20 +141,21 @@ var UserService = /** @class */ (function () {
     // 사용자가 관심 등록한 글 리스트를 조회한다.
     UserService.prototype.findUserLikes = function (id) {
         return __awaiter(this, void 0, void 0, function () {
-            var userLikes;
+            var likePosts, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.userModel
-                            .findById(id)
-                            .populate({
-                            path: 'likePosts',
+                    case 0: return [4 /*yield*/, LikePosts_1.LikePosts.find({ userId: id }).populate({
+                            path: 'postId',
+                            select: "title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt",
                             match: { isDeleted: false },
                             options: { sort: { createdAt: -1 } },
-                        })
-                            .select('likePosts')];
+                        })];
                     case 1:
-                        userLikes = _a.sent();
-                        return [2 /*return*/, userLikes];
+                        likePosts = _a.sent();
+                        result = likePosts.map(function (i) {
+                            return i.postId;
+                        });
+                        return [2 /*return*/, result];
                 }
             });
         });
@@ -160,20 +163,21 @@ var UserService = /** @class */ (function () {
     // 사용자의 읽은 목록을 조회한다.
     UserService.prototype.findReadList = function (id) {
         return __awaiter(this, void 0, void 0, function () {
-            var readList;
+            var readList, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.userModel
-                            .findById(id)
-                            .populate({
-                            path: 'readList',
+                    case 0: return [4 /*yield*/, ReadPosts_1.ReadPosts.find({ userId: id }).populate({
+                            path: 'postId',
+                            select: "title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt",
                             match: { isDeleted: false },
                             options: { sort: { createdAt: -1 } },
-                        })
-                            .select('readList')];
+                        })];
                     case 1:
                         readList = _a.sent();
-                        return [2 /*return*/, readList];
+                        result = readList.map(function (i) {
+                            return i.postId;
+                        });
+                        return [2 /*return*/, result];
                 }
             });
         });

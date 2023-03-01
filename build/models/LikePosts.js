@@ -35,58 +35,42 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserIdByAccessToken = void 0;
-var User_1 = require("../../models/User");
-var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
-var CustomError_1 = __importDefault(require("../../CustomError"));
-var jwt_1 = require("../../utills/jwt");
-var hasTokenByAuthHeaders = function (authorization) {
-    return !!(authorization && authorization.startsWith('Bearer'));
-};
-var getToken = function (authorization) {
-    return authorization.split(' ')[1];
-};
-// 리펙토링 필요(if esle 최소화)
-// Access Token을 이용해 로그인 된 사용자인지 판단한다.
-// 로그인된 사용자일 경우 req.user._id를 세팅한다.
-exports.getUserIdByAccessToken = (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var userId, authorization, decodedUser, user, err_1;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                authorization = req.headers.authorization;
-                if (!hasTokenByAuthHeaders(authorization)) return [3 /*break*/, 7];
-                _a.label = 1;
-            case 1:
-                _a.trys.push([1, 6, , 7]);
-                return [4 /*yield*/, (0, jwt_1.verifyJWT)(getToken(authorization))];
-            case 2:
-                decodedUser = _a.sent();
-                if (!(0, jwt_1.isValidAccessToken)(decodedUser))
-                    throw new CustomError_1.default('JsonWebTokenError', 401, 'Invaild Token');
-                if (!('_id' in decodedUser)) return [3 /*break*/, 3];
-                userId = decodedUser._id;
-                return [3 /*break*/, 5];
-            case 3: return [4 /*yield*/, User_1.User.findByIdToken(decodedUser.idToken)];
-            case 4:
-                user = _a.sent();
-                if (user) {
-                    userId = user._id;
-                }
-                _a.label = 5;
-            case 5: return [3 /*break*/, 7];
-            case 6:
-                err_1 = _a.sent();
-                return [3 /*break*/, 7];
-            case 7:
-                req.user = { _id: userId };
-                next();
-                return [2 /*return*/];
-        }
+exports.LikePosts = void 0;
+var mongoose_1 = require("mongoose");
+var LikePostsSchema = new mongoose_1.Schema({
+    userId: { type: mongoose_1.Types.ObjectId, ref: 'Post' },
+    postId: { type: mongoose_1.Types.ObjectId, ref: 'Post' },
+}, {
+    timestamps: true,
+});
+LikePostsSchema.statics.add = function (postId, userId) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, this.create({
+                        userId: userId,
+                        postId: postId,
+                    })];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
     });
-}); });
-//# sourceMappingURL=getUserIdByAccessToken.js.map
+};
+LikePostsSchema.statics.delete = function (postId, userId) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, this.deleteOne({ userId: userId, postId: postId })];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+};
+var LikePosts = (0, mongoose_1.model)('LikePosts', LikePostsSchema);
+exports.LikePosts = LikePosts;
+//# sourceMappingURL=LikePosts.js.map

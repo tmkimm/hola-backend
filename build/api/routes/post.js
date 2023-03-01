@@ -53,6 +53,7 @@ exports.default = (function (app) {
             description: 글에 관련된 API
      */
     app.use('/posts', route);
+    // #region 글 리스트 조회(메인)
     /**
      * @swagger
      * paths:
@@ -136,6 +137,7 @@ exports.default = (function (app) {
      *                items:
      *                  $ref: '#/components/schemas/Post'
      */
+    // #endregion
     route.get('/', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, offset, limit, sort, language, period, isClosed, type, position, search, PostServiceInstance, posts;
         return __generator(this, function (_b) {
@@ -150,6 +152,7 @@ exports.default = (function (app) {
             }
         });
     }); }));
+    // #region 글 리스트 조회(페이징)
     /**
      * @swagger
      * paths:
@@ -184,7 +187,7 @@ exports.default = (function (app) {
      *        - name: lastId
      *          in: query
      *          description: 조회된 리스트의 마지막 ID
-     *          required: true
+     *          required: false
      *          schema:
      *            type: string
      *          example: '62f4999837ad67001405a6dd'
@@ -236,10 +239,18 @@ exports.default = (function (app) {
      *          content:
      *            application/json:
      *              schema:
-     *                type: array
-     *                items:
-     *                  $ref: '#/components/schemas/Post'
+     *                type: object
+     *                properties:
+     *                  lastPage:
+     *                    type: number
+     *                    description : '전체 페이지 수'
+     *                    example: 7
+     *                  posts:
+     *                    type: array
+     *                    items:
+     *                      $ref: '#/components/schemas/Post'
      */
+    // #endregion
     route.get('/pagination', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, page, previousPage, lastId, sort, language, period, isClosed, type, position, search, PostServiceInstance, posts;
         return __generator(this, function (_b) {
@@ -254,102 +265,7 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    /**
-     * @swagger
-     * paths:
-     *   /posts/last-page:
-     *    get:
-     *      tags:
-     *        - posts
-     *      summary: 총 페이지 수 구하기
-     *      description: 마지막 페이지를 구한다.
-     *      parameters:
-     *        - name: language
-     *          in: query
-     *          description: 사용 언어
-     *          required: false
-     *          schema:
-     *            type: string
-     *          example: 'react,java'
-     *        - name: position
-     *          in: query
-     *          description: '직군(FE: 프론트엔드, BE: 백엔드, DE: 디자이너, IOS: IOS, AND: 안드로이드, DEVOPS: DevOps, PM)'
-     *          required: false
-     *          schema:
-     *            type: string
-     *          example: 'FE,IOS'
-     *        - name: type
-     *          in: query
-     *          description: '모집 구분(1 : 프로젝트, 2: 스터디)'
-     *          required: false
-     *          schema:
-     *            type: string
-     *          example: '1'
-     *        - name: period
-     *          in: query
-     *          description: '조회 기간(일). 14일 경우 14일 이내의 글만 조회'
-     *          required: false
-     *          schema:
-     *            type: string
-     *          example: 14
-     *        - name: isClosed
-     *          in: query
-     *          description: '마감여부(true, false)'
-     *          required: false
-     *          schema:
-     *            type: string
-     *          example: true
-     *        - name: search
-     *          in: query
-     *          description: '검색'
-     *          required: false
-     *          schema:
-     *            type: string
-     *          example: '토이프로젝트'
-     *      responses:
-     *        200:
-     *          description: successful operation
-     *          content:
-     *            application/json:
-     *              schema:
-     *                type: object
-     *                properties:
-     *                  lastPage:
-     *                    type: number
-     *                    description : '전체 페이지 수'
-     *                    example: 7
-     */
-    route.get('/last-page', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, language, period, isClosed, type, position, search, PostServiceInstance, lastPage;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    _a = req.query, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findLastPage(language, period, isClosed, type, position, search)];
-                case 1:
-                    lastPage = _b.sent();
-                    return [2 /*return*/, res.status(200).json({
-                            lastPage: lastPage,
-                        })];
-            }
-        });
-    }); }));
-    // 메인에서의 글 추천(미사용, 제거예정)
-    route.get('/recommend', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var userId, PostServiceInstance, posts;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    userId = req.user._id;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.recommendToUserFromMain(userId)];
-                case 1:
-                    posts = _a.sent();
-                    return [2 /*return*/, res.status(200).json(posts)];
-            }
-        });
-    }); }));
+    // #region 글 상세에서 관련 글 추천
     /**
      * @swagger
      * paths:
@@ -385,6 +301,7 @@ exports.default = (function (app) {
      *        404:
      *          description: Post not found
      */
+    // #endregion
     route.get('/:id/recommend', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var postId, userId, PostServiceInstance, post;
         return __generator(this, function (_a) {
@@ -393,13 +310,14 @@ exports.default = (function (app) {
                     postId = req.params.id;
                     userId = req.user._id;
                     PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.recommendToUserFromPost(mongoose_1.Types.ObjectId(postId), userId)];
+                    return [4 /*yield*/, PostServiceInstance.findPopularPosts(mongoose_1.Types.ObjectId(postId), userId)];
                 case 1:
                     post = _a.sent();
                     return [2 /*return*/, res.status(200).json(post)];
             }
         });
     }); }));
+    // #region 글 상세 보기
     /**
      * @swagger
      * paths:
@@ -435,7 +353,8 @@ exports.default = (function (app) {
      *        404:
      *          description: Post not found
      */
-    route.get('/:id', index_1.isPostIdValid, index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    // #endregion
+    route.get('/:id', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var postId, userId, readList, PostServiceInstance, post, _a, updateReadList, isAlreadyRead, untilMidnight;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -464,6 +383,7 @@ exports.default = (function (app) {
             }
         });
     }); }));
+    // #region 글 등록
     /**
      * @swagger
      * paths:
@@ -499,6 +419,7 @@ exports.default = (function (app) {
      *        401:
      *          $ref: '#/components/responses/UnauthorizedError'
      */
+    // #endregion
     route.post('/', index_1.checkPost, index_1.isPostValid, index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var postDTO, userId, PostServiceInstance, post, error_1;
@@ -531,6 +452,7 @@ exports.default = (function (app) {
             });
         });
     }));
+    // #region 글 수정
     /**
      * @swagger
      * paths:
@@ -573,6 +495,7 @@ exports.default = (function (app) {
      *        401:
      *          $ref: '#/components/responses/UnauthorizedError'
      */
+    // #endregion
     route.patch('/:id', index_1.isAccessTokenValid, index_1.checkPost, index_1.isPostValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, _a, tokenUserId, tokenType, postDTO, PostServiceInstance, post;
         return __generator(this, function (_b) {
@@ -589,6 +512,7 @@ exports.default = (function (app) {
             }
         });
     }); }));
+    // #region 글 삭제
     /**
      * @swagger
      * paths:
@@ -614,6 +538,7 @@ exports.default = (function (app) {
      *        404:
      *          description: Post not found
      */
+    // #endregion
     route.delete('/:id', index_1.isPostIdValid, index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, _a, tokenUserId, tokenType, PostServiceInstance;
         return __generator(this, function (_b) {
@@ -635,6 +560,7 @@ exports.default = (function (app) {
           - name: likes
             description: 글 관심 등록
      */
+    // #region 좋아요 등록
     /**
      * @swagger
      * paths:
@@ -679,6 +605,7 @@ exports.default = (function (app) {
      *        401:
      *          $ref: '#/components/responses/UnauthorizedError'
      */
+    // #endregion
     route.post('/likes', index_1.isAccessTokenValid, index_1.isPostIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var postId, userId, PostServiceInstance, post;
         return __generator(this, function (_a) {

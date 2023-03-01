@@ -3,6 +3,8 @@ import { Types } from 'mongoose';
 import { IPost, IPostModel, IPostDocument } from '../models/Post';
 import { INotificationModel } from '../models/Notification';
 import { PostFilterLog } from '../models/PostFilterLog';
+import { ReadPosts } from '../models/ReadPosts';
+import { LikePosts } from '../models/LikePosts';
 
 import { IUserModel } from '../models/User';
 import CustomError from '../CustomError';
@@ -45,8 +47,7 @@ export class PostService {
         language: language.split(','),
       });
     }
-    const sortPosts = this.sortLanguageByQueryParam(posts, language);
-    return sortPosts;
+    return posts;
   }
 
   // 메인 화면에서 글 리스트를 조회한다.
@@ -81,8 +82,7 @@ export class PostService {
         language: language.split(','),
       });
     }
-    const sortPosts = this.sortLanguageByQueryParam(posts, language);
-    return sortPosts;
+    return posts;
   }
 
   // Pagination을 위해 마지막 페이지를 구한다.
@@ -100,21 +100,13 @@ export class PostService {
     return lastPage;
   }
 
-  // 선택한 언어가 리스트의 앞에 오도록 정렬
-  async sortLanguageByQueryParam(posts: IPostDocument[], language: string | null) {
-    if (typeof language !== 'string') return posts;
-
-    const paramLanguage = language.split(',');
-    for (let i = 0; i < posts.length; i += 1) {
-      posts[i].language.sort(function (a, b) {
-        if (paramLanguage.indexOf(b) !== -1) return 1;
-        return -1;
-      });
-    }
+  // 인기글 조회
+  async findPopularPosts(postId: Types.ObjectId, userId: Types.ObjectId) {
+    const posts = await this.postModel.findPopularPosts(postId, userId);
     return posts;
   }
 
-  // 메인 화면에서 글를 추천한다.(미사용, 제거예정)
+  // 메인 화면에서 글를 추천한다.(현재 미사용, 제거예정)
   async recommendToUserFromMain(userId: Types.ObjectId) {
     let sort;
     let likeLanguages = null;
@@ -151,10 +143,16 @@ export class PostService {
   async increaseView(postId: Types.ObjectId, userId: Types.ObjectId, readList: string) {
     let isAlreadyRead = true;
     let updateReadList = readList;
-
     // 조회수 중복 증가 방지
     if (readList === undefined || (typeof readList === 'string' && readList.indexOf(postId.toString()) === -1)) {
-      if (userId) await Promise.all([this.userModel.addReadList(postId, userId), this.postModel.increaseView(postId)]);
+      if (userId)
+        await Promise.all([
+          await ReadPosts.create({
+            userId,
+            postId,
+          }),
+          this.postModel.increaseView(postId),
+        ]);
       else await this.postModel.increaseView(postId); // 조회수 증가
 
       if (readList === undefined) updateReadList = `${postId}`;
@@ -167,10 +165,8 @@ export class PostService {
   // 상세 글 정보를 조회한다.
   // 로그인된 사용자일 경우 읽은 목록을 추가한다.
   async findPostDetail(postId: Types.ObjectId) {
-    const posts = await this.postModel
-      .findById(postId)
-      .populate('author', 'nickName image')
-      .populate('comments.author', 'nickName image');
+    const posts = await this.postModel.findById(postId).populate('author', 'nickName image');
+    if (!posts) throw new CustomError('NotFoundError', 404, 'Post not found');
     return posts;
   }
 
@@ -228,7 +224,7 @@ export class PostService {
   async addLike(postId: Types.ObjectId, userId: Types.ObjectId) {
     const { post, isLikeExist } = await this.postModel.addLike(postId, userId);
     if (!isLikeExist) {
-      await this.userModel.addLikePost(postId, userId);
+      await LikePosts.add(postId, userId);
       // await this.notificationModel.registerNotification(postId, post.author, userId, 'like');   // 알림 등록
     }
     return post;
@@ -238,7 +234,7 @@ export class PostService {
   async deleteLike(postId: Types.ObjectId, userId: Types.ObjectId) {
     const { post, isLikeExist } = await this.postModel.deleteLike(postId, userId);
     if (isLikeExist) {
-      await this.userModel.deleteLikePost(postId, userId);
+      await LikePosts.delete(postId, userId);
       // await this.notificationModel.deleteNotification(postId, post.author, userId, 'like');   // 알림 삭제
     }
     return post;

@@ -216,6 +216,7 @@ export interface IPostModel extends Model<IPostDocument> {
     position: string | null,
     search: string | null,
   ) => Promise<number>;
+  findPopularPosts: (postId: Types.ObjectId | null, userId: Types.ObjectId | null) => Promise<IPostDocument[]>;
   findPostRecommend: (
     sort: string | null,
     language: string[] | null,
@@ -433,10 +434,16 @@ postSchema.statics.findPostPagination = async function (
     sortQuery.push('createdAt');
   }
   const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
+
   // Pagenation
   const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
   let pagesToSkip = 0;
   let skip = 0;
+
+  // Get last page
+  const count = await this.countDocuments(query);
+  const lastPage = Math.ceil(count / itemsPerPage);
+
   // skip할 페이지 계산
   if (isNumber(page) && isNumber(previousPage)) {
     pagesToSkip = Number(page) - Number(previousPage);
@@ -449,8 +456,7 @@ postSchema.statics.findPostPagination = async function (
     }
   }
 
-  // 앞으로 갈때 skip 적용 시 lastId가 아닌 firstID로 가야하므로 itemsPerPage - 1 더 skip해야함
-  const result = await this.find(query)
+  const posts = await this.find(query)
     .sort(sortQuery.join(' '))
     .skip(skip)
     .limit(Number(itemsPerPage))
@@ -458,10 +464,10 @@ postSchema.statics.findPostPagination = async function (
       `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
     )
     .populate('author', 'nickName image');
-  //  const total = await this.countDocuments(query);
-  //  const lastPage = Math.ceil(total / itemsPerPage);
+
   return {
-    result,
+    posts,
+    lastPage,
   };
 };
 // 최신, 트레딩 조회
@@ -469,6 +475,30 @@ postSchema.statics.countPost = async function (language, period, isClosed, type,
   const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
   const count = await this.countDocuments(query);
   return count;
+};
+
+// 인기글 조회
+postSchema.statics.findPopularPosts = async function (postId, userId) {
+  // Query
+  const query: any = {};
+
+  // 14일 이내 조회
+  const today = new Date();
+  query.createdAt = { $gte: today.setDate(today.getDate() - 14) };
+
+  // 현재 읽고 있는 글은 제외하고 조회
+  query._id = { $ne: postId };
+
+  // 사용자가 작성한 글 제외하고 조회
+  if (userId) query.author = { $ne: userId };
+
+  // 마감글, 인기글 제외
+  query.isDeleted = { $eq: false };
+  query.isClosed = { $eq: false };
+
+  const posts = await this.find(query).sort('-views').limit(10).select('title').lean();
+
+  return posts;
 };
 
 // 사용자에게 추천 조회
@@ -667,14 +697,11 @@ postSchema.statics.deleteLike = async function (postId, userId) {
 
 // 조회수 증가
 postSchema.statics.increaseView = async function (postId) {
-  await this.findOneAndUpdate(
-    { _id: postId },
-    {
-      $inc: {
-        views: 1,
-      },
+  await this.findByIdAndUpdate(postId, {
+    $inc: {
+      views: 1,
     },
-  );
+  });
 };
 
 // 댓글 등록한 사용자 아이디 조회

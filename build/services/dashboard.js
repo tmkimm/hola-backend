@@ -192,7 +192,7 @@ var DashboardService = /** @class */ (function () {
                             { $project: { _id: 0, viewDate: 1, language: 1 } },
                             { $unwind: '$language' },
                             { $group: { _id: '$language', count: { $sum: 1 } } },
-                            { $sort: { count: 1 } },
+                            { $sort: { count: -1 } },
                         ])];
                     case 1:
                         userHistory = _a.sent();

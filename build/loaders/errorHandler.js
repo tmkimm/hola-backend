@@ -28,7 +28,6 @@ var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var Sentry = __importStar(require("@sentry/node"));
 var client_1 = require("@slack/client");
 var index_1 = __importDefault(require("../config/index"));
-var CustomError_1 = __importDefault(require("../CustomError"));
 exports.default = (function (app) {
     app.use(Sentry.Handlers.errorHandler({
         shouldHandleError: function (error) {
@@ -82,7 +81,8 @@ exports.default = (function (app) {
     });
     // custom error handler
     app.use(function handlecustomError(error, req, res, next) {
-        if (error instanceof CustomError_1.default) {
+        // == // if (error instanceof CustomError) {
+        if ('type' in error) {
             var status_1 = error.status, type = error.type, message = error.message;
             return res.status(status_1).send({ type: type, message: message });
         }

@@ -5,6 +5,7 @@ import config from '../config/index';
 type jwtPayload = {
   nickName?: string;
   idToken?: string;
+  _id?: string;
 };
 export function signJWT(payload: jwtPayload, expiresIn: string): Promise<JWT.Secret> {
   return new Promise((resolve, reject) => {

@@ -181,7 +181,7 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
 // 최신, 트레딩 조회
 postSchema.statics.findPostPagination = function (page, previousPage, lastId, sort, language, period, isClosed, type, position, search) {
     return __awaiter(this, void 0, void 0, function () {
-        var sortQuery, sortableColumns_2, query, itemsPerPage, pagesToSkip, skip, sortOperator, result;
+        var sortQuery, sortableColumns_2, query, itemsPerPage, pagesToSkip, skip, count, lastPage, sortOperator, posts;
         var _a;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -202,6 +202,10 @@ postSchema.statics.findPostPagination = function (page, previousPage, lastId, so
                     itemsPerPage = 4 * 6;
                     pagesToSkip = 0;
                     skip = 0;
+                    return [4 /*yield*/, this.countDocuments(query)];
+                case 1:
+                    count = _b.sent();
+                    lastPage = Math.ceil(count / itemsPerPage);
                     // skip할 페이지 계산
                     if ((0, isNumber_1.isNumber)(page) && (0, isNumber_1.isNumber)(previousPage)) {
                         pagesToSkip = Number(page) - Number(previousPage);
@@ -221,12 +225,11 @@ postSchema.statics.findPostPagination = function (page, previousPage, lastId, so
                             .limit(Number(itemsPerPage))
                             .select("title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
                             .populate('author', 'nickName image')];
-                case 1:
-                    result = _b.sent();
-                    //  const total = await this.countDocuments(query);
-                    //  const lastPage = Math.ceil(total / itemsPerPage);
+                case 2:
+                    posts = _b.sent();
                     return [2 /*return*/, {
-                            result: result,
+                            posts: posts,
+                            lastPage: lastPage,
                         }];
             }
         });
@@ -244,6 +247,32 @@ postSchema.statics.countPost = function (language, period, isClosed, type, posit
                 case 1:
                     count = _a.sent();
                     return [2 /*return*/, count];
+            }
+        });
+    });
+};
+// 인기글 조회
+postSchema.statics.findPopularPosts = function (postId, userId) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query, today, posts;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = {};
+                    today = new Date();
+                    query.createdAt = { $gte: today.setDate(today.getDate() - 14) };
+                    // 현재 읽고 있는 글은 제외하고 조회
+                    query._id = { $ne: postId };
+                    // 사용자가 작성한 글 제외하고 조회
+                    if (userId)
+                        query.author = { $ne: userId };
+                    // 마감글, 인기글 제외
+                    query.isDeleted = { $eq: false };
+                    query.isClosed = { $eq: false };
+                    return [4 /*yield*/, this.find(query).sort('-views').limit(10).select('title').lean()];
+                case 1:
+                    posts = _a.sent();
+                    return [2 /*return*/, posts];
             }
         });
     });
@@ -517,7 +546,7 @@ postSchema.statics.increaseView = function (postId) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, this.findOneAndUpdate({ _id: postId }, {
+                case 0: return [4 /*yield*/, this.findByIdAndUpdate(postId, {
                         $inc: {
                             views: 1,
                         },

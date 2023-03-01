@@ -109,7 +109,6 @@ export interface IUserModel extends Model<IUserDocument> {
   findByIdToken: (idToken: string) => Promise<IUserDocument>;
   findByEmail: (email: string) => Promise<IUserDocument>;
   findByNickName: (name: string) => Promise<IUserDocument>;
-  addLikePost: (postId: Types.ObjectId, userId: Types.ObjectId) => Promise<IUserDocument>;
   deleteLikePost: (postId: Types.ObjectId, userId: Types.ObjectId) => Promise<IUserDocument>;
   addReadList: (postId: Types.ObjectId, userId: Types.ObjectId) => void;
 }
@@ -190,7 +189,7 @@ userSchema.statics.findByNickName = async function (nickName) {
 };
 
 userSchema.methods.generateAccessToken = async function () {
-  const accessToken = await signJWT({ nickName: this.nickName, idToken: this.idToken }, '1h');
+  const accessToken = await signJWT({ nickName: this.nickName, idToken: this.idToken, _id: this._id }, '1h');
 
   return accessToken;
 };
@@ -199,34 +198,6 @@ userSchema.methods.generateRefreshToken = async function () {
   const refreshToken = await signJWT({ nickName: this.nickName }, '2w');
 
   return refreshToken;
-};
-
-userSchema.statics.addLikePost = async function (postId, userId) {
-  const result = await this.findByIdAndUpdate(
-    { _id: userId },
-    {
-      $push: {
-        likePosts: {
-          _id: postId,
-        },
-      },
-    },
-    {
-      new: true,
-      upsert: true,
-    },
-  );
-  return result;
-};
-
-userSchema.statics.deleteLikePost = async function (postId, userId) {
-  const deleteRecord = await this.findOneAndUpdate(
-    { _id: userId },
-    {
-      $pull: { likePosts: postId },
-    },
-  );
-  return deleteRecord;
 };
 
 userSchema.statics.addReadList = async function (postId, userId) {

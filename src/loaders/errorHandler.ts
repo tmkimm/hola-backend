@@ -76,12 +76,13 @@ export default (app: express.Application) => {
 
   // custom error handler
   app.use(function handlecustomError(
-    error: Error,
+    error: CustomError,
     req: express.Request,
     res: express.Response,
     next: express.NextFunction,
   ) {
-    if (error instanceof CustomError) {
+    // == // if (error instanceof CustomError) {
+    if ('type' in error) {
       const { status, type, message } = error;
       return res.status(status).send({ type, message });
     }

@@ -160,7 +160,7 @@ userSchema.methods.generateAccessToken = function () {
         var accessToken;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, (0, jwt_1.signJWT)({ nickName: this.nickName, idToken: this.idToken }, '1h')];
+                case 0: return [4 /*yield*/, (0, jwt_1.signJWT)({ nickName: this.nickName, idToken: this.idToken, _id: this._id }, '1h')];
                 case 1:
                     accessToken = _a.sent();
                     return [2 /*return*/, accessToken];
@@ -177,43 +177,6 @@ userSchema.methods.generateRefreshToken = function () {
                 case 1:
                     refreshToken = _a.sent();
                     return [2 /*return*/, refreshToken];
-            }
-        });
-    });
-};
-userSchema.statics.addLikePost = function (postId, userId) {
-    return __awaiter(this, void 0, void 0, function () {
-        var result;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, this.findByIdAndUpdate({ _id: userId }, {
-                        $push: {
-                            likePosts: {
-                                _id: postId,
-                            },
-                        },
-                    }, {
-                        new: true,
-                        upsert: true,
-                    })];
-                case 1:
-                    result = _a.sent();
-                    return [2 /*return*/, result];
-            }
-        });
-    });
-};
-userSchema.statics.deleteLikePost = function (postId, userId) {
-    return __awaiter(this, void 0, void 0, function () {
-        var deleteRecord;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, this.findOneAndUpdate({ _id: userId }, {
-                        $pull: { likePosts: postId },
-                    })];
-                case 1:
-                    deleteRecord = _a.sent();
-                    return [2 /*return*/, deleteRecord];
             }
         });
     });

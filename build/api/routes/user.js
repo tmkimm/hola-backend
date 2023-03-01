@@ -48,11 +48,11 @@ var Notification_1 = require("../../models/Notification");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**
-   * @swagger
-   * tags:
-        - name: users
-          description: 사용자에 관련된 API
-   */
+     * @swagger
+     * tags:
+          - name: users
+            description: 사용자에 관련된 API
+     */
     app.use('/users', route);
     // s3 pre-sign url 발급
     route.post('/sign', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
@@ -120,34 +120,34 @@ exports.default = (function (app) {
         });
     }); }));
     /**
-   * @swagger
-   * paths:
-   *   /users/{id}:
-   *    get:
-   *      tags:
-   *        - users
-   *      summary: 사용자 상세 정보 조회
-   *      description: '사용자의 상세 정보를 조회한다.'
-   *      parameters:
-   *        - name: id
-   *          in: path
-   *          description: 사용자 Id
-   *          required: true
-   *          example: '635a91e837ad67001412321a'
-   *          schema:
-   *            type: string
-   *      responses:
-   *        200:
-   *          description: successful operation
-   *          content:
-   *            application/json:
-   *              schema:
-   *                type: array
-   *                items:
-   *                  $ref: '#/components/schemas/User'
-   *        404:
-   *          description: User not found
-   */
+     * @swagger
+     * paths:
+     *   /users/{id}:
+     *    get:
+     *      tags:
+     *        - users
+     *      summary: 사용자 상세 정보 조회
+     *      description: '사용자의 상세 정보를 조회한다.'
+     *      parameters:
+     *        - name: id
+     *          in: path
+     *          description: 사용자 Id
+     *          required: true
+     *          example: '635a91e837ad67001412321a'
+     *          schema:
+     *            type: string
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: array
+     *                items:
+     *                  $ref: '#/components/schemas/User'
+     *        404:
+     *          description: User not found
+     */
     route.get('/:id', index_2.isUserIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, UserServiceInstance, user;
         return __generator(this, function (_a) {
@@ -162,81 +162,81 @@ exports.default = (function (app) {
             }
         });
     }); }));
-    // 
+    //
     /**
-       * @swagger
-       * paths:
-       *   /users/{id}:
-       *    patch:
-       *      tags:
-       *        - users
-       *      summary: 사용자 정보 수정
-       *      description: 사용자 정보를 수정한다.
-       *      parameters:
-       *        - name: accessToken
-       *          in: header
-       *          description: access token
-       *          required: true
-       *          schema:
-       *            type: string
-       *        - name: id
-       *          in: path
-       *          description: 사용자 Id
-       *          required: true
-       *          example: '635a91e837ad67001412321a'
-       *          schema:
-       *            type: string
-       *      requestBody:
-       *        content:
-       *          application/json:
-       *            schema:
-       *              $ref: '#/components/schemas/User'
-       *      responses:
-       *        200:
-       *          description: successful operation
-       *          content:
-       *            application/json:
-       *              schema:
-       *                type: object
-       *                properties:
-       *                  _id:
-       *                    type: string
-       *                    description: 사용자 ID
-       *                    example: '61063af4ed4b420bbcfa0b4c'
-       *                  nickName:
-       *                    type: string
-       *                    description: 닉네임
-       *                    example: 'hola!'
-       *                  image:
-       *                    type: string
-       *                    description: 사용자 이미지 명
-       *                    example: 'default.PNG'
-       *                  accessToken:
-       *                    type: string
-       *                    description: access token
-       *                  isExists:
-       *                    type: boolean
-       *                    description: 닉네임 중복 여부
-       *                    example: false
-       *        400:
-       *          description: Nickname is duplicated.
-       *          content:
-       *            application/json:
-       *              schema:
-       *                type: object
-       *                properties:
-       *                  isExists:
-       *                    type: boolean
-       *                    description : 닉네임 중복 여부
-       *                    example: true
-       *                  message:
-       *                    type: string
-       *                    example: 'Nickname is duplicated.'
-       *        401:
-       *          $ref: '#/components/responses/UnauthorizedError'
-       *        404:
-       *          description: User not found
-       */
+     * @swagger
+     * paths:
+     *   /users/{id}:
+     *    patch:
+     *      tags:
+     *        - users
+     *      summary: 사용자 정보 수정
+     *      description: 사용자 정보를 수정한다.
+     *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: true
+     *          schema:
+     *            type: string
+     *        - name: id
+     *          in: path
+     *          description: 사용자 Id
+     *          required: true
+     *          example: '635a91e837ad67001412321a'
+     *          schema:
+     *            type: string
+     *      requestBody:
+     *        content:
+     *          application/json:
+     *            schema:
+     *              $ref: '#/components/schemas/User'
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: object
+     *                properties:
+     *                  _id:
+     *                    type: string
+     *                    description: 사용자 ID
+     *                    example: '61063af4ed4b420bbcfa0b4c'
+     *                  nickName:
+     *                    type: string
+     *                    description: 닉네임
+     *                    example: 'hola!'
+     *                  image:
+     *                    type: string
+     *                    description: 사용자 이미지 명
+     *                    example: 'default.PNG'
+     *                  accessToken:
+     *                    type: string
+     *                    description: access token
+     *                  isExists:
+     *                    type: boolean
+     *                    description: 닉네임 중복 여부
+     *                    example: false
+     *        400:
+     *          description: Nickname is duplicated.
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: object
+     *                properties:
+     *                  isExists:
+     *                    type: boolean
+     *                    description : 닉네임 중복 여부
+     *                    example: true
+     *                  message:
+     *                    type: string
+     *                    example: 'Nickname is duplicated.'
+     *        401:
+     *          $ref: '#/components/responses/UnauthorizedError'
+     *        404:
+     *          description: User not found
+     */
     route.patch('/:id', index_2.isUserIdValid, index_2.isAccessTokenValid, index_2.nickNameDuplicationCheck, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, tokenUserId, userDTO, UserServiceInstance, _a, userRecord, accessToken, refreshToken;
         return __generator(this, function (_b) {
@@ -361,37 +361,37 @@ exports.default = (function (app) {
         });
     }); }));
     /**
-   * @swagger
-   * paths:
-   *   /users/likes/{id}:
-   *    get:
-   *      tags:
-   *        - users
-   *      summary: 사용자 관심 등록 리스트 조회
-   *      description: '관심 등록한 글들을 조회한다.'
-   *      parameters:
-   *        - name: id
-   *          in: path
-   *          description: 사용자 Id
-   *          required: true
-   *          example: '61fa3f1fea134800135696b4'
-   *          schema:
-   *            type: string
-   *      responses:
-   *        200:
-   *          description: successful operation
-   *          content:
-   *            application/json:
-   *              schema:
-   *                type: object
-   *                properties:
-   *                  likePosts:
-   *                    type: array
-   *                    items:
-   *                      $ref: '#/components/schemas/Post'
-   *        404:
-   *          description: User not found
-   */
+     * @swagger
+     * paths:
+     *   /users/likes/{id}:
+     *    get:
+     *      tags:
+     *        - users
+     *      summary: 사용자 관심 등록 리스트 조회
+     *      description: '관심 등록한 글들을 조회한다.'
+     *      parameters:
+     *        - name: id
+     *          in: path
+     *          description: 사용자 Id
+     *          required: true
+     *          example: '61fa3f1fea134800135696b4'
+     *          schema:
+     *            type: string
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: object
+     *                properties:
+     *                  likePosts:
+     *                    type: array
+     *                    items:
+     *                      $ref: '#/components/schemas/Post'
+     *        404:
+     *          description: User not found
+     */
     route.get('/likes/:id', index_2.isUserIdValid, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, UserServiceInstance, user;
         return __generator(this, function (_a) {
@@ -429,12 +429,9 @@ exports.default = (function (app) {
      *          content:
      *            application/json:
      *              schema:
-     *                type: object
-     *                properties:
-     *                  readList:
-     *                    type: array
-     *                    items:
-     *                      $ref: '#/components/schemas/Post'
+     *                type: array
+     *                items:
+     *                  $ref: '#/components/schemas/Post'
      *        404:
      *          description: User not found
      */

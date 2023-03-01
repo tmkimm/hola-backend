@@ -107,7 +107,7 @@ export class DashboardService {
       { $project: { _id: 0, viewDate: 1, language: 1 } },
       { $unwind: '$language' },
       { $group: { _id: '$language', count: { $sum: 1 } } },
-      { $sort: { count: 1 } },
+      { $sort: { count: -1 } },
     ]);
     return userHistory;
   }
