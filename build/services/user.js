@@ -148,6 +148,7 @@ var UserService = /** @class */ (function () {
                             path: 'postId',
                             select: "title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt",
                             match: { isDeleted: false },
+                            populate: { path: 'author', select: "nickName image" },
                             options: { sort: { createdAt: -1 } },
                         })];
                     case 1:
@@ -170,6 +171,7 @@ var UserService = /** @class */ (function () {
                             path: 'postId',
                             select: "title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt",
                             match: { isDeleted: false },
+                            populate: { path: 'author', select: "nickName image" },
                             options: { sort: { createdAt: -1 } },
                         })];
                     case 1:

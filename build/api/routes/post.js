@@ -310,9 +310,10 @@ exports.default = (function (app) {
                     postId = req.params.id;
                     userId = req.user._id;
                     PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findPopularPosts(mongoose_1.Types.ObjectId(postId), userId)];
+                    return [4 /*yield*/, PostServiceInstance.recommendToUserFromPost(mongoose_1.Types.ObjectId(postId), userId)];
                 case 1:
                     post = _a.sent();
+                    // const post = await PostServiceInstance.findPopularPosts(Types.ObjectId(postId), userId);  // 무조건 인기글 순으로 조회
                     return [2 /*return*/, res.status(200).json(post)];
             }
         });

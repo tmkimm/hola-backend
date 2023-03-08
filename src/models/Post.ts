@@ -503,14 +503,9 @@ postSchema.statics.findPopularPosts = async function (postId, userId) {
 
 // 사용자에게 추천 조회
 postSchema.statics.findPostRecommend = async function (sort, language, postId, userId, limit) {
-  let sortQuery = [];
+  const sortQuery = [];
   // Sorting
-  if (sort) {
-    const sortableColumns = ['views', 'createdAt', 'totalLikes'];
-    sortQuery = sort.split(',').filter((value: string) => {
-      return sortableColumns.indexOf(value.substr(1, value.length)) !== -1 || sortableColumns.indexOf(value) !== -1;
-    });
-  } else {
+  if (sort == false) {
     sortQuery.push('createdAt');
   }
   // Query

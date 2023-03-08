@@ -349,12 +349,9 @@ export default (app: Router) => {
    *          content:
    *            application/json:
    *              schema:
-   *                type: object
-   *                properties:
-   *                  likePosts:
-   *                    type: array
-   *                    items:
-   *                      $ref: '#/components/schemas/Post'
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/Post'
    *        404:
    *          description: User not found
    */

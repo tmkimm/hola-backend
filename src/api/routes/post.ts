@@ -296,8 +296,8 @@ export default (app: Router) => {
       const { _id: userId } = req.user as IUser;
 
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      // const post = await PostServiceInstance.recommendToUserFromPost(Types.ObjectId(postId), userId);
-      const post = await PostServiceInstance.findPopularPosts(Types.ObjectId(postId), userId);
+      const post = await PostServiceInstance.recommendToUserFromPost(Types.ObjectId(postId), userId);
+      // const post = await PostServiceInstance.findPopularPosts(Types.ObjectId(postId), userId);  // 무조건 인기글 순으로 조회
 
       return res.status(200).json(post);
     }),

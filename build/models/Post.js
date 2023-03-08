@@ -280,19 +280,13 @@ postSchema.statics.findPopularPosts = function (postId, userId) {
 // 사용자에게 추천 조회
 postSchema.statics.findPostRecommend = function (sort, language, postId, userId, limit) {
     return __awaiter(this, void 0, void 0, function () {
-        var sortQuery, sortableColumns_3, query, today, posts, notInPostIdArr, shortPosts;
+        var sortQuery, query, today, posts, notInPostIdArr, shortPosts;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     sortQuery = [];
                     // Sorting
-                    if (sort) {
-                        sortableColumns_3 = ['views', 'createdAt', 'totalLikes'];
-                        sortQuery = sort.split(',').filter(function (value) {
-                            return sortableColumns_3.indexOf(value.substr(1, value.length)) !== -1 || sortableColumns_3.indexOf(value) !== -1;
-                        });
-                    }
-                    else {
+                    if (sort == false) {
                         sortQuery.push('createdAt');
                     }
                     query = {};
