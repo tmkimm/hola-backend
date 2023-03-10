@@ -163,6 +163,12 @@ exports.default = (function (app) {
      *      summary: 글 리스트 조회(페이징)
      *      description: 메인 페이지에서 글 리스트를 조회한다.
      *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *        - name: language
      *          in: query
      *          description: 사용 언어
@@ -248,17 +254,18 @@ exports.default = (function (app) {
      *                  posts:
      *                    type: array
      *                    items:
-     *                      $ref: '#/components/schemas/Post'
+     *                      $ref: '#/components/schemas/PostMain'
      */
     // #endregion
-    route.get('/pagination', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, page, previousPage, lastId, sort, language, period, isClosed, type, position, search, PostServiceInstance, posts;
+    route.get('/pagination', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var _a, page, previousPage, lastId, sort, language, period, isClosed, type, position, search, PostServiceInstance, userId, posts;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = req.query, page = _a.page, previousPage = _a.previousPage, lastId = _a.lastId, sort = _a.sort, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search;
                     PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findPostPagination(page, previousPage, lastId, sort, language, period, isClosed, type, position, search)];
+                    userId = "6107a55372182bfb2315008d";
+                    return [4 /*yield*/, PostServiceInstance.findPostPagination(page, previousPage, lastId, sort, language, period, isClosed, type, position, search, userId)];
                 case 1:
                     posts = _b.sent();
                     return [2 /*return*/, res.status(200).json(posts)];

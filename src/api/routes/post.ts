@@ -141,6 +141,12 @@ export default (app: Router) => {
    *      summary: 글 리스트 조회(페이징)
    *      description: 메인 페이지에서 글 리스트를 조회한다.
    *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *        - name: language
    *          in: query
    *          description: 사용 언어
@@ -226,14 +232,16 @@ export default (app: Router) => {
    *                  posts:
    *                    type: array
    *                    items:
-   *                      $ref: '#/components/schemas/Post'
+   *                      $ref: '#/components/schemas/PostMain'
    */
   // #endregion
   route.get(
     '/pagination',
+    getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { page, previousPage, lastId, sort, language, period, isClosed, type, position, search } = req.query;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+      const userId = "6107a55372182bfb2315008d";
       const posts = await PostServiceInstance.findPostPagination(
         page,
         previousPage,
@@ -245,6 +253,7 @@ export default (app: Router) => {
         type,
         position,
         search,
+        userId,
       );
 
       return res.status(200).json(posts);

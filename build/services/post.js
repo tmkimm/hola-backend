@@ -75,14 +75,33 @@ var PostService = /** @class */ (function () {
         });
     };
     // 메인 화면에서 글 리스트를 조회한다.
-    PostService.prototype.findPostPagination = function (page, previousPage, lastId, sort, language, period, isClosed, type, position, search) {
+    PostService.prototype.findPostPagination = function (page, previousPage, lastId, sort, language, period, isClosed, type, position, search, userId) {
         return __awaiter(this, void 0, void 0, function () {
-            var posts;
+            var result, posts, addIsLike;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.postModel.findPostPagination(page, previousPage, lastId, sort, language, period, isClosed, type, position, search)];
                     case 1:
-                        posts = _a.sent();
+                        result = _a.sent();
+                        // 관심 등록 여부 추가
+                        if (userId) {
+                            posts = result.posts;
+                            addIsLike = posts.map(function (post) {
+                                var isLiked = false;
+                                if (post.likes && post.likes.length > 0) {
+                                    for (var _i = 0, _a = post.likes; _i < _a.length; _i++) {
+                                        var likeUserId = _a[_i];
+                                        if (likeUserId.toString() == userId) {
+                                            isLiked = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                post.isLiked = isLiked;
+                                return post;
+                            });
+                            result.posts = addIsLike;
+                        }
                         if (!language) return [3 /*break*/, 3];
                         return [4 /*yield*/, PostFilterLog_1.PostFilterLog.create({
                                 viewDate: new Date(),
@@ -91,7 +110,7 @@ var PostService = /** @class */ (function () {
                     case 2:
                         _a.sent();
                         _a.label = 3;
-                    case 3: return [2 /*return*/, posts];
+                    case 3: return [2 /*return*/, result];
                 }
             });
         });

@@ -62,8 +62,9 @@ export class PostService {
     type: string | null,
     position: string | null,
     search: string | null,
+    userId: string | null,
   ) {
-    const posts = await this.postModel.findPostPagination(
+    let result: any = await this.postModel.findPostPagination(
       page,
       previousPage,
       lastId,
@@ -75,6 +76,27 @@ export class PostService {
       position,
       search,
     );
+    // 관심 등록 여부 추가
+    if (userId) {
+      const { posts } = result;
+      const addIsLike = posts.map((post: any) => {
+
+        let isLiked = false;
+        if(post.likes && post.likes.length > 0) {
+          for(const likeUserId of post.likes) {
+            if(likeUserId.toString() == userId) {
+              isLiked = true;
+              break;
+            }
+          }
+        }
+
+        post.isLiked = isLiked;
+        return post;
+      });
+      result.posts = addIsLike;
+    }
+
     // 언어 필터링 로그 생성
     if (language) {
       await PostFilterLog.create({
@@ -82,7 +104,7 @@ export class PostService {
         language: language.split(','),
       });
     }
-    return posts;
+    return result;
   }
 
   // Pagination을 위해 마지막 페이지를 구한다.
