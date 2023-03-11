@@ -464,10 +464,9 @@ const makeFindPostQuery = (
     const today = new Date();
     query.createdAt = { $gte: today.setDate(today.getDate() - period) };
   }
-
   // 마감된 글 안보기 기능(false만 지원)
-  if (typeof isClosed === 'string' && !(isClosed === 'true')) {
-    query.isClosed = { $eq: isClosed === 'true' };
+  if (typeof isClosed === 'string' && (isClosed === 'true' || isClosed === 'false')) {
+    query.isClosed = { $eq: JSON.parse(isClosed) };
   }
 
   query.isDeleted = { $eq: false };
