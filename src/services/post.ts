@@ -41,12 +41,12 @@ export class PostService {
       search,
     );
     // 언어 필터링 로그 생성
-    if (language) {
-      await PostFilterLog.create({
-        viewDate: new Date(),
-        language: language.split(','),
-      });
-    }
+    // if (language) {
+    //   await PostFilterLog.create({
+    //     viewDate: new Date(),
+    //     language: language.split(','),
+    //   });
+    // }
     return posts;
   }
 
@@ -62,9 +62,9 @@ export class PostService {
     type: string | null,
     position: string | null,
     search: string | null,
-    userId: string | null,
+    userId: Types.ObjectId | null,
   ) {
-    let result: any = await this.postModel.findPostPagination(
+    const result: any = await this.postModel.findPostPagination(
       page,
       previousPage,
       lastId,
@@ -77,33 +77,41 @@ export class PostService {
       search,
     );
     // 관심 등록 여부 추가
-    if (userId) {
-      const { posts } = result;
-      const addIsLike = posts.map((post: any) => {
+    const { posts } = result;
+    let addIsLiked;
 
+    // 로그인하지 않은 사용자
+    if (userId == null) {
+      addIsLiked = posts.map((post: any) => {
+        post.isLiked = false;
+        return post;
+      });
+    } else {
+      // 로그인한 사용자
+      addIsLiked = posts.map((post: any) => {
         let isLiked = false;
-        if(post.likes && post.likes.length > 0) {
-          for(const likeUserId of post.likes) {
-            if(likeUserId.toString() == userId) {
+        if (post.likes && post.likes.length > 0) {
+          // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
+          for (const likeUserId of post.likes) {
+            if (likeUserId.toString() == userId.toString()) {
               isLiked = true;
               break;
             }
           }
         }
-
         post.isLiked = isLiked;
         return post;
       });
-      result.posts = addIsLike;
     }
+    result.posts = addIsLiked;
 
     // 언어 필터링 로그 생성
-    if (language) {
-      await PostFilterLog.create({
-        viewDate: new Date(),
-        language: language.split(','),
-      });
-    }
+    // if (language) {
+    //   await PostFilterLog.create({
+    //     viewDate: new Date(),
+    //     language: language.split(','),
+    //   });
+    // }
     return result;
   }
 

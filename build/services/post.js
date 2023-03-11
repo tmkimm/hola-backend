@@ -41,7 +41,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostService = void 0;
 var sanitize_html_1 = __importDefault(require("sanitize-html"));
-var PostFilterLog_1 = require("../models/PostFilterLog");
 var ReadPosts_1 = require("../models/ReadPosts");
 var LikePosts_1 = require("../models/LikePosts");
 var CustomError_1 = __importDefault(require("../CustomError"));
@@ -61,15 +60,14 @@ var PostService = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.postModel.findPost(offset, limit, sort, language, period, isClosed, type, position, search)];
                     case 1:
                         posts = _a.sent();
-                        if (!language) return [3 /*break*/, 3];
-                        return [4 /*yield*/, PostFilterLog_1.PostFilterLog.create({
-                                viewDate: new Date(),
-                                language: language.split(','),
-                            })];
-                    case 2:
-                        _a.sent();
-                        _a.label = 3;
-                    case 3: return [2 /*return*/, posts];
+                        // 언어 필터링 로그 생성
+                        // if (language) {
+                        //   await PostFilterLog.create({
+                        //     viewDate: new Date(),
+                        //     language: language.split(','),
+                        //   });
+                        // }
+                        return [2 /*return*/, posts];
                 }
             });
         });
@@ -77,21 +75,29 @@ var PostService = /** @class */ (function () {
     // 메인 화면에서 글 리스트를 조회한다.
     PostService.prototype.findPostPagination = function (page, previousPage, lastId, sort, language, period, isClosed, type, position, search, userId) {
         return __awaiter(this, void 0, void 0, function () {
-            var result, posts, addIsLike;
+            var result, posts, addIsLiked;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.postModel.findPostPagination(page, previousPage, lastId, sort, language, period, isClosed, type, position, search)];
                     case 1:
                         result = _a.sent();
-                        // 관심 등록 여부 추가
-                        if (userId) {
-                            posts = result.posts;
-                            addIsLike = posts.map(function (post) {
+                        posts = result.posts;
+                        // 로그인하지 않은 사용자
+                        if (userId == null) {
+                            addIsLiked = posts.map(function (post) {
+                                post.isLiked = false;
+                                return post;
+                            });
+                        }
+                        else {
+                            // 로그인한 사용자
+                            addIsLiked = posts.map(function (post) {
                                 var isLiked = false;
                                 if (post.likes && post.likes.length > 0) {
+                                    // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
                                     for (var _i = 0, _a = post.likes; _i < _a.length; _i++) {
                                         var likeUserId = _a[_i];
-                                        if (likeUserId.toString() == userId) {
+                                        if (likeUserId.toString() == userId.toString()) {
                                             isLiked = true;
                                             break;
                                         }
@@ -100,17 +106,16 @@ var PostService = /** @class */ (function () {
                                 post.isLiked = isLiked;
                                 return post;
                             });
-                            result.posts = addIsLike;
                         }
-                        if (!language) return [3 /*break*/, 3];
-                        return [4 /*yield*/, PostFilterLog_1.PostFilterLog.create({
-                                viewDate: new Date(),
-                                language: language.split(','),
-                            })];
-                    case 2:
-                        _a.sent();
-                        _a.label = 3;
-                    case 3: return [2 /*return*/, result];
+                        result.posts = addIsLiked;
+                        // 언어 필터링 로그 생성
+                        // if (language) {
+                        //   await PostFilterLog.create({
+                        //     viewDate: new Date(),
+                        //     language: language.split(','),
+                        //   });
+                        // }
+                        return [2 /*return*/, result];
                 }
             });
         });

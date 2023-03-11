@@ -1,1 +1,1 @@
-{"version":3,"file":"index.js","sourceRoot":"/","sources":["schedule/index.ts"],"names":[],"mappings":";;AAEA,mBAAe;IACb,2BAA2B;AAC7B,CAAC,EAAC","sourcesContent":["import { autoClosing } from './post';\r\n\r\nexport default () => {\r\n  //  autoClosing(); // 자동 마감\r\n};\r\n"]}
+{"version":3,"file":"index.js","sourceRoot":"/","sources":["schedule/index.ts"],"names":[],"mappings":";;AAEA,mBAAe;IACb,2BAA2B;AAC7B,CAAC,EAAC","sourcesContent":["import { autoClosing } from './post';\n\nexport default () => {\n  //  autoClosing(); // 자동 마감\n};\n"]}

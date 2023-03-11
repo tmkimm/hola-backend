@@ -240,8 +240,9 @@ export default (app: Router) => {
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { page, previousPage, lastId, sort, language, period, isClosed, type, position, search } = req.query;
+      const { _id: userId } = req.user as IUser;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const userId = "6107a55372182bfb2315008d";
+
       const posts = await PostServiceInstance.findPostPagination(
         page,
         previousPage,
