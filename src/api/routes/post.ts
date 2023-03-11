@@ -161,20 +161,6 @@ export default (app: Router) => {
    *          schema:
    *            type: number
    *          example: 3
-   *        - name: previousPage
-   *          in: query
-   *          description: 이전 페이지(기본 1)
-   *          required: true
-   *          schema:
-   *            type: string
-   *          example: 2
-   *        - name: lastId
-   *          in: query
-   *          description: 조회된 리스트의 마지막 ID
-   *          required: false
-   *          schema:
-   *            type: string
-   *          example: '62f4999837ad67001405a6dd'
    *        - name: sort
    *          in: query
    *          description: '정렬. 필드는 ,로 구분하며 +는 오름차순, -는 내림차순 '
@@ -239,14 +225,12 @@ export default (app: Router) => {
     '/pagination',
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { page, previousPage, lastId, sort, language, period, isClosed, type, position, search } = req.query;
+      const { page, sort, language, period, isClosed, type, position, search } = req.query;
       const { _id: userId } = req.user as IUser;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
 
       const posts = await PostServiceInstance.findPostPagination(
         page,
-        previousPage,
-        lastId,
         sort,
         language,
         period,

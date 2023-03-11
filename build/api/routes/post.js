@@ -183,20 +183,6 @@ exports.default = (function (app) {
      *          schema:
      *            type: number
      *          example: 3
-     *        - name: previousPage
-     *          in: query
-     *          description: 이전 페이지(기본 1)
-     *          required: true
-     *          schema:
-     *            type: string
-     *          example: 2
-     *        - name: lastId
-     *          in: query
-     *          description: 조회된 리스트의 마지막 ID
-     *          required: false
-     *          schema:
-     *            type: string
-     *          example: '62f4999837ad67001405a6dd'
      *        - name: sort
      *          in: query
      *          description: '정렬. 필드는 ,로 구분하며 +는 오름차순, -는 내림차순 '
@@ -258,14 +244,14 @@ exports.default = (function (app) {
      */
     // #endregion
     route.get('/pagination', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, page, previousPage, lastId, sort, language, period, isClosed, type, position, search, userId, PostServiceInstance, posts;
+        var _a, page, sort, language, period, isClosed, type, position, search, userId, PostServiceInstance, posts;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    _a = req.query, page = _a.page, previousPage = _a.previousPage, lastId = _a.lastId, sort = _a.sort, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search;
+                    _a = req.query, page = _a.page, sort = _a.sort, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search;
                     userId = req.user._id;
                     PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findPostPagination(page, previousPage, lastId, sort, language, period, isClosed, type, position, search, userId)];
+                    return [4 /*yield*/, PostServiceInstance.findPostPagination(page, sort, language, period, isClosed, type, position, search, userId)];
                 case 1:
                     posts = _b.sent();
                     return [2 /*return*/, res.status(200).json(posts)];

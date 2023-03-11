@@ -179,12 +179,11 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
     });
 };
 // 최신, 트레딩 조회
-postSchema.statics.findPostPagination = function (page, previousPage, lastId, sort, language, period, isClosed, type, position, search) {
+postSchema.statics.findPostPagination = function (page, sort, language, period, isClosed, type, position, search) {
     return __awaiter(this, void 0, void 0, function () {
-        var sortQuery, sortableColumns_2, query, itemsPerPage, pagesToSkip, skip, count, lastPage, sortOperator, posts;
-        var _a;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var sortQuery, sortableColumns_2, query, itemsPerPage, pageToSkip, count, lastPage, posts;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
                 case 0:
                     sortQuery = [];
                     // Sorting
@@ -199,35 +198,23 @@ postSchema.statics.findPostPagination = function (page, previousPage, lastId, so
                         sortQuery.push('createdAt');
                     }
                     query = makeFindPostQuery(language, period, isClosed, type, position, search);
-                    itemsPerPage = 4 * 6;
-                    pagesToSkip = 0;
-                    skip = 0;
+                    itemsPerPage = 4 * 5;
+                    pageToSkip = 0;
+                    if ((0, isNumber_1.isNumber)(page) && Number(page) > 0)
+                        pageToSkip = (Number(page) - 1) * itemsPerPage;
                     return [4 /*yield*/, this.countDocuments(query)];
                 case 1:
-                    count = _b.sent();
+                    count = _a.sent();
                     lastPage = Math.ceil(count / itemsPerPage);
-                    // skip할 페이지 계산
-                    if ((0, isNumber_1.isNumber)(page) && (0, isNumber_1.isNumber)(previousPage)) {
-                        pagesToSkip = Number(page) - Number(previousPage);
-                        if (lastId && pagesToSkip !== 0) {
-                            sortOperator = pagesToSkip <= 0 ? '$gt' : '$lt';
-                            query._id = (_a = {}, _a[sortOperator] = lastId, _a);
-                            // 실제 skip할 페이지 계산
-                            if (pagesToSkip > 0)
-                                skip = Number(itemsPerPage * Math.abs(pagesToSkip - 1));
-                            else if (pagesToSkip < 0)
-                                skip = Number(itemsPerPage * (Number(page) - 1));
-                        }
-                    }
                     return [4 /*yield*/, this.find(query)
                             .sort(sortQuery.join(' '))
-                            .skip(skip)
+                            .skip(pageToSkip)
                             .limit(Number(itemsPerPage))
                             .select("title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
                             .populate('author', 'nickName image')
                             .lean()];
                 case 2:
-                    posts = _b.sent();
+                    posts = _a.sent();
                     return [2 /*return*/, {
                             posts: posts,
                             lastPage: lastPage,

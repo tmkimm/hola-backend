@@ -73,12 +73,12 @@ var PostService = /** @class */ (function () {
         });
     };
     // 메인 화면에서 글 리스트를 조회한다.
-    PostService.prototype.findPostPagination = function (page, previousPage, lastId, sort, language, period, isClosed, type, position, search, userId) {
+    PostService.prototype.findPostPagination = function (page, sort, language, period, isClosed, type, position, search, userId) {
         return __awaiter(this, void 0, void 0, function () {
             var result, posts, addIsLiked;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.findPostPagination(page, previousPage, lastId, sort, language, period, isClosed, type, position, search)];
+                    case 0: return [4 /*yield*/, this.postModel.findPostPagination(page, sort, language, period, isClosed, type, position, search)];
                     case 1:
                         result = _a.sent();
                         posts = result.posts;

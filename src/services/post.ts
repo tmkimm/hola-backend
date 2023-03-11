@@ -53,8 +53,6 @@ export class PostService {
   // 메인 화면에서 글 리스트를 조회한다.
   async findPostPagination(
     page: string | null,
-    previousPage: string | null,
-    lastId: Types.ObjectId | string,
     sort: string | null,
     language: string | null,
     period: number | null,
@@ -66,8 +64,6 @@ export class PostService {
   ) {
     const result: any = await this.postModel.findPostPagination(
       page,
-      previousPage,
-      lastId,
       sort,
       language,
       period,

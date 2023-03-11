@@ -305,8 +305,6 @@ export interface IPostModel extends Model<IPostDocument> {
   ) => Promise<IPostDocument[]>;
   findPostPagination: (
     page: string | null,
-    previousPage: string | null,
-    lastId: Types.ObjectId | string,
     sort: string | null,
     language: string | null,
     period: number | null,
@@ -518,8 +516,6 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
 // 최신, 트레딩 조회
 postSchema.statics.findPostPagination = async function (
   page: string | null,
-  previousPage: string | null,
-  lastId: Types.ObjectId | string,
   sort,
   language,
   period,
@@ -542,29 +538,17 @@ postSchema.statics.findPostPagination = async function (
   const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
 
   // Pagenation
-  const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
-  let pagesToSkip = 0;
-  let skip = 0;
+  const itemsPerPage = 4 * 5; // 한 페이지에 표현할 수
+  let pageToSkip = 0;
+  if (isNumber(page) && Number(page) > 0) pageToSkip = (Number(page) - 1) * itemsPerPage;
 
   // Get last page
   const count = await this.countDocuments(query);
   const lastPage = Math.ceil(count / itemsPerPage);
 
-  // skip할 페이지 계산
-  if (isNumber(page) && isNumber(previousPage)) {
-    pagesToSkip = Number(page) - Number(previousPage);
-    if (lastId && pagesToSkip !== 0) {
-      const sortOperator = pagesToSkip <= 0 ? '$gt' : '$lt';
-      query._id = { [sortOperator]: lastId };
-      // 실제 skip할 페이지 계산
-      if (pagesToSkip > 0) skip = Number(itemsPerPage * Math.abs(pagesToSkip - 1));
-      else if (pagesToSkip < 0) skip = Number(itemsPerPage * (Number(page) - 1));
-    }
-  }
-
   const posts = await this.find(query)
     .sort(sortQuery.join(' '))
-    .skip(skip)
+    .skip(pageToSkip)
     .limit(Number(itemsPerPage))
     .select(
       `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
