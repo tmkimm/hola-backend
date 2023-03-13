@@ -63,13 +63,15 @@ export class UserService {
 
   // 사용자가 관심 등록한 글 리스트를 조회한다.
   async findUserLikes(id: Types.ObjectId) {
-    const likePosts = await LikePosts.find({ userId: id }).populate({
-      path: 'postId',
-      select: `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
-      match: { isDeleted: false },
-      populate: { path: 'author', select: `nickName image` },
-      options: { sort: { createdAt: -1 } },
-    });
+    const likePosts = await LikePosts.find({ userId: id })
+      .populate({
+        path: 'postId',
+        select: `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
+        match: { isDeleted: false },
+        populate: { path: 'author', select: `nickName image` },
+      })
+      .sort('-createdAt');
+
     const result = likePosts.map((i) => {
       return i.postId;
     });
@@ -78,13 +80,14 @@ export class UserService {
 
   // 사용자의 읽은 목록을 조회한다.
   async findReadList(id: Types.ObjectId) {
-    const readList = await ReadPosts.find({ userId: id }).populate({
-      path: 'postId',
-      select: `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
-      match: { isDeleted: false },
-      populate: { path: 'author', select: `nickName image` },
-      options: { sort: { createdAt: -1 } },
-    });
+    const readList = await ReadPosts.find({ userId: id })
+      .populate({
+        path: 'postId',
+        select: `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
+        match: { isDeleted: false },
+        populate: { path: 'author', select: `nickName image` },
+      })
+      .sort('-createdAt');
 
     const result = readList.map((i) => {
       return i.postId;
