@@ -211,8 +211,7 @@ postSchema.statics.findPostPagination = function (page, sort, language, period, 
                             .skip(pageToSkip)
                             .limit(Number(itemsPerPage))
                             .select("title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
-                            .populate('author', 'nickName image')
-                            .lean()];
+                            .populate('author', 'nickName image')];
                 case 2:
                     posts = _a.sent();
                     return [2 /*return*/, {

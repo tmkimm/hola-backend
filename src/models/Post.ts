@@ -553,9 +553,7 @@ postSchema.statics.findPostPagination = async function (
     .select(
       `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
     )
-    .populate('author', 'nickName image')
-    .lean();
-
+    .populate('author', 'nickName image');
   return {
     posts,
     lastPage,

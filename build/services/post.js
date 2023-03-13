@@ -75,23 +75,25 @@ var PostService = /** @class */ (function () {
     // 메인 화면에서 글 리스트를 조회한다.
     PostService.prototype.findPostPagination = function (page, sort, language, period, isClosed, type, position, search, userId) {
         return __awaiter(this, void 0, void 0, function () {
-            var result, posts, addIsLiked;
+            var result, documentToObject, addIsLiked;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.postModel.findPostPagination(page, sort, language, period, isClosed, type, position, search)];
                     case 1:
                         result = _a.sent();
-                        posts = result.posts;
+                        documentToObject = result.posts.map(function (post) {
+                            return post.toObject({ virtuals: true });
+                        });
                         // 로그인하지 않은 사용자
                         if (userId == null) {
-                            addIsLiked = posts.map(function (post) {
+                            addIsLiked = documentToObject.map(function (post) {
                                 post.isLiked = false;
                                 return post;
                             });
                         }
                         else {
                             // 로그인한 사용자
-                            addIsLiked = posts.map(function (post) {
+                            addIsLiked = documentToObject.map(function (post) {
                                 var isLiked = false;
                                 if (post.likes && post.likes.length > 0) {
                                     // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)

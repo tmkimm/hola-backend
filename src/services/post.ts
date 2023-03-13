@@ -72,19 +72,23 @@ export class PostService {
       position,
       search,
     );
-    // 관심 등록 여부 추가
-    const { posts } = result;
-    let addIsLiked;
 
+    // mongoose document는 불변상태이기 때문에 POJO로 변환
+    const documentToObject = result.posts.map((post: any) => {
+      return post.toObject({ virtuals: true });
+    });
+
+    // 관심 등록 여부 추가
+    let addIsLiked;
     // 로그인하지 않은 사용자
     if (userId == null) {
-      addIsLiked = posts.map((post: any) => {
+      addIsLiked = documentToObject.map((post: any) => {
         post.isLiked = false;
         return post;
       });
     } else {
       // 로그인한 사용자
-      addIsLiked = posts.map((post: any) => {
+      addIsLiked = documentToObject.map((post: any) => {
         let isLiked = false;
         if (post.likes && post.likes.length > 0) {
           // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
