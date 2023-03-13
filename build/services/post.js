@@ -129,7 +129,7 @@ var PostService = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        itemsPerPage = 4 * 6;
+                        itemsPerPage = 4 * 5;
                         return [4 /*yield*/, this.postModel.countPost(language, period, isClosed, type, position, search)];
                     case 1:
                         totalCount = _a.sent();

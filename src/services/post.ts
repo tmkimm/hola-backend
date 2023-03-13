@@ -124,7 +124,7 @@ export class PostService {
     position: string | null,
     search: string | null,
   ) {
-    const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
+    const itemsPerPage = 4 * 5; // 한 페이지에 표현할 수
     const totalCount = await this.postModel.countPost(language, period, isClosed, type, position, search);
     const lastPage = Math.ceil(totalCount / itemsPerPage);
     return lastPage;

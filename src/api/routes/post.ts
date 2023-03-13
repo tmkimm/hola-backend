@@ -211,10 +211,6 @@ export default (app: Router) => {
    *              schema:
    *                type: object
    *                properties:
-   *                  lastPage:
-   *                    type: number
-   *                    description : '전체 페이지 수'
-   *                    example: 7
    *                  posts:
    *                    type: array
    *                    items:
@@ -242,6 +238,84 @@ export default (app: Router) => {
       );
 
       return res.status(200).json(posts);
+    }),
+  );
+
+  /**
+   * @swagger
+   * paths:
+   *   /posts/last-page:
+   *    get:
+   *      tags:
+   *        - posts
+   *      summary: 총 페이지 수 구하기
+   *      description: 마지막 페이지를 구한다.
+   *      parameters:
+   *        - name: language
+   *          in: query
+   *          description: 사용 언어
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: 'react,java'
+   *        - name: position
+   *          in: query
+   *          description: '직군(FE: 프론트엔드, BE: 백엔드, DE: 디자이너, IOS: IOS, AND: 안드로이드, DEVOPS: DevOps, PM)'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: 'FE,IOS'
+   *        - name: type
+   *          in: query
+   *          description: '모집 구분(1 : 프로젝트, 2: 스터디)'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: '1'
+   *        - name: period
+   *          in: query
+   *          description: '조회 기간(일). 14일 경우 14일 이내의 글만 조회'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: 14
+   *        - name: isClosed
+   *          in: query
+   *          description: '마감여부(true, false)'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: true
+   *        - name: search
+   *          in: query
+   *          description: '검색'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: '토이프로젝트'
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: object
+   *                properties:
+   *                  lastPage:
+   *                    type: number
+   *                    description : '전체 페이지 수'
+   *                    example: 7
+   */
+  route.get(
+    '/last-page',
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const { language, period, isClosed, type, position, search } = req.query;
+      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+      const lastPage = await PostServiceInstance.findLastPage(language, period, isClosed, type, position, search);
+
+      return res.status(200).json({
+        lastPage,
+      });
     }),
   );
 

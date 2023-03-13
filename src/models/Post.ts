@@ -542,10 +542,6 @@ postSchema.statics.findPostPagination = async function (
   let pageToSkip = 0;
   if (isNumber(page) && Number(page) > 0) pageToSkip = (Number(page) - 1) * itemsPerPage;
 
-  // Get last page
-  const count = await this.countDocuments(query);
-  const lastPage = Math.ceil(count / itemsPerPage);
-
   const posts = await this.find(query)
     .sort(sortQuery.join(' '))
     .skip(pageToSkip)
@@ -556,7 +552,6 @@ postSchema.statics.findPostPagination = async function (
     .populate('author', 'nickName image');
   return {
     posts,
-    lastPage,
   };
 };
 // 최신, 트레딩 조회

@@ -181,7 +181,7 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
 // 최신, 트레딩 조회
 postSchema.statics.findPostPagination = function (page, sort, language, period, isClosed, type, position, search) {
     return __awaiter(this, void 0, void 0, function () {
-        var sortQuery, sortableColumns_2, query, itemsPerPage, pageToSkip, count, lastPage, posts;
+        var sortQuery, sortableColumns_2, query, itemsPerPage, pageToSkip, posts;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -202,21 +202,16 @@ postSchema.statics.findPostPagination = function (page, sort, language, period, 
                     pageToSkip = 0;
                     if ((0, isNumber_1.isNumber)(page) && Number(page) > 0)
                         pageToSkip = (Number(page) - 1) * itemsPerPage;
-                    return [4 /*yield*/, this.countDocuments(query)];
-                case 1:
-                    count = _a.sent();
-                    lastPage = Math.ceil(count / itemsPerPage);
                     return [4 /*yield*/, this.find(query)
                             .sort(sortQuery.join(' '))
                             .skip(pageToSkip)
                             .limit(Number(itemsPerPage))
                             .select("title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
                             .populate('author', 'nickName image')];
-                case 2:
+                case 1:
                     posts = _a.sent();
                     return [2 /*return*/, {
                             posts: posts,
-                            lastPage: lastPage,
                         }];
             }
         });
