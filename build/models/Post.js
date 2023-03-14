@@ -124,8 +124,8 @@ var makeFindPostQuery = function (language, period, isClosed, type, position, se
         query.createdAt = { $gte: today.setDate(today.getDate() - period) };
     }
     // 마감된 글 안보기 기능(false만 지원)
-    if (typeof isClosed === 'string' && !(isClosed === 'true')) {
-        query.isClosed = { $eq: isClosed === 'true' };
+    if (typeof isClosed === 'string' && isClosed === 'false') {
+        query.isClosed = { $eq: false };
     }
     query.isDeleted = { $eq: false };
     // 글 구분(0: 전체, 1: 프로젝트, 2: 스터디)
@@ -179,12 +179,11 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
     });
 };
 // 최신, 트레딩 조회
-postSchema.statics.findPostPagination = function (page, previousPage, lastId, sort, language, period, isClosed, type, position, search) {
+postSchema.statics.findPostPagination = function (page, sort, language, period, isClosed, type, position, search) {
     return __awaiter(this, void 0, void 0, function () {
-        var sortQuery, sortableColumns_2, query, itemsPerPage, pagesToSkip, skip, count, lastPage, sortOperator, posts;
-        var _a;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var sortQuery, sortableColumns_2, query, itemsPerPage, pageToSkip, posts;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
                 case 0:
                     sortQuery = [];
                     // Sorting
@@ -199,37 +198,20 @@ postSchema.statics.findPostPagination = function (page, previousPage, lastId, so
                         sortQuery.push('createdAt');
                     }
                     query = makeFindPostQuery(language, period, isClosed, type, position, search);
-                    itemsPerPage = 4 * 6;
-                    pagesToSkip = 0;
-                    skip = 0;
-                    return [4 /*yield*/, this.countDocuments(query)];
-                case 1:
-                    count = _b.sent();
-                    lastPage = Math.ceil(count / itemsPerPage);
-                    // skip할 페이지 계산
-                    if ((0, isNumber_1.isNumber)(page) && (0, isNumber_1.isNumber)(previousPage)) {
-                        pagesToSkip = Number(page) - Number(previousPage);
-                        if (lastId && pagesToSkip !== 0) {
-                            sortOperator = pagesToSkip <= 0 ? '$gt' : '$lt';
-                            query._id = (_a = {}, _a[sortOperator] = lastId, _a);
-                            // 실제 skip할 페이지 계산
-                            if (pagesToSkip > 0)
-                                skip = Number(itemsPerPage * Math.abs(pagesToSkip - 1));
-                            else if (pagesToSkip < 0)
-                                skip = Number(itemsPerPage * (Number(page) - 1));
-                        }
-                    }
+                    itemsPerPage = 4 * 5;
+                    pageToSkip = 0;
+                    if ((0, isNumber_1.isNumber)(page) && Number(page) > 0)
+                        pageToSkip = (Number(page) - 1) * itemsPerPage;
                     return [4 /*yield*/, this.find(query)
                             .sort(sortQuery.join(' '))
-                            .skip(skip)
+                            .skip(pageToSkip)
                             .limit(Number(itemsPerPage))
                             .select("title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
                             .populate('author', 'nickName image')];
-                case 2:
-                    posts = _b.sent();
+                case 1:
+                    posts = _a.sent();
                     return [2 /*return*/, {
                             posts: posts,
-                            lastPage: lastPage,
                         }];
             }
         });
@@ -280,19 +262,13 @@ postSchema.statics.findPopularPosts = function (postId, userId) {
 // 사용자에게 추천 조회
 postSchema.statics.findPostRecommend = function (sort, language, postId, userId, limit) {
     return __awaiter(this, void 0, void 0, function () {
-        var sortQuery, sortableColumns_3, query, today, posts, notInPostIdArr, shortPosts;
+        var sortQuery, query, today, posts, notInPostIdArr, shortPosts;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     sortQuery = [];
                     // Sorting
-                    if (sort) {
-                        sortableColumns_3 = ['views', 'createdAt', 'totalLikes'];
-                        sortQuery = sort.split(',').filter(function (value) {
-                            return sortableColumns_3.indexOf(value.substr(1, value.length)) !== -1 || sortableColumns_3.indexOf(value) !== -1;
-                        });
-                    }
-                    else {
+                    if (sort == false) {
                         sortQuery.push('createdAt');
                     }
                     query = {};

@@ -142,6 +142,112 @@ export interface IReply {
  *        description: 댓글 내용
  *        example: '신청합니다!'
  */
+
+/**
+ * @swagger
+ *  components:
+ *  schemas:
+ *   PostMain:
+ *     properties:
+ *      _id:
+ *        type: string
+ *        description: 글 ID
+ *        example: '6355eee637ad670014118738'
+ *      author:
+ *        type: string
+ *        description: 글 등록자 정보
+ *        example: '634e1a1537ad67001410d1f4'
+ *      language:
+ *        type: array
+ *        items:
+ *          type: string
+ *        description: 사용 언어
+ *        example:
+ *          - react
+ *          - java
+ *      title:
+ *        type: string
+ *        description: 제목
+ *      isClosed:
+ *        type: boolean
+ *        description: 마감 여부
+ *      views:
+ *        type: number
+ *        description: 조회수
+ *        example: 219
+ *      likes:
+ *        type: array
+ *        description: 관심 등록한 사용자 리스트
+ *        items:
+ *          type: string
+ *        example:
+ *          - '634e1a1537ad67001410d1f4'
+ *          - '61063a70ed4b420bbcfa0b4b'
+ *      totalLikes:
+ *        type: number
+ *        description: 관심 등록 수
+ *        example: 2
+ *      isLiked:
+ *        type: boolean
+ *        description: 사용자의 관심 등록 여부
+ *        example: false
+ *      type:
+ *        type: string
+ *        description: '모집 구분(1 : 프로젝트, 2: 스터디)'
+ *        example: '1'
+ *      recruits:
+ *        type: string
+ *        description: '모집인원(und: 인원 미정, 1, 2, 3, mo: 10명 이상)'
+ *        example: 'und'
+ *      onlineOrOffline:
+ *        type: string
+ *        description: '진행방식(on: 온라인/ off: 오프라인)'
+ *        example: 'on'
+ *      contactType:
+ *        type: string
+ *        description: '연락방법(ok: 오픈 카카오톡, em: 이메일, pk: 개인 카카오톡, gf: 구글폼)'
+ *        example: 'em'
+ *      expectedPeriod:
+ *        type: string
+ *        description: '예상 진행기간(und: 기간 미정, 1, 2, 3, mo: 장기)'
+ *        example: '3'
+ *      positions:
+ *        type: array
+ *        description: '포지션(FE: 프론트엔드, BE: 백엔드, DE: 디자이너, IOS: IOS, AND: 안드로이드, DEVOPS: DevOps, PM)'
+ *        items:
+ *          type: string
+ *        example:
+ *          - 'FE'
+ *          - 'BE'
+ *      state:
+ *        type: string
+ *        description: '글 상태(new : 신규글, deadline : 마감임박, hot:인기)'
+ *        items:
+ *          type: string
+ *        example:
+ *          - '1'
+ *          - 'new'
+ *      createdAt:
+ *        type: string
+ *        description: 생성일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      startDate:
+ *        type: string
+ *        description: 시작예정일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      endDate:
+ *        type: string
+ *        description: 모집 마감일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ *      closeDate:
+ *        type: string
+ *        description: 마감처리일
+ *        format: date-time
+ *        example: "2021-01-30T08:30:00Z"
+ */
 export interface IReplyDocument extends IReply, Document {}
 
 export type IReplyModel = Model<IReplyDocument>;
@@ -165,6 +271,7 @@ export interface IPost {
   content: string; // 글 내용
   isDeleted: boolean; // 글 삭제 여부
   isClosed: boolean; // 글 마감 여부
+  isLiked: boolean; // 관심 등록 여부
   views: number; // 글 조회수
   comments: ICommentDocument[]; // 글 댓글 정보
   likes: Types.ObjectId[]; // 관심 등록한 사용자 리스트
@@ -198,8 +305,6 @@ export interface IPostModel extends Model<IPostDocument> {
   ) => Promise<IPostDocument[]>;
   findPostPagination: (
     page: string | null,
-    previousPage: string | null,
-    lastId: Types.ObjectId | string,
     sort: string | null,
     language: string | null,
     period: number | null,
@@ -357,10 +462,9 @@ const makeFindPostQuery = (
     const today = new Date();
     query.createdAt = { $gte: today.setDate(today.getDate() - period) };
   }
-
   // 마감된 글 안보기 기능(false만 지원)
-  if (typeof isClosed === 'string' && !(isClosed === 'true')) {
-    query.isClosed = { $eq: isClosed === 'true' };
+  if (typeof isClosed === 'string' && isClosed === 'false') {
+    query.isClosed = { $eq: false };
   }
 
   query.isDeleted = { $eq: false };
@@ -412,8 +516,6 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
 // 최신, 트레딩 조회
 postSchema.statics.findPostPagination = async function (
   page: string | null,
-  previousPage: string | null,
-  lastId: Types.ObjectId | string,
   sort,
   language,
   period,
@@ -436,38 +538,20 @@ postSchema.statics.findPostPagination = async function (
   const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
 
   // Pagenation
-  const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
-  let pagesToSkip = 0;
-  let skip = 0;
-
-  // Get last page
-  const count = await this.countDocuments(query);
-  const lastPage = Math.ceil(count / itemsPerPage);
-
-  // skip할 페이지 계산
-  if (isNumber(page) && isNumber(previousPage)) {
-    pagesToSkip = Number(page) - Number(previousPage);
-    if (lastId && pagesToSkip !== 0) {
-      const sortOperator = pagesToSkip <= 0 ? '$gt' : '$lt';
-      query._id = { [sortOperator]: lastId };
-      // 실제 skip할 페이지 계산
-      if (pagesToSkip > 0) skip = Number(itemsPerPage * Math.abs(pagesToSkip - 1));
-      else if (pagesToSkip < 0) skip = Number(itemsPerPage * (Number(page) - 1));
-    }
-  }
+  const itemsPerPage = 4 * 5; // 한 페이지에 표현할 수
+  let pageToSkip = 0;
+  if (isNumber(page) && Number(page) > 0) pageToSkip = (Number(page) - 1) * itemsPerPage;
 
   const posts = await this.find(query)
     .sort(sortQuery.join(' '))
-    .skip(skip)
+    .skip(pageToSkip)
     .limit(Number(itemsPerPage))
     .select(
       `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
     )
     .populate('author', 'nickName image');
-
   return {
     posts,
-    lastPage,
   };
 };
 // 최신, 트레딩 조회
@@ -503,14 +587,9 @@ postSchema.statics.findPopularPosts = async function (postId, userId) {
 
 // 사용자에게 추천 조회
 postSchema.statics.findPostRecommend = async function (sort, language, postId, userId, limit) {
-  let sortQuery = [];
+  const sortQuery = [];
   // Sorting
-  if (sort) {
-    const sortableColumns = ['views', 'createdAt', 'totalLikes'];
-    sortQuery = sort.split(',').filter((value: string) => {
-      return sortableColumns.indexOf(value.substr(1, value.length)) !== -1 || sortableColumns.indexOf(value) !== -1;
-    });
-  } else {
+  if (sort == false) {
     sortQuery.push('createdAt');
   }
   // Query

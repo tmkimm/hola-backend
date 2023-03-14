@@ -41,20 +41,18 @@ export class PostService {
       search,
     );
     // 언어 필터링 로그 생성
-    if (language) {
-      await PostFilterLog.create({
-        viewDate: new Date(),
-        language: language.split(','),
-      });
-    }
+    // if (language) {
+    //   await PostFilterLog.create({
+    //     viewDate: new Date(),
+    //     language: language.split(','),
+    //   });
+    // }
     return posts;
   }
 
   // 메인 화면에서 글 리스트를 조회한다.
   async findPostPagination(
     page: string | null,
-    previousPage: string | null,
-    lastId: Types.ObjectId | string,
     sort: string | null,
     language: string | null,
     period: number | null,
@@ -62,11 +60,10 @@ export class PostService {
     type: string | null,
     position: string | null,
     search: string | null,
+    userId: Types.ObjectId | null,
   ) {
-    const posts = await this.postModel.findPostPagination(
+    const result: any = await this.postModel.findPostPagination(
       page,
-      previousPage,
-      lastId,
       sort,
       language,
       period,
@@ -75,14 +72,47 @@ export class PostService {
       position,
       search,
     );
-    // 언어 필터링 로그 생성
-    if (language) {
-      await PostFilterLog.create({
-        viewDate: new Date(),
-        language: language.split(','),
+
+    // mongoose document는 불변상태이기 때문에 POJO로 변환
+    const documentToObject = result.posts.map((post: any) => {
+      return post.toObject({ virtuals: true });
+    });
+
+    // 관심 등록 여부 추가
+    let addIsLiked;
+    // 로그인하지 않은 사용자
+    if (userId == null) {
+      addIsLiked = documentToObject.map((post: any) => {
+        post.isLiked = false;
+        return post;
+      });
+    } else {
+      // 로그인한 사용자
+      addIsLiked = documentToObject.map((post: any) => {
+        let isLiked = false;
+        if (post.likes && post.likes.length > 0) {
+          // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
+          for (const likeUserId of post.likes) {
+            if (likeUserId.toString() == userId.toString()) {
+              isLiked = true;
+              break;
+            }
+          }
+        }
+        post.isLiked = isLiked;
+        return post;
       });
     }
-    return posts;
+    result.posts = addIsLiked;
+
+    // 언어 필터링 로그 생성
+    // if (language) {
+    //   await PostFilterLog.create({
+    //     viewDate: new Date(),
+    //     language: language.split(','),
+    //   });
+    // }
+    return result;
   }
 
   // Pagination을 위해 마지막 페이지를 구한다.
@@ -94,7 +124,7 @@ export class PostService {
     position: string | null,
     search: string | null,
   ) {
-    const itemsPerPage = 4 * 6; // 한 페이지에 표현할 수
+    const itemsPerPage = 4 * 5; // 한 페이지에 표현할 수
     const totalCount = await this.postModel.countPost(language, period, isClosed, type, position, search);
     const lastPage = Math.ceil(totalCount / itemsPerPage);
     return lastPage;

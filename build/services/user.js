@@ -144,12 +144,14 @@ var UserService = /** @class */ (function () {
             var likePosts, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, LikePosts_1.LikePosts.find({ userId: id }).populate({
+                    case 0: return [4 /*yield*/, LikePosts_1.LikePosts.find({ userId: id })
+                            .populate({
                             path: 'postId',
                             select: "title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt",
                             match: { isDeleted: false },
-                            options: { sort: { createdAt: -1 } },
-                        })];
+                            populate: { path: 'author', select: "nickName image" },
+                        })
+                            .sort('-createdAt')];
                     case 1:
                         likePosts = _a.sent();
                         result = likePosts.map(function (i) {
@@ -166,12 +168,14 @@ var UserService = /** @class */ (function () {
             var readList, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, ReadPosts_1.ReadPosts.find({ userId: id }).populate({
+                    case 0: return [4 /*yield*/, ReadPosts_1.ReadPosts.find({ userId: id })
+                            .populate({
                             path: 'postId',
                             select: "title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt",
                             match: { isDeleted: false },
-                            options: { sort: { createdAt: -1 } },
-                        })];
+                            populate: { path: 'author', select: "nickName image" },
+                        })
+                            .sort('-createdAt')];
                     case 1:
                         readList = _a.sent();
                         result = readList.map(function (i) {
