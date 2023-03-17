@@ -7,6 +7,7 @@ import {
   isAccessTokenValid,
   getUserIdByAccessToken,
   isPostIdValid,
+  isObjectIdValid,
 } from '../middlewares/index';
 import { PostService } from '../../services/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
@@ -410,6 +411,7 @@ export default (app: Router) => {
   // #endregion
   route.get(
     '/:id',
+    isObjectIdValid,
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const postId = req.params.id;

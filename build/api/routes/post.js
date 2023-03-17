@@ -425,7 +425,7 @@ exports.default = (function (app) {
      *          description: Post not found
      */
     // #endregion
-    route.get('/:id', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/:id', index_1.isObjectIdValid, index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var postId, userId, readList, PostServiceInstance, post, _a, updateReadList, isAlreadyRead, untilMidnight;
         return __generator(this, function (_b) {
             switch (_b.label) {

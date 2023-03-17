@@ -6,3 +6,4 @@ export { nickNameDuplicationCheck } from './nickNameDuplicationCheck';
 export { getUserIdByAccessToken } from './getUserIdByAccessToken';
 export { isPostIdValid } from './isPostIdValid';
 export { isUserIdValid } from './isUserIdValid';
+export { isObjectIdValid } from './isObjectIdValid';
