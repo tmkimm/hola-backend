@@ -1,5 +1,11 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { DashboardService } from '../../services/index';
+import {
+  findDailyPost,
+  findDailyUser,
+  findPostFilterRank,
+  findPostHistory,
+  findUserHistory,
+} from '../../services/dashboard';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 
 const route = Router();
@@ -43,8 +49,7 @@ export default (app: Router) => {
   route.get(
     '/users/daily',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const DashboardServiceInstance = new DashboardService();
-      const user = await DashboardServiceInstance.findDailyUser();
+      const user = await findDailyUser();
       return res.status(200).json(user);
     }),
   );
@@ -101,8 +106,7 @@ export default (app: Router) => {
     '/users/history',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { startDate, endDate } = req.query;
-      const DashboardServiceInstance = new DashboardService();
-      const user = await DashboardServiceInstance.findUserHistory(startDate, endDate);
+      const user = await findUserHistory(startDate, endDate);
       return res.status(200).json(user);
     }),
   );
@@ -140,8 +144,7 @@ export default (app: Router) => {
   route.get(
     '/posts/daily',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const DashboardServiceInstance = new DashboardService();
-      const post = await DashboardServiceInstance.findDailyPost();
+      const post = await findDailyPost();
       return res.status(200).json(post);
     }),
   );
@@ -202,8 +205,7 @@ export default (app: Router) => {
     '/posts/history',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { startDate, endDate } = req.query;
-      const DashboardServiceInstance = new DashboardService();
-      const user = await DashboardServiceInstance.findPostHistory(startDate, endDate);
+      const user = await findPostHistory(startDate, endDate);
       return res.status(200).json(user);
     }),
   );
@@ -259,8 +261,7 @@ export default (app: Router) => {
     '/posts/filter-rank',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { startDate, endDate } = req.query;
-      const DashboardServiceInstance = new DashboardService();
-      const user = await DashboardServiceInstance.findPostFilterRank(startDate, endDate);
+      const user = await findPostFilterRank(startDate, endDate);
       return res.status(200).json(user);
     }),
   );

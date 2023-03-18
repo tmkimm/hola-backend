@@ -38,22 +38,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mongoose_1 = require("mongoose");
-var index_1 = require("../../services/index");
-var index_2 = require("../middlewares/index");
+var notification_1 = require("../../services/notification");
+var index_1 = require("../middlewares/index");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
-var Notification_1 = require("../../models/Notification");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     app.use('/notifications', route);
     // 알림 전체 조회
-    route.get('/', index_2.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var userId, NoticeServiceInstance, notifications;
+    route.get('/', index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var userId, notifications;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     userId = req.user._id;
-                    NoticeServiceInstance = new index_1.NotificationService(Notification_1.Notification);
-                    return [4 /*yield*/, NoticeServiceInstance.findNotifications(userId)];
+                    return [4 /*yield*/, (0, notification_1.findNotifications)(userId)];
                 case 1:
                     notifications = _a.sent();
                     return [2 /*return*/, res.status(200).json(notifications)];
@@ -62,13 +60,12 @@ exports.default = (function (app) {
     }); }));
     // 알림 상세 조회(개발필요)
     route.get('/:id', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, NotificationServcieInstance, notice;
+        var id, notice;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     id = req.params.id;
-                    NotificationServcieInstance = new index_1.NotificationService(Notification_1.Notification);
-                    return [4 /*yield*/, NotificationServcieInstance.findNotification(mongoose_1.Types.ObjectId(id))];
+                    return [4 /*yield*/, (0, notification_1.findNotification)(mongoose_1.Types.ObjectId(id))];
                 case 1:
                     notice = _a.sent();
                     return [2 /*return*/, res.status(200).json(notice)];
@@ -76,14 +73,13 @@ exports.default = (function (app) {
         });
     }); }));
     // 알림 읽음 처리
-    route.patch('/:id/read', index_2.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, NotificationServcieInstance, notice;
+    route.patch('/:id/read', index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var id, notice;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     id = req.params.id;
-                    NotificationServcieInstance = new index_1.NotificationService(Notification_1.Notification);
-                    return [4 /*yield*/, NotificationServcieInstance.readNotification(mongoose_1.Types.ObjectId(id))];
+                    return [4 /*yield*/, (0, notification_1.readNotification)(mongoose_1.Types.ObjectId(id))];
                 case 1:
                     notice = _a.sent();
                     return [2 /*return*/, res.status(200).json({
@@ -93,14 +89,13 @@ exports.default = (function (app) {
         });
     }); }));
     // 알림 전체 읽음 처리
-    route.patch('/read-all', index_2.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var userId, NotificationServcieInstance, notice;
+    route.patch('/read-all', index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var userId, notice;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     userId = req.user._id;
-                    NotificationServcieInstance = new index_1.NotificationService(Notification_1.Notification);
-                    return [4 /*yield*/, NotificationServcieInstance.readAll(userId)];
+                    return [4 /*yield*/, (0, notification_1.readAll)(userId)];
                 case 1:
                     notice = _a.sent();
                     return [2 /*return*/, res.status(200).json({

@@ -39,17 +39,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.autoClosing = void 0;
+exports.automaticClosingOfPosts = void 0;
 var node_schedule_1 = __importDefault(require("node-schedule"));
-var User_1 = require("../models/User");
-var index_1 = require("../services/index");
-var Post_1 = require("../models/Post");
-var Notification_1 = require("../models/Notification");
+var post_1 = require("../services/post");
 /*
   글에 관련된 Schedule을 정의한다.
 */
 // 자동 마감
-function autoClosing() {
+function automaticClosingOfPosts() {
     return __awaiter(this, void 0, void 0, function () {
         var rule, job;
         return __generator(this, function (_a) {
@@ -61,12 +58,9 @@ function autoClosing() {
                     rule.tz = 'Asia/Seoul';
                     return [4 /*yield*/, node_schedule_1.default.scheduleJob(rule, function () {
                             return __awaiter(this, void 0, void 0, function () {
-                                var PostServiceInstance;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
-                                        case 0:
-                                            PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                                            return [4 /*yield*/, PostServiceInstance.autoClosing()];
+                                        case 0: return [4 /*yield*/, (0, post_1.autoClosing)()];
                                         case 1:
                                             _a.sent();
                                             return [2 /*return*/];
@@ -82,5 +76,5 @@ function autoClosing() {
         });
     });
 }
-exports.autoClosing = autoClosing;
+exports.automaticClosingOfPosts = automaticClosingOfPosts;
 //# sourceMappingURL=post.js.map

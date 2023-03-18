@@ -8,7 +8,21 @@ import {
   getUserIdByAccessToken,
   isPostIdValid,
 } from '../middlewares/index';
-import { PostService } from '../../services/index';
+import {
+  findPost,
+  findPostPagination,
+  findLastPage,
+  recommendToUserFromPost,
+  increaseView,
+  findPostDetail,
+  findUserLiked,
+  findLikeUsers,
+  registerPost,
+  modifyPost,
+  deletePost,
+  addLike,
+  deleteLike,
+} from '../../services/post';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Post as PostModel } from '../../models/Post';
 import { Notification as NotificationModel } from '../../models/Notification';
@@ -113,18 +127,7 @@ export default (app: Router) => {
     '/',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { offset, limit, sort, language, period, isClosed, type, position, search } = req.query;
-      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const posts = await PostServiceInstance.findPost(
-        offset,
-        limit,
-        sort,
-        language,
-        period,
-        isClosed,
-        type,
-        position,
-        search,
-      );
+      const posts = await findPost(offset, limit, sort, language, period, isClosed, type, position, search);
 
       return res.status(200).json(posts);
     }),
@@ -223,19 +226,7 @@ export default (app: Router) => {
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { page, sort, language, period, isClosed, type, position, search } = req.query;
       const { _id: userId } = req.user as IUser;
-      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-
-      const posts = await PostServiceInstance.findPostPagination(
-        page,
-        sort,
-        language,
-        period,
-        isClosed,
-        type,
-        position,
-        search,
-        userId,
-      );
+      const posts = await findPostPagination(page, sort, language, period, isClosed, type, position, search, userId);
 
       return res.status(200).json(posts);
     }),
@@ -310,8 +301,7 @@ export default (app: Router) => {
     '/last-page',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { language, period, isClosed, type, position, search } = req.query;
-      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const lastPage = await PostServiceInstance.findLastPage(language, period, isClosed, type, position, search);
+      const lastPage = await findLastPage(language, period, isClosed, type, position, search);
 
       return res.status(200).json({
         lastPage,
@@ -363,8 +353,7 @@ export default (app: Router) => {
       const postId = req.params.id;
       const { _id: userId } = req.user as IUser;
 
-      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const post = await PostServiceInstance.recommendToUserFromPost(Types.ObjectId(postId), userId);
+      const post = await recommendToUserFromPost(Types.ObjectId(postId), userId);
       // const post = await PostServiceInstance.findPopularPosts(Types.ObjectId(postId), userId);  // 무조건 인기글 순으로 조회
 
       return res.status(200).json(post);
@@ -416,13 +405,8 @@ export default (app: Router) => {
       const { _id: userId } = req.user as IUser;
       const readList = req.cookies.RVIEW;
 
-      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const post = await PostServiceInstance.findPostDetail(Types.ObjectId(postId));
-      const { updateReadList, isAlreadyRead } = await PostServiceInstance.increaseView(
-        Types.ObjectId(postId),
-        userId,
-        readList,
-      );
+      const post = await findPostDetail(Types.ObjectId(postId));
+      const { updateReadList, isAlreadyRead } = await increaseView(Types.ObjectId(postId), userId, readList);
       if (!isAlreadyRead) {
         // 쿠키는 당일만 유효
         const untilMidnight = new Date();
@@ -485,8 +469,7 @@ export default (app: Router) => {
         const postDTO = req.body;
         const { _id: userId } = req.user as IUser;
 
-        const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-        const post = await PostServiceInstance.registerPost(userId, postDTO);
+        const post = await registerPost(userId, postDTO);
         return res.status(201).json(post);
       } catch (error) {
         return res.status(400).json({
@@ -559,8 +542,7 @@ export default (app: Router) => {
 
       const postDTO = req.body;
 
-      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const post = await PostServiceInstance.modifyPost(Types.ObjectId(id), tokenUserId, tokenType, postDTO);
+      const post = await modifyPost(Types.ObjectId(id), tokenUserId, tokenType, postDTO);
 
       return res.status(200).json(post);
     }),
@@ -601,8 +583,7 @@ export default (app: Router) => {
       const { id } = req.params;
       const { _id: tokenUserId, tokenType } = req.user as IUser;
 
-      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      await PostServiceInstance.deletePost(Types.ObjectId(id), tokenUserId, tokenType);
+      await deletePost(Types.ObjectId(id), tokenUserId, tokenType);
       return res.status(204).json();
     }),
   );
@@ -667,8 +648,7 @@ export default (app: Router) => {
       const { postId } = req.body;
       const { _id: userId } = req.user as IUser;
 
-      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const post = await PostServiceInstance.addLike(Types.ObjectId(postId), userId);
+      const post = await addLike(Types.ObjectId(postId), userId);
 
       return res.status(201).json({ likeUsers: post.likes });
     }),
@@ -713,8 +693,7 @@ export default (app: Router) => {
       const postId = req.params.id; // 사용자 id
       const { _id: userId } = req.user as IUser;
 
-      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const post = await PostServiceInstance.deleteLike(Types.ObjectId(postId), userId);
+      const post = await deleteLike(Types.ObjectId(postId), userId);
       return res.status(201).json({ likeUsers: post.likes });
     }),
   );
@@ -763,8 +742,7 @@ export default (app: Router) => {
       const postId = req.params.id;
       const { _id: userId } = req.user as IUser;
 
-      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const isLiked = await PostServiceInstance.findUserLiked(Types.ObjectId(postId), userId);
+      const isLiked = await findUserLiked(Types.ObjectId(postId), userId);
 
       return res.status(200).json({
         isLiked,
@@ -807,8 +785,7 @@ export default (app: Router) => {
     '/:id/likes',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const postId = req.params.id;
-      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const likeUsers = await PostServiceInstance.findLikeUsers(Types.ObjectId(postId));
+      const likeUsers = await findLikeUsers(Types.ObjectId(postId));
 
       return res.status(200).json({
         likeUsers,

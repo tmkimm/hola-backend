@@ -36,70 +36,60 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReplyService = void 0;
-var ReplyService = /** @class */ (function () {
-    function ReplyService(postModel, notificationModel) {
-        this.postModel = postModel;
-        this.notificationModel = notificationModel;
-    }
-    // 신규 대댓글을 추가한다.
-    ReplyService.prototype.registerReply = function (userID, postId, commentId, content, nickName) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, post, replyId, author;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0: return [4 /*yield*/, this.postModel.registerReply(postId, commentId, content, userID)];
-                    case 1:
-                        _a = _b.sent(), post = _a.post, replyId = _a.replyId;
-                        return [4 /*yield*/, this.postModel.findAuthorByCommentId(commentId)];
-                    case 2:
-                        author = _b.sent();
-                        if (author !== null)
-                            // await this.notificationModel.registerNotification(postId, author, userID, 'reply', replyId, nickName); // 알림 등록
-                            return [2 /*return*/, post];
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    // 대댓글을 수정한다.
-    ReplyService.prototype.modifyReply = function (comment, tokenUserId) {
-        return __awaiter(this, void 0, void 0, function () {
-            var commentRecord;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.checkReplyAuthorization(comment._id, tokenUserId)];
-                    case 1:
-                        _a.sent();
-                        return [4 /*yield*/, this.postModel.modifyReply(comment)];
-                    case 2:
-                        commentRecord = _a.sent();
-                        return [2 /*return*/, commentRecord];
-                }
-            });
-        });
-    };
-    // 대댓글을 삭제한다.
-    ReplyService.prototype.deleteReply = function (replyId, userId) {
-        return __awaiter(this, void 0, void 0, function () {
-            var author, postRecord;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.checkReplyAuthorization(replyId, userId)];
-                    case 1:
-                        _a.sent();
-                        return [4 /*yield*/, this.postModel.findAuthorByReplyId(replyId)];
-                    case 2:
-                        author = _a.sent();
-                        return [4 /*yield*/, this.postModel.deleteReply(replyId)];
-                    case 3:
-                        postRecord = _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    return ReplyService;
-}());
-exports.ReplyService = ReplyService;
+exports.deleteReply = exports.modifyReply = exports.registerReply = void 0;
+var Post_1 = require("../models/Post");
+// 신규 대댓글을 추가한다.
+var registerReply = function (userID, postId, commentId, content, nickName) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, post, replyId, author;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0: return [4 /*yield*/, Post_1.Post.registerReply(postId, commentId, content, userID)];
+            case 1:
+                _a = _b.sent(), post = _a.post, replyId = _a.replyId;
+                return [4 /*yield*/, Post_1.Post.findAuthorByCommentId(commentId)];
+            case 2:
+                author = _b.sent();
+                if (author !== null)
+                    // await NotificationModel.registerNotification(postId, author, userID, 'reply', replyId, nickName); // 알림 등록
+                    return [2 /*return*/, post];
+                return [2 /*return*/];
+        }
+    });
+}); };
+exports.registerReply = registerReply;
+// 대댓글을 수정한다.
+var modifyReply = function (comment, tokenUserId) { return __awaiter(void 0, void 0, void 0, function () {
+    var commentRecord;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, Post_1.Post.checkReplyAuthorization(comment._id, tokenUserId)];
+            case 1:
+                _a.sent();
+                return [4 /*yield*/, Post_1.Post.modifyReply(comment)];
+            case 2:
+                commentRecord = _a.sent();
+                return [2 /*return*/, commentRecord];
+        }
+    });
+}); };
+exports.modifyReply = modifyReply;
+// 대댓글을 삭제한다.
+var deleteReply = function (replyId, userId) { return __awaiter(void 0, void 0, void 0, function () {
+    var author, postRecord;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, Post_1.Post.checkReplyAuthorization(replyId, userId)];
+            case 1:
+                _a.sent();
+                return [4 /*yield*/, Post_1.Post.findAuthorByReplyId(replyId)];
+            case 2:
+                author = _a.sent();
+                return [4 /*yield*/, Post_1.Post.deleteReply(replyId)];
+            case 3:
+                postRecord = _a.sent();
+                return [2 /*return*/];
+        }
+    });
+}); };
+exports.deleteReply = deleteReply;
 //# sourceMappingURL=reply.js.map

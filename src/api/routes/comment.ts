@@ -3,10 +3,8 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { isPostIdValid } from '../middlewares/isPostIdValid';
 import { IUser } from '../../models/User';
 import { isAccessTokenValid } from '../middlewares/index';
-import { CommentService } from '../../services/index';
+import { findComments, registerComment, modifyComment, deleteComment } from '../../services/comment';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
-import { Post as PostModel } from '../../models/Post';
-import { Notification as NotificationModel } from '../../models/Notification';
 import CustomError from '../../CustomError';
 
 const route = Router();
@@ -61,8 +59,7 @@ export default (app: Router) => {
       if (!id || !Types.ObjectId.isValid(id)) {
         throw new CustomError('InvalidApiError', 400, 'Invalid Api Parameter');
       }
-      const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
-      const comments = await CommentServiceInstance.findComments(Types.ObjectId(id));
+      const comments = await findComments(Types.ObjectId(id));
 
       return res.status(200).json(comments);
     }),
@@ -122,8 +119,7 @@ export default (app: Router) => {
       const { _id: userId } = req.user as IUser;
 
       if (!nickName) nickName = `사용자`;
-      const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
-      const post = await CommentServiceInstance.registerComment(userId, postId, content, nickName);
+      const post = await registerComment(userId, postId, content, nickName);
 
       return res.status(201).json(post);
     }),
@@ -183,8 +179,7 @@ export default (app: Router) => {
       commentDTO._id = req.params.id;
       const { _id: tokenUserId, tokenType } = req.user as IUser;
 
-      const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
-      const comment = await CommentServiceInstance.modifyComment(commentDTO, tokenUserId, tokenType);
+      const comment = await modifyComment(commentDTO, tokenUserId, tokenType);
 
       return res.status(200).json(comment);
     }),
@@ -222,8 +217,7 @@ export default (app: Router) => {
       const commentId = req.params.id;
       const { _id: userId, tokenType } = req.user as IUser;
 
-      const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
-      await CommentServiceInstance.deleteComment(Types.ObjectId(commentId), userId, tokenType);
+      await deleteComment(Types.ObjectId(commentId), userId, tokenType);
       return res.status(204).json();
     }),
   );

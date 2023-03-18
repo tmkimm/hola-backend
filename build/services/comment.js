@@ -36,78 +36,65 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CommentService = void 0;
-var CommentService = /** @class */ (function () {
-    function CommentService(postModel, notificationModel) {
-        this.postModel = postModel;
-        this.notificationModel = notificationModel;
-        this.postModel = postModel;
-        this.notificationModel = notificationModel;
-    }
-    // 글 id를 이용해 댓글 리스트를 조회한다.
-    CommentService.prototype.findComments = function (id) {
-        return __awaiter(this, void 0, void 0, function () {
-            var comments;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.findComments(id)];
-                    case 1:
-                        comments = _a.sent();
-                        return [2 /*return*/, comments];
-                }
-            });
-        });
-    };
-    // 신규 댓글을 추가한다.
-    CommentService.prototype.registerComment = function (userID, postId, content, nickName) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, post, commentId;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0: return [4 /*yield*/, this.postModel.registerComment(postId, content, userID)];
-                    case 1:
-                        _a = _b.sent(), post = _a.post, commentId = _a.commentId;
-                        // await this.notificationModel.registerNotification(postId, post.author, userID, 'comment', commentId, nickName); // 알림 등록
-                        return [2 /*return*/, post];
-                }
-            });
-        });
-    };
-    // 댓글을 수정한다.
-    CommentService.prototype.modifyComment = function (comment, tokenUserId, tokenType) {
-        return __awaiter(this, void 0, void 0, function () {
-            var commentRecord;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.checkCommentAuthorization(comment._id, tokenUserId, tokenType)];
-                    case 1:
-                        _a.sent();
-                        return [4 /*yield*/, this.postModel.modifyComment(comment)];
-                    case 2:
-                        commentRecord = _a.sent();
-                        return [2 /*return*/, commentRecord];
-                }
-            });
-        });
-    };
-    // 댓글을 삭제한다.
-    CommentService.prototype.deleteComment = function (commentId, userId, tokenType) {
-        return __awaiter(this, void 0, void 0, function () {
-            var postRecord;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.checkCommentAuthorization(commentId, userId, tokenType)];
-                    case 1:
-                        _a.sent();
-                        return [4 /*yield*/, this.postModel.deleteComment(commentId)];
-                    case 2:
-                        postRecord = _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    return CommentService;
-}());
-exports.CommentService = CommentService;
+exports.deleteComment = exports.modifyComment = exports.registerComment = exports.findComments = void 0;
+var Post_1 = require("../models/Post");
+// 글 id를 이용해 댓글 리스트를 조회한다.
+var findComments = function (id) { return __awaiter(void 0, void 0, void 0, function () {
+    var comments;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, Post_1.Post.findComments(id)];
+            case 1:
+                comments = _a.sent();
+                return [2 /*return*/, comments];
+        }
+    });
+}); };
+exports.findComments = findComments;
+// 신규 댓글 추가
+var registerComment = function (userID, postId, content, nickName) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, post, commentId;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0: return [4 /*yield*/, Post_1.Post.registerComment(postId, content, userID)];
+            case 1:
+                _a = _b.sent(), post = _a.post, commentId = _a.commentId;
+                // await this.notificationModel.registerNotification(postId, post.author, userID, 'comment', commentId, nickName); // 알림 등록
+                return [2 /*return*/, post];
+        }
+    });
+}); };
+exports.registerComment = registerComment;
+// 댓글 수정한다.
+var modifyComment = function (comment, tokenUserId, tokenType) { return __awaiter(void 0, void 0, void 0, function () {
+    var commentRecord;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, Post_1.Post.checkCommentAuthorization(comment._id, tokenUserId, tokenType)];
+            case 1:
+                _a.sent();
+                return [4 /*yield*/, Post_1.Post.modifyComment(comment)];
+            case 2:
+                commentRecord = _a.sent();
+                return [2 /*return*/, commentRecord];
+        }
+    });
+}); };
+exports.modifyComment = modifyComment;
+// 댓글 삭제한다.
+var deleteComment = function (commentId, userId, tokenType) { return __awaiter(void 0, void 0, void 0, function () {
+    var postRecord;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, Post_1.Post.checkCommentAuthorization(commentId, userId, tokenType)];
+            case 1:
+                _a.sent();
+                return [4 /*yield*/, Post_1.Post.deleteComment(commentId)];
+            case 2:
+                postRecord = _a.sent();
+                return [2 /*return*/];
+        }
+    });
+}); };
+exports.deleteComment = deleteComment;
 //# sourceMappingURL=comment.js.map

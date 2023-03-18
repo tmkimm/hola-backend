@@ -37,9 +37,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var index_1 = require("../../services/index");
+var auth_1 = require("../../services/auth");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
-var User_1 = require("../../models/User");
 var isPasswordValidWithAdmin_1 = require("../middlewares/isPasswordValidWithAdmin");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
@@ -106,13 +105,12 @@ exports.default = (function (app) {
      */
     // #endregion
     route.post('/login', isPasswordValidWithAdmin_1.isPasswordValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var idToken, AuthServiceInstance, _a, _id, nickName, image, likeLanguages, accessToken, refreshToken;
+        var idToken, _a, _id, nickName, image, likeLanguages, accessToken, refreshToken;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     idToken = req.user.idToken;
-                    AuthServiceInstance = new index_1.AuthService(User_1.User);
-                    return [4 /*yield*/, AuthServiceInstance.SignIn(idToken)];
+                    return [4 /*yield*/, (0, auth_1.SignIn)(idToken)];
                 case 1:
                     _a = _b.sent(), _id = _a._id, nickName = _a.nickName, image = _a.image, likeLanguages = _a.likeLanguages, accessToken = _a.accessToken, refreshToken = _a.refreshToken;
                     res.cookie('R_AUTH', refreshToken, {

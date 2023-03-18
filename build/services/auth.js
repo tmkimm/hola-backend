@@ -39,69 +39,61 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AuthService = void 0;
+exports.reissueAccessToken = exports.SignIn = void 0;
 var CustomError_1 = __importDefault(require("../CustomError"));
+var User_1 = require("../models/User");
 var jwt_1 = require("../utills/jwt");
-var AuthService = /** @class */ (function () {
-    function AuthService(userModel) {
-        this.userModel = userModel;
-    }
-    // 로그인 시 사용자 정보를 조회하고 Token을 생성한다.
-    AuthService.prototype.SignIn = function (idToken) {
-        return __awaiter(this, void 0, void 0, function () {
-            var user, _id, nickName, image, likeLanguages, _a, accessToken, refreshToken;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0: return [4 /*yield*/, this.userModel.findByIdToken(idToken)];
-                    case 1:
-                        user = _b.sent();
-                        if (!user)
-                            throw new CustomError_1.default('InvaildParameterError', 401, 'User not found');
-                        _id = user._id, nickName = user.nickName, image = user.image, likeLanguages = user.likeLanguages;
-                        return [4 /*yield*/, Promise.all([user.generateAccessToken(), user.generateRefreshToken()])];
-                    case 2:
-                        _a = _b.sent(), accessToken = _a[0], refreshToken = _a[1];
-                        return [2 /*return*/, { _id: _id, nickName: nickName, image: image, likeLanguages: likeLanguages, accessToken: accessToken, refreshToken: refreshToken }];
-                }
-            });
-        });
-    };
-    // Refresh Token을 이용하여 Access Token 재발급한다.
-    AuthService.prototype.reissueAccessToken = function (refreshToken) {
-        return __awaiter(this, void 0, void 0, function () {
-            var decodeSuccess, decodeRefreshToken, user, _id, nickName, email, image, likeLanguages, accessToken, err_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        decodeSuccess = true;
-                        _a.label = 1;
-                    case 1:
-                        _a.trys.push([1, 5, , 6]);
-                        return [4 /*yield*/, (0, jwt_1.verifyJWT)(refreshToken)];
-                    case 2:
-                        decodeRefreshToken = _a.sent();
-                        if (typeof decodeRefreshToken === 'string')
-                            throw new CustomError_1.default('JsonWebTokenError', 401, 'Invaild Token');
-                        return [4 /*yield*/, this.userModel.findByNickName(decodeRefreshToken.nickName)];
-                    case 3:
-                        user = _a.sent();
-                        if (!user)
-                            throw new CustomError_1.default('InvaildParameterError', 401, 'User not found');
-                        _id = user._id, nickName = user.nickName, email = user.email, image = user.image, likeLanguages = user.likeLanguages;
-                        return [4 /*yield*/, user.generateAccessToken()];
-                    case 4:
-                        accessToken = _a.sent();
-                        return [2 /*return*/, { decodeSuccess: decodeSuccess, _id: _id, nickName: nickName, email: email, image: image, likeLanguages: likeLanguages, accessToken: accessToken }];
-                    case 5:
-                        err_1 = _a.sent();
-                        decodeSuccess = false;
-                        return [2 /*return*/, { decodeSuccess: decodeSuccess }];
-                    case 6: return [2 /*return*/];
-                }
-            });
-        });
-    };
-    return AuthService;
-}());
-exports.AuthService = AuthService;
+// 로그인 시 사용자 정보를 조회, Token을 생성한다.
+var SignIn = function (idToken) { return __awaiter(void 0, void 0, void 0, function () {
+    var user, _id, nickName, image, likeLanguages, _a, accessToken, refreshToken;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0: return [4 /*yield*/, User_1.User.findByIdToken(idToken)];
+            case 1:
+                user = _b.sent();
+                if (!user)
+                    throw new CustomError_1.default('InvaildParameterError', 401, 'User not found');
+                _id = user._id, nickName = user.nickName, image = user.image, likeLanguages = user.likeLanguages;
+                return [4 /*yield*/, Promise.all([user.generateAccessToken(), user.generateRefreshToken()])];
+            case 2:
+                _a = _b.sent(), accessToken = _a[0], refreshToken = _a[1];
+                return [2 /*return*/, { _id: _id, nickName: nickName, image: image, likeLanguages: likeLanguages, accessToken: accessToken, refreshToken: refreshToken }];
+        }
+    });
+}); };
+exports.SignIn = SignIn;
+// Refresh Token을 이용하여 Access Token 재발급한다.
+var reissueAccessToken = function (refreshToken) { return __awaiter(void 0, void 0, void 0, function () {
+    var decodeSuccess, decodeRefreshToken, user, _id, nickName, email, image, likeLanguages, accessToken, err_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                decodeSuccess = true;
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 5, , 6]);
+                return [4 /*yield*/, (0, jwt_1.verifyJWT)(refreshToken)];
+            case 2:
+                decodeRefreshToken = _a.sent();
+                if (typeof decodeRefreshToken === 'string')
+                    throw new CustomError_1.default('JsonWebTokenError', 401, 'Invaild Token');
+                return [4 /*yield*/, User_1.User.findByNickName(decodeRefreshToken.nickName)];
+            case 3:
+                user = _a.sent();
+                if (!user)
+                    throw new CustomError_1.default('InvaildParameterError', 401, 'User not found');
+                _id = user._id, nickName = user.nickName, email = user.email, image = user.image, likeLanguages = user.likeLanguages;
+                return [4 /*yield*/, user.generateAccessToken()];
+            case 4:
+                accessToken = _a.sent();
+                return [2 /*return*/, { decodeSuccess: decodeSuccess, _id: _id, nickName: nickName, email: email, image: image, likeLanguages: likeLanguages, accessToken: accessToken }];
+            case 5:
+                err_1 = _a.sent();
+                decodeSuccess = false;
+                return [2 /*return*/, { decodeSuccess: decodeSuccess }];
+            case 6: return [2 /*return*/];
+        }
+    });
+}); };
+exports.reissueAccessToken = reissueAccessToken;
 //# sourceMappingURL=auth.js.map

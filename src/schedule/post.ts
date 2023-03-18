@@ -1,6 +1,6 @@
 import schedule from 'node-schedule';
 import { IUser, User as UserModel } from '../models/User';
-import { PostService } from '../services/index';
+import { autoClosing } from '../services/post';
 import { Post as PostModel } from '../models/Post';
 import { Notification as NotificationModel } from '../models/Notification';
 /*
@@ -8,7 +8,7 @@ import { Notification as NotificationModel } from '../models/Notification';
 */
 
 // 자동 마감
-async function autoClosing() {
+async function automaticClosingOfPosts() {
   // 프로덕션 환경에서만 실행
   if (process.env.NODE_ENV === 'production') {
     const rule = new schedule.RecurrenceRule();
@@ -16,10 +16,9 @@ async function autoClosing() {
     rule.tz = 'Asia/Seoul';
 
     const job = await schedule.scheduleJob(rule, async function () {
-      const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      await PostServiceInstance.autoClosing();
+      await autoClosing();
     });
   }
 }
 
-export { autoClosing };
+export { automaticClosingOfPosts };

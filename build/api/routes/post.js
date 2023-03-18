@@ -38,12 +38,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mongoose_1 = require("mongoose");
-var User_1 = require("../../models/User");
 var index_1 = require("../middlewares/index");
-var index_2 = require("../../services/index");
+var post_1 = require("../../services/post");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
-var Post_1 = require("../../models/Post");
-var Notification_1 = require("../../models/Notification");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**
@@ -139,13 +136,12 @@ exports.default = (function (app) {
      */
     // #endregion
     route.get('/', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, offset, limit, sort, language, period, isClosed, type, position, search, PostServiceInstance, posts;
+        var _a, offset, limit, sort, language, period, isClosed, type, position, search, posts;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = req.query, offset = _a.offset, limit = _a.limit, sort = _a.sort, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findPost(offset, limit, sort, language, period, isClosed, type, position, search)];
+                    return [4 /*yield*/, (0, post_1.findPost)(offset, limit, sort, language, period, isClosed, type, position, search)];
                 case 1:
                     posts = _b.sent();
                     return [2 /*return*/, res.status(200).json(posts)];
@@ -240,14 +236,13 @@ exports.default = (function (app) {
      */
     // #endregion
     route.get('/pagination', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, page, sort, language, period, isClosed, type, position, search, userId, PostServiceInstance, posts;
+        var _a, page, sort, language, period, isClosed, type, position, search, userId, posts;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = req.query, page = _a.page, sort = _a.sort, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search;
                     userId = req.user._id;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findPostPagination(page, sort, language, period, isClosed, type, position, search, userId)];
+                    return [4 /*yield*/, (0, post_1.findPostPagination)(page, sort, language, period, isClosed, type, position, search, userId)];
                 case 1:
                     posts = _b.sent();
                     return [2 /*return*/, res.status(200).json(posts)];
@@ -320,13 +315,12 @@ exports.default = (function (app) {
      *                    example: 7
      */
     route.get('/last-page', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, language, period, isClosed, type, position, search, PostServiceInstance, lastPage;
+        var _a, language, period, isClosed, type, position, search, lastPage;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = req.query, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findLastPage(language, period, isClosed, type, position, search)];
+                    return [4 /*yield*/, (0, post_1.findLastPage)(language, period, isClosed, type, position, search)];
                 case 1:
                     lastPage = _b.sent();
                     return [2 /*return*/, res.status(200).json({
@@ -373,14 +367,13 @@ exports.default = (function (app) {
      */
     // #endregion
     route.get('/:id/recommend', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var postId, userId, PostServiceInstance, post;
+        var postId, userId, post;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     postId = req.params.id;
                     userId = req.user._id;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.recommendToUserFromPost(mongoose_1.Types.ObjectId(postId), userId)];
+                    return [4 /*yield*/, (0, post_1.recommendToUserFromPost)(mongoose_1.Types.ObjectId(postId), userId)];
                 case 1:
                     post = _a.sent();
                     // const post = await PostServiceInstance.findPopularPosts(Types.ObjectId(postId), userId);  // 무조건 인기글 순으로 조회
@@ -426,18 +419,17 @@ exports.default = (function (app) {
      */
     // #endregion
     route.get('/:id', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var postId, userId, readList, PostServiceInstance, post, _a, updateReadList, isAlreadyRead, untilMidnight;
+        var postId, userId, readList, post, _a, updateReadList, isAlreadyRead, untilMidnight;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     postId = req.params.id;
                     userId = req.user._id;
                     readList = req.cookies.RVIEW;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findPostDetail(mongoose_1.Types.ObjectId(postId))];
+                    return [4 /*yield*/, (0, post_1.findPostDetail)(mongoose_1.Types.ObjectId(postId))];
                 case 1:
                     post = _b.sent();
-                    return [4 /*yield*/, PostServiceInstance.increaseView(mongoose_1.Types.ObjectId(postId), userId, readList)];
+                    return [4 /*yield*/, (0, post_1.increaseView)(mongoose_1.Types.ObjectId(postId), userId, readList)];
                 case 2:
                     _a = _b.sent(), updateReadList = _a.updateReadList, isAlreadyRead = _a.isAlreadyRead;
                     if (!isAlreadyRead) {
@@ -493,15 +485,14 @@ exports.default = (function (app) {
     // #endregion
     route.post('/', index_1.checkPost, index_1.isPostValid, index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
-            var postDTO, userId, PostServiceInstance, post, error_1;
+            var postDTO, userId, post, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
                         postDTO = req.body;
                         userId = req.user._id;
-                        PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                        return [4 /*yield*/, PostServiceInstance.registerPost(userId, postDTO)];
+                        return [4 /*yield*/, (0, post_1.registerPost)(userId, postDTO)];
                     case 1:
                         post = _a.sent();
                         return [2 /*return*/, res.status(201).json(post)];
@@ -568,15 +559,14 @@ exports.default = (function (app) {
      */
     // #endregion
     route.patch('/:id', index_1.isAccessTokenValid, index_1.checkPost, index_1.isPostValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, _a, tokenUserId, tokenType, postDTO, PostServiceInstance, post;
+        var id, _a, tokenUserId, tokenType, postDTO, post;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     id = req.params.id;
                     _a = req.user, tokenUserId = _a._id, tokenType = _a.tokenType;
                     postDTO = req.body;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.modifyPost(mongoose_1.Types.ObjectId(id), tokenUserId, tokenType, postDTO)];
+                    return [4 /*yield*/, (0, post_1.modifyPost)(mongoose_1.Types.ObjectId(id), tokenUserId, tokenType, postDTO)];
                 case 1:
                     post = _b.sent();
                     return [2 /*return*/, res.status(200).json(post)];
@@ -611,14 +601,13 @@ exports.default = (function (app) {
      */
     // #endregion
     route.delete('/:id', index_1.isPostIdValid, index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, _a, tokenUserId, tokenType, PostServiceInstance;
+        var id, _a, tokenUserId, tokenType;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     id = req.params.id;
                     _a = req.user, tokenUserId = _a._id, tokenType = _a.tokenType;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.deletePost(mongoose_1.Types.ObjectId(id), tokenUserId, tokenType)];
+                    return [4 /*yield*/, (0, post_1.deletePost)(mongoose_1.Types.ObjectId(id), tokenUserId, tokenType)];
                 case 1:
                     _b.sent();
                     return [2 /*return*/, res.status(204).json()];
@@ -678,14 +667,13 @@ exports.default = (function (app) {
      */
     // #endregion
     route.post('/likes', index_1.isAccessTokenValid, index_1.isPostIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var postId, userId, PostServiceInstance, post;
+        var postId, userId, post;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     postId = req.body.postId;
                     userId = req.user._id;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.addLike(mongoose_1.Types.ObjectId(postId), userId)];
+                    return [4 /*yield*/, (0, post_1.addLike)(mongoose_1.Types.ObjectId(postId), userId)];
                 case 1:
                     post = _a.sent();
                     return [2 /*return*/, res.status(201).json({ likeUsers: post.likes })];
@@ -724,14 +712,13 @@ exports.default = (function (app) {
      *          description: Post not found
      */
     route.delete('/likes/:id', index_1.isAccessTokenValid, index_1.isPostIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var postId, userId, PostServiceInstance, post;
+        var postId, userId, post;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     postId = req.params.id;
                     userId = req.user._id;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.deleteLike(mongoose_1.Types.ObjectId(postId), userId)];
+                    return [4 /*yield*/, (0, post_1.deleteLike)(mongoose_1.Types.ObjectId(postId), userId)];
                 case 1:
                     post = _a.sent();
                     return [2 /*return*/, res.status(201).json({ likeUsers: post.likes })];
@@ -776,14 +763,13 @@ exports.default = (function (app) {
      *          $ref: '#/components/responses/UnauthorizedError'
      */
     route.get('/:id/isLiked', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var postId, userId, PostServiceInstance, isLiked;
+        var postId, userId, isLiked;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     postId = req.params.id;
                     userId = req.user._id;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findUserLiked(mongoose_1.Types.ObjectId(postId), userId)];
+                    return [4 /*yield*/, (0, post_1.findUserLiked)(mongoose_1.Types.ObjectId(postId), userId)];
                 case 1:
                     isLiked = _a.sent();
                     return [2 /*return*/, res.status(200).json({
@@ -824,13 +810,12 @@ exports.default = (function (app) {
      *                      type: string
      */
     route.get('/:id/likes', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var postId, PostServiceInstance, likeUsers;
+        var postId, likeUsers;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     postId = req.params.id;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findLikeUsers(mongoose_1.Types.ObjectId(postId))];
+                    return [4 /*yield*/, (0, post_1.findLikeUsers)(mongoose_1.Types.ObjectId(postId))];
                 case 1:
                     likeUsers = _a.sent();
                     return [2 /*return*/, res.status(200).json({

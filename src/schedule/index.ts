@@ -1,5 +1,5 @@
-import { autoClosing } from './post';
+import { automaticClosingOfPosts } from './post';
 
 export default () => {
-  //  autoClosing(); // 자동 마감
+  //  automaticClosingOfPosts(); // 자동 마감
 };

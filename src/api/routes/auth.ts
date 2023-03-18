@@ -1,7 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Notification as NotificationModel } from '../../models/Notification';
 import { User as UserModel } from '../../models/User';
-import { AuthService, NotificationService } from '../../services/index';
+import { reissueAccessToken } from '../../services/auth';
+import { findUnReadCount } from '../../services/notification';
 import { isAccessTokenValid } from '../middlewares/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import CustomError from '../../CustomError';
@@ -10,17 +11,17 @@ const route = Router();
 
 export default (app: Router) => {
   /**
- * @swagger
- *  components:
- *    securitySchemes:
- *      bearerAuth:
- *        type: http
- *        scheme: bearer
- *        bearerFormat: JWT
- *    responses:
- *      UnauthorizedError:
- *        description: Access token is missing or invalid
- */
+   * @swagger
+   *  components:
+   *    securitySchemes:
+   *      bearerAuth:
+   *        type: http
+   *        scheme: bearer
+   *        bearerFormat: JWT
+   *    responses:
+   *      UnauthorizedError:
+   *        description: Access token is missing or invalid
+   */
 
   /*
     권한에 관련된 Router를 정의한다.
@@ -37,17 +38,16 @@ export default (app: Router) => {
       if (!req.cookies.R_AUTH) {
         throw new CustomError('RefreshTokenError', 401, 'Refresh token not found');
       }
-      const AuthServiceInstance = new AuthService(UserModel);
-      const { decodeSuccess, _id, nickName, image, likeLanguages, accessToken } =
-        await AuthServiceInstance.reissueAccessToken(req.cookies.R_AUTH);
+      const { decodeSuccess, _id, nickName, image, likeLanguages, accessToken } = await reissueAccessToken(
+        req.cookies.R_AUTH,
+      );
       // Refresh Token가 유효하지 않을 경우
 
       if (!decodeSuccess || typeof _id === 'undefined') {
         res.clearCookie('R_AUTH');
         throw new CustomError('RefreshTokenError', 401, 'Invalid refresh token');
       }
-      const NotificationServcieInstance = new NotificationService(NotificationModel);
-      const unReadNoticeCount = await NotificationServcieInstance.findUnReadCount(_id);
+      const unReadNoticeCount = await findUnReadCount(_id);
       const hasUnreadNotice = unReadNoticeCount > 0;
       return res.status(200).json({
         _id,

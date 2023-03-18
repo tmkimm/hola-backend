@@ -39,12 +39,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mongoose_1 = require("mongoose");
 var isStringEmpty_1 = require("../../utills/isStringEmpty");
-var User_1 = require("../../models/User");
-var index_1 = require("../../services/index");
-var index_2 = require("../middlewares/index");
+var user_1 = require("../../services/user");
+var index_1 = require("../middlewares/index");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
-var Post_1 = require("../../models/Post");
-var Notification_1 = require("../../models/Notification");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**
@@ -56,13 +53,12 @@ exports.default = (function (app) {
     app.use('/users', route);
     // s3 pre-sign url 발급
     route.post('/sign', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var fileName, UserServiceInstance, signedUrlPut;
+        var fileName, signedUrlPut;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     fileName = req.body.fileName;
-                    UserServiceInstance = new index_1.UserService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, UserServiceInstance.getPreSignUrl(fileName)];
+                    return [4 /*yield*/, (0, user_1.getPreSignUrl)(fileName)];
                 case 1:
                     signedUrlPut = _a.sent();
                     return [2 /*return*/, res.status(200).json({
@@ -101,7 +97,7 @@ exports.default = (function (app) {
      *          description: parameter is incorrect
      */
     route.get('/', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var nickName, UserServiceInstance, user;
+        var nickName, user;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -111,8 +107,7 @@ exports.default = (function (app) {
                                 message: "parameter is incorrect",
                             })];
                     }
-                    UserServiceInstance = new index_1.UserService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, UserServiceInstance.findByNickName(nickName)];
+                    return [4 /*yield*/, (0, user_1.findByNickName)(nickName)];
                 case 1:
                     user = _a.sent();
                     return [2 /*return*/, res.status(200).json(user)];
@@ -148,14 +143,13 @@ exports.default = (function (app) {
      *        404:
      *          description: User not found
      */
-    route.get('/:id', index_2.isUserIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, UserServiceInstance, user;
+    route.get('/:id', index_1.isUserIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var id, user;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     id = req.params.id;
-                    UserServiceInstance = new index_1.UserService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, UserServiceInstance.findById(mongoose_1.Types.ObjectId(id))];
+                    return [4 /*yield*/, (0, user_1.findById)(mongoose_1.Types.ObjectId(id))];
                 case 1:
                     user = _a.sent();
                     return [2 /*return*/, res.status(200).json(user)];
@@ -237,16 +231,15 @@ exports.default = (function (app) {
      *        404:
      *          description: User not found
      */
-    route.patch('/:id', index_2.isUserIdValid, index_2.isAccessTokenValid, index_2.nickNameDuplicationCheck, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, tokenUserId, userDTO, UserServiceInstance, _a, userRecord, accessToken, refreshToken;
+    route.patch('/:id', index_1.isUserIdValid, index_1.isAccessTokenValid, index_1.nickNameDuplicationCheck, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var id, tokenUserId, userDTO, _a, userRecord, accessToken, refreshToken;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     id = req.params.id;
                     tokenUserId = req.user._id;
                     userDTO = req.body;
-                    UserServiceInstance = new index_1.UserService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, UserServiceInstance.modifyUser(mongoose_1.Types.ObjectId(id), tokenUserId, userDTO)];
+                    return [4 /*yield*/, (0, user_1.modifyUser)(mongoose_1.Types.ObjectId(id), tokenUserId, userDTO)];
                 case 1:
                     _a = _b.sent(), userRecord = _a.userRecord, accessToken = _a.accessToken, refreshToken = _a.refreshToken;
                     res.cookie('R_AUTH', refreshToken, {
@@ -306,7 +299,7 @@ exports.default = (function (app) {
      *                    description : '닉네임 중복 여부(true: 중복)'
      *                    example: true
      */
-    route.get('/:id/exists', index_2.nickNameDuplicationCheck, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/:id/exists', index_1.nickNameDuplicationCheck, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, res.status(200).json({
                     isExists: false,
@@ -344,15 +337,14 @@ exports.default = (function (app) {
      *        404:
      *          description: User not found
      */
-    route.delete('/:id', index_2.isUserIdValid, index_2.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, tokenUserId, UserServiceInstance;
+    route.delete('/:id', index_1.isUserIdValid, index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var id, tokenUserId;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     id = req.params.id;
                     tokenUserId = req.user._id;
-                    UserServiceInstance = new index_1.UserService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, UserServiceInstance.deleteUser(mongoose_1.Types.ObjectId(id), tokenUserId)];
+                    return [4 /*yield*/, (0, user_1.deleteUser)(mongoose_1.Types.ObjectId(id), tokenUserId)];
                 case 1:
                     _a.sent();
                     res.clearCookie('R_AUTH');
@@ -389,14 +381,13 @@ exports.default = (function (app) {
      *        404:
      *          description: User not found
      */
-    route.get('/likes/:id', index_2.isUserIdValid, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, UserServiceInstance, user;
+    route.get('/likes/:id', index_1.isUserIdValid, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var id, user;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     id = req.params.id;
-                    UserServiceInstance = new index_1.UserService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, UserServiceInstance.findUserLikes(mongoose_1.Types.ObjectId(id))];
+                    return [4 /*yield*/, (0, user_1.findUserLikes)(mongoose_1.Types.ObjectId(id))];
                 case 1:
                     user = _a.sent();
                     return [2 /*return*/, res.status(200).json(user)];
@@ -432,14 +423,13 @@ exports.default = (function (app) {
      *        404:
      *          description: User not found
      */
-    route.get('/read-list/:id', index_2.isUserIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, UserServiceInstance, user;
+    route.get('/read-list/:id', index_1.isUserIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var id, user;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     id = req.params.id;
-                    UserServiceInstance = new index_1.UserService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, UserServiceInstance.findReadList(mongoose_1.Types.ObjectId(id))];
+                    return [4 /*yield*/, (0, user_1.findReadList)(mongoose_1.Types.ObjectId(id))];
                 case 1:
                     user = _a.sent();
                     return [2 /*return*/, res.status(200).json(user)];
@@ -475,14 +465,13 @@ exports.default = (function (app) {
      *        404:
      *          description: User not found
      */
-    route.get('/myPosts/:id', index_2.isUserIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, UserServiceInstance, user;
+    route.get('/myPosts/:id', index_1.isUserIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var id, user;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     id = req.params.id;
-                    UserServiceInstance = new index_1.UserService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, UserServiceInstance.findMyPosts(mongoose_1.Types.ObjectId(id))];
+                    return [4 /*yield*/, (0, user_1.findMyPosts)(mongoose_1.Types.ObjectId(id))];
                 case 1:
                     user = _a.sent();
                     return [2 /*return*/, res.status(200).json(user)];

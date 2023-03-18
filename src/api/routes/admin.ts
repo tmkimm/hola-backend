@@ -1,6 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { FeedbackService, AuthService, UserService } from '../../services/index';
-import { Feedback as FeedbackModel } from '../../models/Feedback';
+import { SignIn } from '../../services/auth';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { IUser, User as UserModel } from '../../models/User';
 import { isPasswordValidWithAdmin } from '../middlewares/isPasswordValidWithAdmin';
@@ -76,10 +75,7 @@ export default (app: Router) => {
     isPasswordValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { idToken } = req.user as IUser;
-      const AuthServiceInstance = new AuthService(UserModel);
-      const { _id, nickName, image, likeLanguages, accessToken, refreshToken } = await AuthServiceInstance.SignIn(
-        idToken,
-      );
+      const { _id, nickName, image, likeLanguages, accessToken, refreshToken } = await SignIn(idToken);
       res.cookie('R_AUTH', refreshToken, {
         sameSite: 'none',
         httpOnly: true,

@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { AuthService, UserService } from '../../services/index';
+import { SignIn } from '../../services/auth';
+import { modifyUser } from '../../services/user';
 import { isUserIdValid, isTokenValidWithOauth, nickNameDuplicationCheck, autoSignUp } from '../middlewares/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Post as PostModel } from '../../models/Post';
@@ -9,68 +10,68 @@ import { Notification as NotificationModel } from '../../models/Notification';
 const route = Router();
 
 export default (app: Router) => {
-    /**
+  /**
    * @swagger
    * tags:
         - name: login
           description: 로그인에 관련된 API
    */
   app.use('/login', route);
-/**
- * @swagger
- *  components:
- *  schemas:
- *    loginSuccess:
- *      properties:
- *        _id:
- *          type: string
- *          description: 사용자 ID
- *          example: '61063af4ed4b420bbcfa0b4c'
- *        nickName:
- *          type: string
- *          description: 닉네임
- *          example: 'hola!'
- *        image:
- *          type: string
- *          description: 사용자 이미지 명
- *          example: 'default.PNG'
- *        accessToken:
- *          type: string
- *          description: access token
- *        loginSuccess:
- *          type: boolean
- *          description: 로그인 성공 여부
- *          example: true
- *        likeLanguages:
- *          type: array
- *          description: 관심 등록 언어
- *          items:
- *            type: string
- *    SignUpRequired:
- *      properties:
- *        _id:
- *          type: string
- *          description: 사용자 ID
- *          example: '61063af4ed4b420bbcfa0b4c'
- *        loginSuccess:
- *          type: boolean
- *          description: 로그인 성공 여부(false일 경우 회원가입 필요)
- *          example: false
- *        message:
- *          type: string
- *          description: 메시지
- *          example: '회원 가입을 진행해야 합니다.'
- *    nickNameDuplicate:
- *      properties:
- *        isExists::
- *          type: boolean
- *          description: '닉네임 중복 여부(true: 중복)'
- *          example: true
- *        message:
- *          type: string
- *          description: 메시지
- *          example: 'Nickname is duplicated'
- */ 
+  /**
+   * @swagger
+   *  components:
+   *  schemas:
+   *    loginSuccess:
+   *      properties:
+   *        _id:
+   *          type: string
+   *          description: 사용자 ID
+   *          example: '61063af4ed4b420bbcfa0b4c'
+   *        nickName:
+   *          type: string
+   *          description: 닉네임
+   *          example: 'hola!'
+   *        image:
+   *          type: string
+   *          description: 사용자 이미지 명
+   *          example: 'default.PNG'
+   *        accessToken:
+   *          type: string
+   *          description: access token
+   *        loginSuccess:
+   *          type: boolean
+   *          description: 로그인 성공 여부
+   *          example: true
+   *        likeLanguages:
+   *          type: array
+   *          description: 관심 등록 언어
+   *          items:
+   *            type: string
+   *    SignUpRequired:
+   *      properties:
+   *        _id:
+   *          type: string
+   *          description: 사용자 ID
+   *          example: '61063af4ed4b420bbcfa0b4c'
+   *        loginSuccess:
+   *          type: boolean
+   *          description: 로그인 성공 여부(false일 경우 회원가입 필요)
+   *          example: false
+   *        message:
+   *          type: string
+   *          description: 메시지
+   *          example: '회원 가입을 진행해야 합니다.'
+   *    nickNameDuplicate:
+   *      properties:
+   *        isExists::
+   *          type: boolean
+   *          description: '닉네임 중복 여부(true: 중복)'
+   *          example: true
+   *        message:
+   *          type: string
+   *          description: 메시지
+   *          example: 'Nickname is duplicated'
+   */
   /**
    * @swagger
    * paths:
@@ -105,18 +106,15 @@ export default (app: Router) => {
    *                  - $ref: '#/components/schemas/SignUpRequired'
    *        400:
    *          description: Oauth parameter is Invalid
-   */  
+   */
   route.post(
     '/',
-    isTokenValidWithOauth,  // 클라이언트에게 전달받은 idToken을 이용해 유효성 검증 후 사용자 정보를 가져온다.
+    isTokenValidWithOauth, // 클라이언트에게 전달받은 idToken을 이용해 유효성 검증 후 사용자 정보를 가져온다.
     autoSignUp,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       // 로그인 시 각 소셜 로그인 Oauth 서버를 통해 올바른 토큰인지 확인한다.(idToken)
       const { idToken } = req.user as IUser;
-      const AuthServiceInstance = new AuthService(UserModel);
-      const { _id, nickName, image, likeLanguages, accessToken, refreshToken } = await AuthServiceInstance.SignIn(
-        idToken,
-      );
+      const { _id, nickName, image, likeLanguages, accessToken, refreshToken } = await SignIn(idToken);
       res.cookie('R_AUTH', refreshToken, {
         sameSite: 'none',
         httpOnly: true,
@@ -161,7 +159,7 @@ export default (app: Router) => {
    *          description: Oauth parameter is Invalid
    *        404:
    *          description: User not found
-   */  
+   */
   route.post(
     '/signup',
     nickNameDuplicationCheck,
@@ -172,11 +170,9 @@ export default (app: Router) => {
       delete userDTO.id;
 
       // 회원 정보 수정(등록)
-      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
-      const { userRecord } = await UserServiceInstance.modifyUser(id, id, userDTO);
+      const { userRecord } = await modifyUser(id, id, userDTO);
       // AccessToken, RefreshToken 발급
-      const AuthServiceInstance = new AuthService(UserModel);
-      const { accessToken, refreshToken } = await AuthServiceInstance.SignIn(userRecord.idToken);
+      const { accessToken, refreshToken } = await SignIn(userRecord.idToken);
 
       res.cookie('R_AUTH', refreshToken, {
         sameSite: 'none',

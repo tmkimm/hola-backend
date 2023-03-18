@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { FeedbackService } from '../../services/index';
+import { registerFeedback } from '../../services/feedback';
 import { Feedback as FeedbackModel } from '../../models/Feedback';
 
 const route = Router();
@@ -15,8 +15,7 @@ export default (app: Router) => {
   route.post('/', async function (req: Request, res: Response, next: NextFunction) {
     const { rating, content } = req.body;
 
-    const FeedbackServiceInstance = new FeedbackService(FeedbackModel);
-    const feedback = await FeedbackServiceInstance.registerFeedback(rating, content);
+    const feedback = await registerFeedback(rating, content);
     return res.status(201).json(feedback);
   });
 };

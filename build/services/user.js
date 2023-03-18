@@ -39,211 +39,194 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserService = void 0;
+exports.addReadLists = exports.getPreSignUrl = exports.findMyPosts = exports.findReadList = exports.findUserLikes = exports.deleteUser = exports.modifyUser = exports.findById = exports.findByNickName = void 0;
 var aws_sdk_1 = __importDefault(require("aws-sdk"));
+var User_1 = require("../models/User");
 var ReadPosts_1 = require("../models/ReadPosts");
 var LikePosts_1 = require("../models/LikePosts");
+var Post_1 = require("../models/Post");
 var index_1 = __importDefault(require("../config/index"));
 var CustomError_1 = __importDefault(require("../CustomError"));
 var SignOutUser_1 = require("../models/SignOutUser");
-var UserService = /** @class */ (function () {
-    function UserService(postModel, userModel, notificationModel) {
-        this.postModel = postModel;
-        this.userModel = userModel;
-        this.notificationModel = notificationModel;
-    }
-    // 닉네임을 이용하여 사용자 정보를 조회한다.
-    UserService.prototype.findByNickName = function (nickName) {
-        return __awaiter(this, void 0, void 0, function () {
-            var users;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.userModel.findByNickName(nickName)];
-                    case 1:
-                        users = _a.sent();
-                        return [2 /*return*/, users];
-                }
-            });
-        });
-    };
-    // id를 이용하여 사용자 정보를 조회한다.
-    UserService.prototype.findById = function (id) {
-        return __awaiter(this, void 0, void 0, function () {
-            var users;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.userModel.findById(id)];
-                    case 1:
-                        users = _a.sent();
-                        return [2 /*return*/, users];
-                }
-            });
-        });
-    };
-    // 사용자 정보를 수정한다.
-    // 닉네임을 기준으로 Token을 생성하기 때문에 Token을 재발급한다.
-    UserService.prototype.modifyUser = function (id, tokenUserId, user) {
-        return __awaiter(this, void 0, void 0, function () {
-            var userRecord, _a, accessToken, refreshToken;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        if (id.toString() !== tokenUserId.toString())
-                            throw new CustomError_1.default('NotAuthenticatedError', 401, 'User does not match');
-                        return [4 /*yield*/, this.userModel.modifyUser(id, user)];
-                    case 1:
-                        userRecord = _b.sent();
-                        return [4 /*yield*/, Promise.all([
-                                userRecord.generateAccessToken(),
-                                userRecord.generateRefreshToken(),
-                            ])];
-                    case 2:
-                        _a = _b.sent(), accessToken = _a[0], refreshToken = _a[1];
-                        return [2 /*return*/, { userRecord: userRecord, accessToken: accessToken, refreshToken: refreshToken }];
-                }
-            });
-        });
-    };
-    // 회원 탈퇴
-    UserService.prototype.deleteUser = function (id, tokenUserId) {
-        return __awaiter(this, void 0, void 0, function () {
-            var user;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (id.toString() !== tokenUserId.toString())
-                            throw new CustomError_1.default('NotAuthenticatedError', 401, 'User does not match');
-                        return [4 /*yield*/, this.userModel.findById(id)];
-                    case 1:
-                        user = _a.sent();
-                        if (!user) return [3 /*break*/, 4];
-                        // 탈퇴 유저 이력 생성
-                        return [4 /*yield*/, SignOutUser_1.SignOutUser.create({
-                                idToken: user.idToken,
-                                tokenType: user.tokenType,
-                                nickName: user.nickName,
-                                signInDate: user.createdAt,
-                                signOutDate: new Date(),
-                                userId: user._id,
-                            })];
-                    case 2:
-                        // 탈퇴 유저 이력 생성
-                        _a.sent();
-                        return [4 /*yield*/, this.userModel.findOneAndDelete({ _id: id })];
-                    case 3:
-                        _a.sent();
-                        _a.label = 4;
-                    case 4: return [2 /*return*/];
-                }
-            });
-        });
-    };
-    // 사용자가 관심 등록한 글 리스트를 조회한다.
-    UserService.prototype.findUserLikes = function (id) {
-        return __awaiter(this, void 0, void 0, function () {
-            var likePosts, result;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, LikePosts_1.LikePosts.find({ userId: id })
-                            .populate({
-                            path: 'postId',
-                            select: "title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt",
-                            match: { isDeleted: false },
-                            populate: { path: 'author', select: "nickName image" },
-                        })
-                            .sort('-createdAt')];
-                    case 1:
-                        likePosts = _a.sent();
-                        result = likePosts.map(function (i) {
-                            return i.postId;
-                        });
-                        return [2 /*return*/, result];
-                }
-            });
-        });
-    };
-    // 사용자의 읽은 목록을 조회한다.
-    UserService.prototype.findReadList = function (id) {
-        return __awaiter(this, void 0, void 0, function () {
-            var readList, result;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, ReadPosts_1.ReadPosts.find({ userId: id })
-                            .populate({
-                            path: 'postId',
-                            select: "title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt",
-                            match: { isDeleted: false },
-                            populate: { path: 'author', select: "nickName image" },
-                        })
-                            .sort('-createdAt')];
-                    case 1:
-                        readList = _a.sent();
-                        result = readList.map(function (i) {
-                            return i.postId;
-                        });
-                        return [2 /*return*/, result];
-                }
-            });
-        });
-    };
-    // 사용자의 작성 목록을 조회한다.
-    UserService.prototype.findMyPosts = function (id) {
-        return __awaiter(this, void 0, void 0, function () {
-            var myPosts;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel
-                            .find({ author: id, isDeleted: false })
-                            .populate('author', 'nickName image')
-                            .sort('-createdAt')];
-                    case 1:
-                        myPosts = _a.sent();
-                        return [2 /*return*/, myPosts];
-                }
-            });
-        });
-    };
-    // S3 Pre-Sign Url을 발급한다.
-    // eslint-disable-next-line class-methods-use-this
-    UserService.prototype.getPreSignUrl = function (fileName) {
-        return __awaiter(this, void 0, void 0, function () {
-            var s3, params, signedUrlPut;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        s3 = new aws_sdk_1.default.S3({
-                            accessKeyId: index_1.default.S3AccessKeyId,
-                            secretAccessKey: index_1.default.S3SecretAccessKey,
-                            region: index_1.default.S3BucketRegion,
-                        });
-                        params = {
-                            Bucket: index_1.default.S3BucketName,
-                            Key: fileName,
-                            Expires: 60 * 60 * 3,
-                        };
-                        return [4 /*yield*/, s3.getSignedUrlPromise('putObject', params)];
-                    case 1:
-                        signedUrlPut = _a.sent();
-                        return [2 /*return*/, signedUrlPut];
-                }
-            });
-        });
-    };
-    // 사용자의 읽은 목록을 추가한다.
-    UserService.prototype.addReadLists = function (postId, userId) {
-        return __awaiter(this, void 0, void 0, function () {
-            var user;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.userModel.addReadList(postId, userId)];
-                    case 1:
-                        user = _a.sent();
-                        return [2 /*return*/, user];
-                }
-            });
-        });
-    };
-    return UserService;
-}());
-exports.UserService = UserService;
+// 닉네임을 이용하여 사용자 정보를 조회한다.
+var findByNickName = function (nickName) { return __awaiter(void 0, void 0, void 0, function () {
+    var users;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, User_1.User.findByNickName(nickName)];
+            case 1:
+                users = _a.sent();
+                return [2 /*return*/, users];
+        }
+    });
+}); };
+exports.findByNickName = findByNickName;
+// id를 이용하여 사용자 정보를 조회한다.
+var findById = function (id) { return __awaiter(void 0, void 0, void 0, function () {
+    var users;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, User_1.User.findById(id)];
+            case 1:
+                users = _a.sent();
+                return [2 /*return*/, users];
+        }
+    });
+}); };
+exports.findById = findById;
+// 사용자 정보를 수정한다.
+// 닉네임을 기준으로 Token을 생성하기 때문에 Token을 재발급한다.
+var modifyUser = function (id, tokenUserId, user) { return __awaiter(void 0, void 0, void 0, function () {
+    var userRecord, _a, accessToken, refreshToken;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                if (id.toString() !== tokenUserId.toString())
+                    throw new CustomError_1.default('NotAuthenticatedError', 401, 'User does not match');
+                return [4 /*yield*/, User_1.User.modifyUser(id, user)];
+            case 1:
+                userRecord = _b.sent();
+                return [4 /*yield*/, Promise.all([
+                        userRecord.generateAccessToken(),
+                        userRecord.generateRefreshToken(),
+                    ])];
+            case 2:
+                _a = _b.sent(), accessToken = _a[0], refreshToken = _a[1];
+                return [2 /*return*/, { userRecord: userRecord, accessToken: accessToken, refreshToken: refreshToken }];
+        }
+    });
+}); };
+exports.modifyUser = modifyUser;
+// 회원 탈퇴
+var deleteUser = function (id, tokenUserId) { return __awaiter(void 0, void 0, void 0, function () {
+    var user;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                if (id.toString() !== tokenUserId.toString())
+                    throw new CustomError_1.default('NotAuthenticatedError', 401, 'User does not match');
+                return [4 /*yield*/, User_1.User.findById(id)];
+            case 1:
+                user = _a.sent();
+                if (!user) return [3 /*break*/, 4];
+                // 탈퇴 유저 이력 생성
+                return [4 /*yield*/, SignOutUser_1.SignOutUser.create({
+                        idToken: user.idToken,
+                        tokenType: user.tokenType,
+                        nickName: user.nickName,
+                        signInDate: user.createdAt,
+                        signOutDate: new Date(),
+                        userId: user._id,
+                    })];
+            case 2:
+                // 탈퇴 유저 이력 생성
+                _a.sent();
+                return [4 /*yield*/, User_1.User.findOneAndDelete({ _id: id })];
+            case 3:
+                _a.sent();
+                _a.label = 4;
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+exports.deleteUser = deleteUser;
+// 사용자가 관심 등록한 글 리스트를 조회한다.
+var findUserLikes = function (id) { return __awaiter(void 0, void 0, void 0, function () {
+    var likePosts, result;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, LikePosts_1.LikePosts.find({ userId: id })
+                    .populate({
+                    path: 'postId',
+                    select: "title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt",
+                    match: { isDeleted: false },
+                    populate: { path: 'author', select: "nickName image" },
+                })
+                    .sort('-createdAt')];
+            case 1:
+                likePosts = _a.sent();
+                result = likePosts.map(function (i) {
+                    return i.postId;
+                });
+                return [2 /*return*/, result];
+        }
+    });
+}); };
+exports.findUserLikes = findUserLikes;
+// 사용자의 읽은 목록을 조회한다.
+var findReadList = function (id) { return __awaiter(void 0, void 0, void 0, function () {
+    var readList, result;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, ReadPosts_1.ReadPosts.find({ userId: id })
+                    .populate({
+                    path: 'postId',
+                    select: "title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt",
+                    match: { isDeleted: false },
+                    populate: { path: 'author', select: "nickName image" },
+                })
+                    .sort('-createdAt')];
+            case 1:
+                readList = _a.sent();
+                result = readList.map(function (i) {
+                    return i.postId;
+                });
+                return [2 /*return*/, result];
+        }
+    });
+}); };
+exports.findReadList = findReadList;
+// 사용자의 작성 목록을 조회한다.
+var findMyPosts = function (id) { return __awaiter(void 0, void 0, void 0, function () {
+    var myPosts;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, Post_1.Post.find({ author: id, isDeleted: false })
+                    .populate('author', 'nickName image')
+                    .sort('-createdAt')];
+            case 1:
+                myPosts = _a.sent();
+                return [2 /*return*/, myPosts];
+        }
+    });
+}); };
+exports.findMyPosts = findMyPosts;
+// S3 Pre-Sign Url을 발급한다.
+// eslint-disable-next-line class-methods-use-this
+var getPreSignUrl = function (fileName) { return __awaiter(void 0, void 0, void 0, function () {
+    var s3, params, signedUrlPut;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                s3 = new aws_sdk_1.default.S3({
+                    accessKeyId: index_1.default.S3AccessKeyId,
+                    secretAccessKey: index_1.default.S3SecretAccessKey,
+                    region: index_1.default.S3BucketRegion,
+                });
+                params = {
+                    Bucket: index_1.default.S3BucketName,
+                    Key: fileName,
+                    Expires: 60 * 60 * 3,
+                };
+                return [4 /*yield*/, s3.getSignedUrlPromise('putObject', params)];
+            case 1:
+                signedUrlPut = _a.sent();
+                return [2 /*return*/, signedUrlPut];
+        }
+    });
+}); };
+exports.getPreSignUrl = getPreSignUrl;
+// 사용자의 읽은 목록을 추가한다.
+var addReadLists = function (postId, userId) { return __awaiter(void 0, void 0, void 0, function () {
+    var user;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, User_1.User.addReadList(postId, userId)];
+            case 1:
+                user = _a.sent();
+                return [2 /*return*/, user];
+        }
+    });
+}); };
+exports.addReadLists = addReadLists;
 //# sourceMappingURL=user.js.map

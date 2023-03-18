@@ -36,172 +36,161 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DashboardService = void 0;
+exports.findPostFilterRank = exports.findPostHistory = exports.findDailyPost = exports.findUserHistory = exports.findDailyUser = void 0;
 var User_1 = require("../models/User");
 var Post_1 = require("../models/Post");
 var SignOutUser_1 = require("../models/SignOutUser");
 var PostFilterLog_1 = require("../models/PostFilterLog");
-var DashboardService = /** @class */ (function () {
-    function DashboardService() {
-    }
-    // 데일리 액션) 현재 총 회원 수, 오늘 가입자, 오늘 탈퇴자
-    DashboardService.prototype.findDailyUser = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var totalUser, today, signUp, signOut;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, User_1.User.countDocuments()];
-                    case 1:
-                        totalUser = _a.sent();
-                        today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        return [4 /*yield*/, User_1.User.countDocuments({ createdAt: { $gte: today } })];
-                    case 2:
-                        signUp = _a.sent();
-                        return [4 /*yield*/, SignOutUser_1.SignOutUser.countDocuments({ signOutDate: { $gte: today } })];
-                    case 3:
-                        signOut = _a.sent();
-                        return [2 /*return*/, {
-                                totalUser: totalUser,
-                                signUp: signUp,
-                                signOut: signOut,
-                            }];
-                }
-            });
-        });
-    };
-    // 일자별 회원 가입 현황(일자 / 신규 가입자 / 탈퇴자)
-    DashboardService.prototype.findUserHistory = function (startDate, endDate) {
-        return __awaiter(this, void 0, void 0, function () {
-            var userHistory;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, User_1.User.aggregate([
-                            { $match: { createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
-                            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, signIn: { $sum: 1 } } },
-                            { $addFields: { signOut: 0 } },
-                            {
-                                $unionWith: {
-                                    coll: 'signoutusers',
-                                    pipeline: [
-                                        { $match: { signOutDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
-                                        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$signOutDate' } }, signOut: { $sum: 1 } } },
-                                        { $addFields: { signIn: 0 } },
-                                    ],
-                                },
-                            },
-                            { $group: { _id: '$_id', signIn: { $sum: '$signIn' }, signOut: { $sum: '$signOut' } } },
-                            { $sort: { _id: 1 } },
-                        ])];
-                    case 1:
-                        userHistory = _a.sent();
-                        return [2 /*return*/, userHistory];
-                }
-            });
-        });
-    };
-    // 게시글 데일리(오늘 전체 글 조회 수, 등록된 글, 글 마감 수, 글 삭제 수 )
-    DashboardService.prototype.findDailyPost = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var today, totalView, totalViewSum, created, closed, deleted;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        totalView = 0;
-                        return [4 /*yield*/, Post_1.Post.aggregate([
-                                { $match: { createdAt: { $gte: today } } },
-                                { $group: { _id: null, totalView: { $sum: '$views' } } },
-                            ])];
-                    case 1:
-                        totalViewSum = _a.sent();
-                        if (totalViewSum && totalViewSum.length > 0 && totalViewSum[0].totalView)
-                            totalView = totalViewSum[0].totalView;
-                        return [4 /*yield*/, Post_1.Post.countDocuments({ createdAt: { $gte: today } })];
-                    case 2:
-                        created = _a.sent();
-                        return [4 /*yield*/, Post_1.Post.countDocuments({ closeDate: { $gte: today } })];
-                    case 3:
-                        closed = _a.sent();
-                        return [4 /*yield*/, Post_1.Post.countDocuments({ deleteDate: { $gte: today } })];
-                    case 4:
-                        deleted = _a.sent();
-                        return [2 /*return*/, {
-                                totalView: totalView,
-                                created: created,
-                                closed: closed,
-                                deleted: deleted,
-                            }];
-                }
-            });
-        });
-    };
-    // 일자별 게시글 현황(일자 / 등록된 글 / 마감된 글 / 삭제된 글)
-    DashboardService.prototype.findPostHistory = function (startDate, endDate) {
-        return __awaiter(this, void 0, void 0, function () {
-            var postHistory;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, Post_1.Post.aggregate([
-                            { $match: { createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
-                            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, created: { $sum: 1 } } },
-                            {
-                                $unionWith: {
-                                    coll: 'posts',
-                                    pipeline: [
-                                        { $match: { closeDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
-                                        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$closeDate' } }, closed: { $sum: 1 } } },
-                                    ],
-                                },
-                            },
-                            {
-                                $unionWith: {
-                                    coll: 'posts',
-                                    pipeline: [
-                                        { $match: { deleteDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
-                                        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$deleteDate' } }, deleted: { $sum: 1 } } },
-                                    ],
-                                },
-                            },
-                            {
-                                $group: {
-                                    _id: '$_id',
-                                    created: { $sum: '$created' },
-                                    closed: { $sum: '$closed' },
-                                    deleted: { $sum: '$deleted' },
-                                },
-                            },
-                            { $sort: { _id: 1 } },
-                        ])];
-                    case 1:
-                        postHistory = _a.sent();
-                        return [2 /*return*/, postHistory];
-                }
-            });
-        });
-    };
-    // 가장 많이 조회해 본 언어 필터
-    DashboardService.prototype.findPostFilterRank = function (startDate, endDate) {
-        return __awaiter(this, void 0, void 0, function () {
-            var userHistory;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, PostFilterLog_1.PostFilterLog.aggregate([
-                            { $match: { viewDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
-                            { $project: { _id: 0, viewDate: 1, language: 1 } },
-                            { $unwind: '$language' },
-                            { $group: { _id: '$language', count: { $sum: 1 } } },
-                            { $sort: { count: -1 } },
-                        ])];
-                    case 1:
-                        userHistory = _a.sent();
-                        return [2 /*return*/, userHistory];
-                }
-            });
-        });
-    };
-    return DashboardService;
-}());
-exports.DashboardService = DashboardService;
+// 데일리 액션) 현재 총 회원 수, 오늘 가입자, 오늘 탈퇴자
+var findDailyUser = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var totalUser, today, signUp, signOut;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, User_1.User.countDocuments()];
+            case 1:
+                totalUser = _a.sent();
+                today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return [4 /*yield*/, User_1.User.countDocuments({ createdAt: { $gte: today } })];
+            case 2:
+                signUp = _a.sent();
+                return [4 /*yield*/, SignOutUser_1.SignOutUser.countDocuments({ signOutDate: { $gte: today } })];
+            case 3:
+                signOut = _a.sent();
+                return [2 /*return*/, {
+                        totalUser: totalUser,
+                        signUp: signUp,
+                        signOut: signOut,
+                    }];
+        }
+    });
+}); };
+exports.findDailyUser = findDailyUser;
+// 일자별 회원 가입 현황(일자 / 신규 가입자 / 탈퇴자)
+var findUserHistory = function (startDate, endDate) { return __awaiter(void 0, void 0, void 0, function () {
+    var userHistory;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, User_1.User.aggregate([
+                    { $match: { createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
+                    { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, signIn: { $sum: 1 } } },
+                    { $addFields: { signOut: 0 } },
+                    {
+                        $unionWith: {
+                            coll: 'signoutusers',
+                            pipeline: [
+                                { $match: { signOutDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
+                                { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$signOutDate' } }, signOut: { $sum: 1 } } },
+                                { $addFields: { signIn: 0 } },
+                            ],
+                        },
+                    },
+                    { $group: { _id: '$_id', signIn: { $sum: '$signIn' }, signOut: { $sum: '$signOut' } } },
+                    { $sort: { _id: 1 } },
+                ])];
+            case 1:
+                userHistory = _a.sent();
+                return [2 /*return*/, userHistory];
+        }
+    });
+}); };
+exports.findUserHistory = findUserHistory;
+// 게시글 데일리(오늘 전체 글 조회 수, 등록된 글, 글 마감 수, 글 삭제 수 )
+var findDailyPost = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var today, totalView, totalViewSum, created, closed, deleted;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                today = new Date();
+                today.setHours(0, 0, 0, 0);
+                totalView = 0;
+                return [4 /*yield*/, Post_1.Post.aggregate([
+                        { $match: { createdAt: { $gte: today } } },
+                        { $group: { _id: null, totalView: { $sum: '$views' } } },
+                    ])];
+            case 1:
+                totalViewSum = _a.sent();
+                if (totalViewSum && totalViewSum.length > 0 && totalViewSum[0].totalView)
+                    totalView = totalViewSum[0].totalView;
+                return [4 /*yield*/, Post_1.Post.countDocuments({ createdAt: { $gte: today } })];
+            case 2:
+                created = _a.sent();
+                return [4 /*yield*/, Post_1.Post.countDocuments({ closeDate: { $gte: today } })];
+            case 3:
+                closed = _a.sent();
+                return [4 /*yield*/, Post_1.Post.countDocuments({ deleteDate: { $gte: today } })];
+            case 4:
+                deleted = _a.sent();
+                return [2 /*return*/, {
+                        totalView: totalView,
+                        created: created,
+                        closed: closed,
+                        deleted: deleted,
+                    }];
+        }
+    });
+}); };
+exports.findDailyPost = findDailyPost;
+// 일자별 게시글 현황(일자 / 등록된 글 / 마감된 글 / 삭제된 글)
+var findPostHistory = function (startDate, endDate) { return __awaiter(void 0, void 0, void 0, function () {
+    var postHistory;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, Post_1.Post.aggregate([
+                    { $match: { createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
+                    { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, created: { $sum: 1 } } },
+                    {
+                        $unionWith: {
+                            coll: 'posts',
+                            pipeline: [
+                                { $match: { closeDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
+                                { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$closeDate' } }, closed: { $sum: 1 } } },
+                            ],
+                        },
+                    },
+                    {
+                        $unionWith: {
+                            coll: 'posts',
+                            pipeline: [
+                                { $match: { deleteDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
+                                { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$deleteDate' } }, deleted: { $sum: 1 } } },
+                            ],
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: '$_id',
+                            created: { $sum: '$created' },
+                            closed: { $sum: '$closed' },
+                            deleted: { $sum: '$deleted' },
+                        },
+                    },
+                    { $sort: { _id: 1 } },
+                ])];
+            case 1:
+                postHistory = _a.sent();
+                return [2 /*return*/, postHistory];
+        }
+    });
+}); };
+exports.findPostHistory = findPostHistory;
+// 가장 많이 조회해 본 언어 필터
+var findPostFilterRank = function (startDate, endDate) { return __awaiter(void 0, void 0, void 0, function () {
+    var userHistory;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, PostFilterLog_1.PostFilterLog.aggregate([
+                    { $match: { viewDate: { $gte: new Date(startDate), $lte: new Date(endDate) } } },
+                    { $project: { _id: 0, viewDate: 1, language: 1 } },
+                    { $unwind: '$language' },
+                    { $group: { _id: '$language', count: { $sum: 1 } } },
+                    { $sort: { count: -1 } },
+                ])];
+            case 1:
+                userHistory = _a.sent();
+                return [2 /*return*/, userHistory];
+        }
+    });
+}); };
+exports.findPostFilterRank = findPostFilterRank;
 //# sourceMappingURL=dashboard.js.map

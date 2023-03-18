@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
-import { NotificationService } from '../../services/index';
+import { findNotification, findNotifications, readAll, readNotification } from '../../services/notification';
 import { isAccessTokenValid } from '../middlewares/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Notification as NotificationModel } from '../../models/Notification';
@@ -18,8 +18,7 @@ export default (app: Router) => {
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { _id: userId } = req.user as IUser;
 
-      const NoticeServiceInstance = new NotificationService(NotificationModel);
-      const notifications = await NoticeServiceInstance.findNotifications(userId);
+      const notifications = await findNotifications(userId);
       return res.status(200).json(notifications);
     }),
   );
@@ -29,8 +28,7 @@ export default (app: Router) => {
     '/:id',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
-      const NotificationServcieInstance = new NotificationService(NotificationModel);
-      const notice = await NotificationServcieInstance.findNotification(Types.ObjectId(id));
+      const notice = await findNotification(Types.ObjectId(id));
       return res.status(200).json(notice);
     }),
   );
@@ -41,8 +39,7 @@ export default (app: Router) => {
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
-      const NotificationServcieInstance = new NotificationService(NotificationModel);
-      const notice = await NotificationServcieInstance.readNotification(Types.ObjectId(id));
+      const notice = await readNotification(Types.ObjectId(id));
 
       return res.status(200).json({
         isRead: true,
@@ -56,8 +53,7 @@ export default (app: Router) => {
     isAccessTokenValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { _id: userId } = req.user as IUser;
-      const NotificationServcieInstance = new NotificationService(NotificationModel);
-      const notice = await NotificationServcieInstance.readAll(userId);
+      const notice = await readAll(userId);
 
       return res.status(200).json({
         isRead: true,

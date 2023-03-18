@@ -40,26 +40,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var Notification_1 = require("../../models/Notification");
-var User_1 = require("../../models/User");
-var index_1 = require("../../services/index");
-var index_2 = require("../middlewares/index");
+var auth_1 = require("../../services/auth");
+var notification_1 = require("../../services/notification");
+var index_1 = require("../middlewares/index");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var CustomError_1 = __importDefault(require("../../CustomError"));
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**
-   * @swagger
-   *  components:
-   *    securitySchemes:
-   *      bearerAuth:
-   *        type: http
-   *        scheme: bearer
-   *        bearerFormat: JWT
-   *    responses:
-   *      UnauthorizedError:
-   *        description: Access token is missing or invalid
-   */
+     * @swagger
+     *  components:
+     *    securitySchemes:
+     *      bearerAuth:
+     *        type: http
+     *        scheme: bearer
+     *        bearerFormat: JWT
+     *    responses:
+     *      UnauthorizedError:
+     *        description: Access token is missing or invalid
+     */
     /*
       권한에 관련된 Router를 정의한다.
       # GET /auth : Refresh Token을 이용해 Access Token 발급
@@ -69,15 +68,14 @@ exports.default = (function (app) {
     app.use('/auth', route);
     // Refresh Token을 이용해 Access Token 발급
     route.get('/', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var AuthServiceInstance, _a, decodeSuccess, _id, nickName, image, likeLanguages, accessToken, NotificationServcieInstance, unReadNoticeCount, hasUnreadNotice;
+        var _a, decodeSuccess, _id, nickName, image, likeLanguages, accessToken, unReadNoticeCount, hasUnreadNotice;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     if (!req.cookies.R_AUTH) {
                         throw new CustomError_1.default('RefreshTokenError', 401, 'Refresh token not found');
                     }
-                    AuthServiceInstance = new index_1.AuthService(User_1.User);
-                    return [4 /*yield*/, AuthServiceInstance.reissueAccessToken(req.cookies.R_AUTH)];
+                    return [4 /*yield*/, (0, auth_1.reissueAccessToken)(req.cookies.R_AUTH)];
                 case 1:
                     _a = _b.sent(), decodeSuccess = _a.decodeSuccess, _id = _a._id, nickName = _a.nickName, image = _a.image, likeLanguages = _a.likeLanguages, accessToken = _a.accessToken;
                     // Refresh Token가 유효하지 않을 경우
@@ -85,8 +83,7 @@ exports.default = (function (app) {
                         res.clearCookie('R_AUTH');
                         throw new CustomError_1.default('RefreshTokenError', 401, 'Invalid refresh token');
                     }
-                    NotificationServcieInstance = new index_1.NotificationService(Notification_1.Notification);
-                    return [4 /*yield*/, NotificationServcieInstance.findUnReadCount(_id)];
+                    return [4 /*yield*/, (0, notification_1.findUnReadCount)(_id)];
                 case 2:
                     unReadNoticeCount = _b.sent();
                     hasUnreadNotice = unReadNoticeCount > 0;
@@ -102,7 +99,7 @@ exports.default = (function (app) {
         });
     }); }));
     // Access Token이 유효한지 체크
-    route.get('/isValid', index_2.isAccessTokenValid, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/isValid', index_1.isAccessTokenValid, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, res.status(200).json({
                     isValid: true,

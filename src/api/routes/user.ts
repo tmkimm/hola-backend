@@ -2,7 +2,16 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 import { isString } from '../../utills/isStringEmpty';
 import { IUser, User as UserModel } from '../../models/User';
-import { UserService, NotificationService } from '../../services/index';
+import {
+  findByNickName,
+  findById,
+  modifyUser,
+  deleteUser,
+  findUserLikes,
+  findReadList,
+  findMyPosts,
+  getPreSignUrl,
+} from '../../services/user';
 import { nickNameDuplicationCheck, isAccessTokenValid, isUserIdValid } from '../middlewares/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Post as PostModel } from '../../models/Post';
@@ -24,8 +33,7 @@ export default (app: Router) => {
     '/sign',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { fileName } = req.body;
-      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
-      const signedUrlPut = await UserServiceInstance.getPreSignUrl(fileName);
+      const signedUrlPut = await getPreSignUrl(fileName);
 
       return res.status(200).json({
         preSignUrl: signedUrlPut,
@@ -72,8 +80,7 @@ export default (app: Router) => {
         });
       }
 
-      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
-      const user = await UserServiceInstance.findByNickName(nickName);
+      const user = await findByNickName(nickName);
       return res.status(200).json(user);
     }),
   );
@@ -113,8 +120,7 @@ export default (app: Router) => {
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
 
-      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
-      const user = await UserServiceInstance.findById(Types.ObjectId(id));
+      const user = await findById(Types.ObjectId(id));
 
       return res.status(200).json(user);
     }),
@@ -205,12 +211,7 @@ export default (app: Router) => {
       const { _id: tokenUserId } = req.user as IUser;
 
       const userDTO = req.body;
-      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
-      const { userRecord, accessToken, refreshToken } = await UserServiceInstance.modifyUser(
-        Types.ObjectId(id),
-        tokenUserId,
-        userDTO,
-      );
+      const { userRecord, accessToken, refreshToken } = await modifyUser(Types.ObjectId(id), tokenUserId, userDTO);
 
       res.cookie('R_AUTH', refreshToken, {
         sameSite: 'none',
@@ -319,8 +320,7 @@ export default (app: Router) => {
       const { id } = req.params;
       const { _id: tokenUserId } = req.user as IUser;
 
-      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
-      await UserServiceInstance.deleteUser(Types.ObjectId(id), tokenUserId);
+      await deleteUser(Types.ObjectId(id), tokenUserId);
       res.clearCookie('R_AUTH');
       return res.status(204).json();
     }),
@@ -357,8 +357,7 @@ export default (app: Router) => {
    */
   route.get('/likes/:id', isUserIdValid, async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
-    const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
-    const user = await UserServiceInstance.findUserLikes(Types.ObjectId(id));
+    const user = await findUserLikes(Types.ObjectId(id));
     return res.status(200).json(user);
   });
 
@@ -396,8 +395,7 @@ export default (app: Router) => {
     isUserIdValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
-      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
-      const user = await UserServiceInstance.findReadList(Types.ObjectId(id));
+      const user = await findReadList(Types.ObjectId(id));
       return res.status(200).json(user);
     }),
   );
@@ -436,8 +434,7 @@ export default (app: Router) => {
     isUserIdValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
-      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
-      const user = await UserServiceInstance.findMyPosts(Types.ObjectId(id));
+      const user = await findMyPosts(Types.ObjectId(id));
       return res.status(200).json(user);
     }),
   );

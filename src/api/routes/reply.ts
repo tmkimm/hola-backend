@@ -3,7 +3,7 @@ import { Types } from 'mongoose';
 import { isPostIdValid } from '../middlewares/isPostIdValid';
 import { IUser } from '../../models/User';
 import { isAccessTokenValid } from '../middlewares/index';
-import { ReplyService } from '../../services/index';
+import { registerReply, deleteReply, modifyReply } from '../../services/reply';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Post as PostModel } from '../../models/Post';
 import { Notification as NotificationModel } from '../../models/Notification';
@@ -31,8 +31,7 @@ export default (app: Router) => {
       let { nickName } = req.body;
       const { _id: userId } = req.user as IUser;
       if (!nickName) nickName = `사용자`;
-      const ReplyServiceInstance = new ReplyService(PostModel, NotificationModel);
-      const post = await ReplyServiceInstance.registerReply(userId, postId, commentId, content, nickName);
+      const post = await registerReply(userId, postId, commentId, content, nickName);
 
       return res.status(201).json(post);
     }),
@@ -47,8 +46,7 @@ export default (app: Router) => {
       commentDTO._id = req.params.id;
       const { _id: tokenUserId } = req.user as IUser;
 
-      const ReplyServiceInstance = new ReplyService(PostModel, NotificationModel);
-      const comment = await ReplyServiceInstance.modifyReply(commentDTO, tokenUserId);
+      const comment = await modifyReply(commentDTO, tokenUserId);
 
       return res.status(200).json(comment);
     }),
@@ -61,8 +59,7 @@ export default (app: Router) => {
       const replyId = req.params.id;
       const { _id: userId } = req.user as IUser;
 
-      const ReplyServiceInstance = new ReplyService(PostModel, NotificationModel);
-      await ReplyServiceInstance.deleteReply(Types.ObjectId(replyId), userId);
+      await deleteReply(Types.ObjectId(replyId), userId);
 
       return res.status(204).json();
     }),

@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var index_1 = require("../../services/index");
+var dashboard_1 = require("../../services/dashboard");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
@@ -76,12 +76,10 @@ exports.default = (function (app) {
      *                    description: 오늘 탈퇴자 조회 수
      */
     route.get('/users/daily', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var DashboardServiceInstance, user;
+        var user;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    DashboardServiceInstance = new index_1.DashboardService();
-                    return [4 /*yield*/, DashboardServiceInstance.findDailyUser()];
+                case 0: return [4 /*yield*/, (0, dashboard_1.findDailyUser)()];
                 case 1:
                     user = _a.sent();
                     return [2 /*return*/, res.status(200).json(user)];
@@ -137,13 +135,12 @@ exports.default = (function (app) {
      *                signOut: 3
      */
     route.get('/users/history', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, startDate, endDate, DashboardServiceInstance, user;
+        var _a, startDate, endDate, user;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = req.query, startDate = _a.startDate, endDate = _a.endDate;
-                    DashboardServiceInstance = new index_1.DashboardService();
-                    return [4 /*yield*/, DashboardServiceInstance.findUserHistory(startDate, endDate)];
+                    return [4 /*yield*/, (0, dashboard_1.findUserHistory)(startDate, endDate)];
                 case 1:
                     user = _b.sent();
                     return [2 /*return*/, res.status(200).json(user)];
@@ -181,12 +178,10 @@ exports.default = (function (app) {
      *                    description: 삭제된 글
      */
     route.get('/posts/daily', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var DashboardServiceInstance, post;
+        var post;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    DashboardServiceInstance = new index_1.DashboardService();
-                    return [4 /*yield*/, DashboardServiceInstance.findDailyPost()];
+                case 0: return [4 /*yield*/, (0, dashboard_1.findDailyPost)()];
                 case 1:
                     post = _a.sent();
                     return [2 /*return*/, res.status(200).json(post)];
@@ -246,13 +241,12 @@ exports.default = (function (app) {
      *                deleted: 3
      */
     route.get('/posts/history', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, startDate, endDate, DashboardServiceInstance, user;
+        var _a, startDate, endDate, user;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = req.query, startDate = _a.startDate, endDate = _a.endDate;
-                    DashboardServiceInstance = new index_1.DashboardService();
-                    return [4 /*yield*/, DashboardServiceInstance.findPostHistory(startDate, endDate)];
+                    return [4 /*yield*/, (0, dashboard_1.findPostHistory)(startDate, endDate)];
                 case 1:
                     user = _b.sent();
                     return [2 /*return*/, res.status(200).json(user)];
@@ -307,13 +301,12 @@ exports.default = (function (app) {
      */
     // 가장 많이 조회해 본 언어 필터
     route.get('/posts/filter-rank', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, startDate, endDate, DashboardServiceInstance, user;
+        var _a, startDate, endDate, user;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = req.query, startDate = _a.startDate, endDate = _a.endDate;
-                    DashboardServiceInstance = new index_1.DashboardService();
-                    return [4 /*yield*/, DashboardServiceInstance.findPostFilterRank(startDate, endDate)];
+                    return [4 /*yield*/, (0, dashboard_1.findPostFilterRank)(startDate, endDate)];
                 case 1:
                     user = _b.sent();
                     return [2 /*return*/, res.status(200).json(user)];

@@ -37,8 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var index_1 = require("../../services/index");
-var Feedback_1 = require("../../models/Feedback");
+var feedback_1 = require("../../services/feedback");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /*
@@ -49,13 +48,12 @@ exports.default = (function (app) {
     // 피드백 등록
     route.post('/', function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, rating, content, FeedbackServiceInstance, feedback;
+            var _a, rating, content, feedback;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         _a = req.body, rating = _a.rating, content = _a.content;
-                        FeedbackServiceInstance = new index_1.FeedbackService(Feedback_1.Feedback);
-                        return [4 /*yield*/, FeedbackServiceInstance.registerFeedback(rating, content)];
+                        return [4 /*yield*/, (0, feedback_1.registerFeedback)(rating, content)];
                     case 1:
                         feedback = _b.sent();
                         return [2 /*return*/, res.status(201).json(feedback)];

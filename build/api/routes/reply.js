@@ -40,10 +40,8 @@ var express_1 = require("express");
 var mongoose_1 = require("mongoose");
 var isPostIdValid_1 = require("../middlewares/isPostIdValid");
 var index_1 = require("../middlewares/index");
-var index_2 = require("../../services/index");
+var reply_1 = require("../../services/reply");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
-var Post_1 = require("../../models/Post");
-var Notification_1 = require("../../models/Notification");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /*
@@ -57,7 +55,7 @@ exports.default = (function (app) {
     app.use('/posts/replies', route);
     // 대댓글 등록
     route.post('/', index_1.isAccessTokenValid, isPostIdValid_1.isPostIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, postId, commentId, content, nickName, userId, ReplyServiceInstance, post;
+        var _a, postId, commentId, content, nickName, userId, post;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -66,8 +64,7 @@ exports.default = (function (app) {
                     userId = req.user._id;
                     if (!nickName)
                         nickName = "\uC0AC\uC6A9\uC790";
-                    ReplyServiceInstance = new index_2.ReplyService(Post_1.Post, Notification_1.Notification);
-                    return [4 /*yield*/, ReplyServiceInstance.registerReply(userId, postId, commentId, content, nickName)];
+                    return [4 /*yield*/, (0, reply_1.registerReply)(userId, postId, commentId, content, nickName)];
                 case 1:
                     post = _b.sent();
                     return [2 /*return*/, res.status(201).json(post)];
@@ -76,15 +73,14 @@ exports.default = (function (app) {
     }); }));
     // 대댓글 수정
     route.patch('/:id', index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var commentDTO, tokenUserId, ReplyServiceInstance, comment;
+        var commentDTO, tokenUserId, comment;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     commentDTO = req.body;
                     commentDTO._id = req.params.id;
                     tokenUserId = req.user._id;
-                    ReplyServiceInstance = new index_2.ReplyService(Post_1.Post, Notification_1.Notification);
-                    return [4 /*yield*/, ReplyServiceInstance.modifyReply(commentDTO, tokenUserId)];
+                    return [4 /*yield*/, (0, reply_1.modifyReply)(commentDTO, tokenUserId)];
                 case 1:
                     comment = _a.sent();
                     return [2 /*return*/, res.status(200).json(comment)];
@@ -93,14 +89,13 @@ exports.default = (function (app) {
     }); }));
     // 대댓글 삭제
     route.delete('/:id', index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var replyId, userId, ReplyServiceInstance;
+        var replyId, userId;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     replyId = req.params.id;
                     userId = req.user._id;
-                    ReplyServiceInstance = new index_2.ReplyService(Post_1.Post, Notification_1.Notification);
-                    return [4 /*yield*/, ReplyServiceInstance.deleteReply(mongoose_1.Types.ObjectId(replyId), userId)];
+                    return [4 /*yield*/, (0, reply_1.deleteReply)(mongoose_1.Types.ObjectId(replyId), userId)];
                 case 1:
                     _a.sent();
                     return [2 /*return*/, res.status(204).json()];

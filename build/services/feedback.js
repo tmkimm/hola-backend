@@ -36,29 +36,22 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FeedbackService = void 0;
-var FeedbackService = /** @class */ (function () {
-    function FeedbackService(feedbackModel) {
-        this.feedbackModel = feedbackModel;
-    }
-    // 신규 글를 등록한다.
-    FeedbackService.prototype.registerFeedback = function (rating, content) {
-        return __awaiter(this, void 0, void 0, function () {
-            var feedbackRecord;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.feedbackModel.create({
-                            rating: rating,
-                            content: content,
-                        })];
-                    case 1:
-                        feedbackRecord = _a.sent();
-                        return [2 /*return*/, feedbackRecord];
-                }
-            });
-        });
-    };
-    return FeedbackService;
-}());
-exports.FeedbackService = FeedbackService;
+exports.registerFeedback = void 0;
+var Feedback_1 = require("../models/Feedback");
+// 신규 글를 등록한다.
+var registerFeedback = function (rating, content) { return __awaiter(void 0, void 0, void 0, function () {
+    var feedbackRecord;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, Feedback_1.Feedback.create({
+                    rating: rating,
+                    content: content,
+                })];
+            case 1:
+                feedbackRecord = _a.sent();
+                return [2 /*return*/, feedbackRecord];
+        }
+    });
+}); };
+exports.registerFeedback = registerFeedback;
 //# sourceMappingURL=feedback.js.map

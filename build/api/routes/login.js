@@ -37,20 +37,18 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var index_1 = require("../../services/index");
-var index_2 = require("../middlewares/index");
+var auth_1 = require("../../services/auth");
+var user_1 = require("../../services/user");
+var index_1 = require("../middlewares/index");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
-var Post_1 = require("../../models/Post");
-var User_1 = require("../../models/User");
-var Notification_1 = require("../../models/Notification");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**
-   * @swagger
-   * tags:
-        - name: login
-          description: 로그인에 관련된 API
-   */
+     * @swagger
+     * tags:
+          - name: login
+            description: 로그인에 관련된 API
+     */
     app.use('/login', route);
     /**
      * @swagger
@@ -142,15 +140,14 @@ exports.default = (function (app) {
      *        400:
      *          description: Oauth parameter is Invalid
      */
-    route.post('/', index_2.isTokenValidWithOauth, // 클라이언트에게 전달받은 idToken을 이용해 유효성 검증 후 사용자 정보를 가져온다.
-    index_2.autoSignUp, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var idToken, AuthServiceInstance, _a, _id, nickName, image, likeLanguages, accessToken, refreshToken;
+    route.post('/', index_1.isTokenValidWithOauth, // 클라이언트에게 전달받은 idToken을 이용해 유효성 검증 후 사용자 정보를 가져온다.
+    index_1.autoSignUp, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var idToken, _a, _id, nickName, image, likeLanguages, accessToken, refreshToken;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     idToken = req.user.idToken;
-                    AuthServiceInstance = new index_1.AuthService(User_1.User);
-                    return [4 /*yield*/, AuthServiceInstance.SignIn(idToken)];
+                    return [4 /*yield*/, (0, auth_1.SignIn)(idToken)];
                 case 1:
                     _a = _b.sent(), _id = _a._id, nickName = _a.nickName, image = _a.image, likeLanguages = _a.likeLanguages, accessToken = _a.accessToken, refreshToken = _a.refreshToken;
                     res.cookie('R_AUTH', refreshToken, {
@@ -198,20 +195,18 @@ exports.default = (function (app) {
      *        404:
      *          description: User not found
      */
-    route.post('/signup', index_2.nickNameDuplicationCheck, index_2.isUserIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, userDTO, UserServiceInstance, userRecord, AuthServiceInstance, _a, accessToken, refreshToken;
+    route.post('/signup', index_1.nickNameDuplicationCheck, index_1.isUserIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var id, userDTO, userRecord, _a, accessToken, refreshToken;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     id = req.body.id;
                     userDTO = req.body;
                     delete userDTO.id;
-                    UserServiceInstance = new index_1.UserService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, UserServiceInstance.modifyUser(id, id, userDTO)];
+                    return [4 /*yield*/, (0, user_1.modifyUser)(id, id, userDTO)];
                 case 1:
                     userRecord = (_b.sent()).userRecord;
-                    AuthServiceInstance = new index_1.AuthService(User_1.User);
-                    return [4 /*yield*/, AuthServiceInstance.SignIn(userRecord.idToken)];
+                    return [4 /*yield*/, (0, auth_1.SignIn)(userRecord.idToken)];
                 case 2:
                     _a = _b.sent(), accessToken = _a.accessToken, refreshToken = _a.refreshToken;
                     res.cookie('R_AUTH', refreshToken, {

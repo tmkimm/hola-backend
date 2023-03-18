@@ -17,7 +17,7 @@ export default (app: Router) => {
    *      responses:
    *        204:
    *          description: successful operation
-   */ 
+   */
 
   route.post('/', (req: Request, res: Response, next: NextFunction) => {
     res.clearCookie('R_AUTH');
