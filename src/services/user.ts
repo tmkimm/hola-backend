@@ -72,9 +72,13 @@ export class UserService {
       })
       .sort('-createdAt');
 
-    const result = likePosts.map((i) => {
-      return i.postId;
-    });
+    const result = likePosts
+      .filter((i) => {
+        return i.postId && i.postId !== null;
+      })
+      .map((i) => {
+        return i.postId;
+      });
     return result;
   }
 
@@ -89,9 +93,13 @@ export class UserService {
       })
       .sort('-createdAt');
 
-    const result = readList.map((i) => {
-      return i.postId;
-    });
+    const result = readList
+      .filter((i) => {
+        return i.postId && i.postId !== null;
+      })
+      .map((i) => {
+        return i.postId;
+      });
     return result;
   }
 

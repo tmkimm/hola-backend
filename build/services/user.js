@@ -154,7 +154,11 @@ var UserService = /** @class */ (function () {
                             .sort('-createdAt')];
                     case 1:
                         likePosts = _a.sent();
-                        result = likePosts.map(function (i) {
+                        result = likePosts
+                            .filter(function (i) {
+                            return i.postId && i.postId !== null;
+                        })
+                            .map(function (i) {
                             return i.postId;
                         });
                         return [2 /*return*/, result];
@@ -178,7 +182,11 @@ var UserService = /** @class */ (function () {
                             .sort('-createdAt')];
                     case 1:
                         readList = _a.sent();
-                        result = readList.map(function (i) {
+                        result = readList
+                            .filter(function (i) {
+                            return i.postId && i.postId !== null;
+                        })
+                            .map(function (i) {
                             return i.postId;
                         });
                         return [2 /*return*/, result];
