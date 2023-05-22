@@ -197,7 +197,29 @@ export class PostService {
   async findPostDetail(postId: Types.ObjectId) {
     const posts = await this.postModel.findById(postId).populate('author', 'nickName image');
     if (!posts) throw new CustomError('NotFoundError', 404, 'Post not found');
-    return posts;
+    const postToObject = posts.toObject({ virtuals: true });
+    const today: Date = new Date();
+    const badge = [];
+    if (postToObject.startDate > today) {
+      badge.push({
+        type: 'deadline',
+        name: `마감 ${this.timeForEndDate(postToObject.startDate)}`,
+      });
+    }
+    postToObject.badge = badge;
+    return postToObject;
+  }
+
+  timeForEndDate(endDate: Date): string {
+    const today: Date = new Date();
+    const betweenTime: number = Math.floor((endDate.getTime() - today.getTime()) / 1000 / 60);
+
+    const betweenTimeDay = Math.floor(betweenTime / 60 / 24);
+    if (betweenTimeDay > 1 && betweenTimeDay < 365) {
+      return `${betweenTimeDay}일전`;
+    }
+    const betweenTimeHour = Math.floor(betweenTime / 60);
+    return `${betweenTimeHour}시간전`;
   }
 
   // 사용자의 관심 등록 여부를 조회한다.

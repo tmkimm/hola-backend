@@ -268,7 +268,7 @@ postSchema.statics.findPostRecommend = function (sort, language, postId, userId,
                 case 0:
                     sortQuery = [];
                     // Sorting
-                    if (sort == false) {
+                    if (sort === false) {
                         sortQuery.push('createdAt');
                     }
                     query = {};

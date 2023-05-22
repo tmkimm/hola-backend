@@ -250,7 +250,7 @@ var PostService = /** @class */ (function () {
     // 로그인된 사용자일 경우 읽은 목록을 추가한다.
     PostService.prototype.findPostDetail = function (postId) {
         return __awaiter(this, void 0, void 0, function () {
-            var posts;
+            var posts, postToObject, today, badge;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.postModel.findById(postId).populate('author', 'nickName image')];
@@ -258,10 +258,30 @@ var PostService = /** @class */ (function () {
                         posts = _a.sent();
                         if (!posts)
                             throw new CustomError_1.default('NotFoundError', 404, 'Post not found');
-                        return [2 /*return*/, posts];
+                        postToObject = posts.toObject({ virtuals: true });
+                        today = new Date();
+                        badge = [];
+                        if (postToObject.startDate > today) {
+                            badge.push({
+                                type: 'deadline',
+                                name: "\uB9C8\uAC10 ".concat(this.timeForEndDate(postToObject.startDate)),
+                            });
+                        }
+                        postToObject.badge = badge;
+                        return [2 /*return*/, postToObject];
                 }
             });
         });
+    };
+    PostService.prototype.timeForEndDate = function (endDate) {
+        var today = new Date();
+        var betweenTime = Math.floor((endDate.getTime() - today.getTime()) / 1000 / 60);
+        var betweenTimeDay = Math.floor(betweenTime / 60 / 24);
+        if (betweenTimeDay > 1 && betweenTimeDay < 365) {
+            return "".concat(betweenTimeDay, "\uC77C\uC804");
+        }
+        var betweenTimeHour = Math.floor(betweenTime / 60);
+        return "".concat(betweenTimeHour, "\uC2DC\uAC04\uC804");
     };
     // 사용자의 관심 등록 여부를 조회한다.
     PostService.prototype.findUserLiked = function (postId, userId) {

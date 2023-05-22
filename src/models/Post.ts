@@ -288,6 +288,12 @@ export interface IPost {
   startDate: Date; // 시작예정일
   closeDate: Date; // 마감일
   deleteDate: Date; // 삭제일
+  badge: [
+    {
+      type: string;
+      name: string;
+    },
+  ];
 }
 export interface IPostDocument extends IPost, Document {}
 
@@ -589,7 +595,7 @@ postSchema.statics.findPopularPosts = async function (postId, userId) {
 postSchema.statics.findPostRecommend = async function (sort, language, postId, userId, limit) {
   const sortQuery = [];
   // Sorting
-  if (sort == false) {
+  if (sort === false) {
     sortQuery.push('createdAt');
   }
   // Query
