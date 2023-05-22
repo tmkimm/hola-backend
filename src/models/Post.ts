@@ -127,6 +127,16 @@ export interface IReply {
  *        type: array
  *        items:
  *          $ref: '#/components/schemas/Comment'
+ *      badge:
+ *        properties:
+ *          type:
+ *            type: string
+ *            description: 뱃지종류
+ *            example: 'deadline'
+ *          name:
+ *            type: string
+ *            description: 뱃지명
+ *            example: '마감 3일전'
  *   Comment:
  *     properties:
  *      _id:
