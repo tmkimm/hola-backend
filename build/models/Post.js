@@ -35,6 +35,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -136,15 +145,15 @@ var makeFindPostQuery = function (language, period, isClosed, type, position, se
             query.type = { $eq: type };
     }
     // 텍스트 검색
-    if (typeof search === 'string') {
-        query.$text = { $search: search };
-    }
+    // if (typeof search === 'string') {
+    //   query.$text = { $search: search };
+    // }
     return query;
 };
 // 최신, 트레딩 조회
 postSchema.statics.findPost = function (offset, limit, sort, language, period, isClosed, type, position, search) {
     return __awaiter(this, void 0, void 0, function () {
-        var offsetQuery, limitQuery, sortQuery, sortableColumns_1, query, result;
+        var offsetQuery, limitQuery, sortQuery, sortableColumns_1, query, aggregateSearch, aggregate, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -163,16 +172,71 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                         sortQuery.push('createdAt');
                     }
                     query = makeFindPostQuery(language, period, isClosed, type, position, search);
-                    return [4 /*yield*/, this.find(query)
-                            .where('isDeleted')
-                            .equals(false)
+                    aggregateSearch = [];
+                    if (search && typeof search === 'string') {
+                        aggregateSearch.push({
+                            $search: {
+                                index: 'posts_text_search',
+                                text: {
+                                    query: search,
+                                    path: {
+                                        wildcard: '*',
+                                    },
+                                },
+                            },
+                        });
+                    }
+                    aggregate = __spreadArray(__spreadArray([], aggregateSearch, true), [
+                        { $match: query },
+                        {
+                            $lookup: {
+                                from: 'users',
+                                localField: 'author',
+                                foreignField: '_id',
+                                pipeline: [{ $project: { _id: 1, nickName: 1, image: 1 } }],
+                                as: 'author',
+                            },
+                        },
+                        {
+                            $project: {
+                                title: 1,
+                                views: 1,
+                                comments: 1,
+                                likes: 1,
+                                language: 1,
+                                isClosed: 1,
+                                totalLikes: 1,
+                                startDate: 1,
+                                endDate: 1,
+                                type: 1,
+                                onlineOrOffline: 1,
+                                contactType: 1,
+                                recruits: 1,
+                                expectedPeriod: 1,
+                                author: 1,
+                                positions: 1,
+                                createdAt: 1,
+                            },
+                        },
+                    ], false);
+                    return [4 /*yield*/, this.aggregate(aggregate)
                             .sort(sortQuery.join(' '))
                             .skip(Number(offsetQuery))
-                            .limit(Number(limitQuery))
-                            .select("title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
-                            .populate('author', 'nickName image')];
+                            .limit(Number(limitQuery))];
                 case 1:
                     result = _a.sent();
+                    // .select(
+                    //   `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
+                    // )
+                    // .populate('author', 'nickName image');
+                    // const result = await this.find(query)
+                    //   .sort(sortQuery.join(' '))
+                    //   .skip(Number(offsetQuery))
+                    //   .limit(Number(limitQuery))
+                    //   .select(
+                    //     `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
+                    //   )
+                    //   .populate('author', 'nickName image');
                     return [2 /*return*/, result];
             }
         });

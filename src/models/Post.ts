@@ -475,9 +475,9 @@ const makeFindPostQuery = (
   }
 
   // 텍스트 검색
-  if (typeof search === 'string') {
-    query.$text = { $search: search };
-  }
+  // if (typeof search === 'string') {
+  //   query.$text = { $search: search };
+  // }
   return query;
 };
 
@@ -498,18 +498,75 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
   } else {
     sortQuery.push('createdAt');
   }
+  // posts_text_search
   // Query
   const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
-  const result = await this.find(query)
-    .where('isDeleted')
-    .equals(false)
+
+  const aggregateSearch = [];
+  if (search && typeof search === 'string') {
+    aggregateSearch.push({
+      $search: {
+        index: 'posts_text_search',
+        text: {
+          query: search,
+          path: {
+            wildcard: '*',
+          },
+        },
+      },
+    });
+  }
+
+  const aggregate = [
+    ...aggregateSearch,
+    { $match: query },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'author',
+        foreignField: '_id',
+        pipeline: [{ $project: { _id: 1, nickName: 1, image: 1 } }],
+        as: 'author',
+      },
+    },
+    {
+      $project: {
+        title: 1,
+        views: 1,
+        comments: 1,
+        likes: 1,
+        language: 1,
+        isClosed: 1,
+        totalLikes: 1,
+        startDate: 1,
+        endDate: 1,
+        type: 1,
+        onlineOrOffline: 1,
+        contactType: 1,
+        recruits: 1,
+        expectedPeriod: 1,
+        author: 1,
+        positions: 1,
+        createdAt: 1,
+      },
+    },
+  ];
+  const result = await this.aggregate(aggregate)
     .sort(sortQuery.join(' '))
     .skip(Number(offsetQuery))
-    .limit(Number(limitQuery))
-    .select(
-      `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
-    )
-    .populate('author', 'nickName image');
+    .limit(Number(limitQuery));
+  // .select(
+  //   `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
+  // )
+  // .populate('author', 'nickName image');
+  // const result = await this.find(query)
+  //   .sort(sortQuery.join(' '))
+  //   .skip(Number(offsetQuery))
+  //   .limit(Number(limitQuery))
+  //   .select(
+  //     `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
+  //   )
+  //   .populate('author', 'nickName image');
   return result;
 };
 
