@@ -308,17 +308,7 @@ export interface IPost {
 export interface IPostDocument extends IPost, Document {}
 
 export interface IPostModel extends Model<IPostDocument> {
-  findPost: (
-    offset: number | null,
-    limit: number | null,
-    sort: string | null,
-    language: string | null,
-    period: number | null,
-    isClosed: string | null,
-    type: string | null,
-    position: string | null,
-    search: string | null,
-  ) => Promise<IPostDocument[]>;
+  findTopPost: (limit: number | null, sort: string | null) => Promise<IPostDocument[]>;
   findPostPagination: (
     page: string | null,
     sort: string | null,
@@ -498,10 +488,9 @@ const makeFindPostQuery = (
 };
 
 // 최신, 트레딩 조회
-postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed, type, position, search) {
+postSchema.statics.findTopPost = async function (limit, sort) {
   // Pagenation
-  const offsetQuery = parseInt(offset, 10) || 0;
-  const limitQuery = parseInt(limit, 10) || 20;
+  const limitQuery = parseInt(limit, 10) || 6;
 
   let sortQuery = [];
   // Sorting
@@ -510,17 +499,22 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     sortQuery = sort.split(',').filter((value: string) => {
       return sortableColumns.indexOf(value.substr(1, value.length)) !== -1 || sortableColumns.indexOf(value) !== -1;
     });
-    sortQuery.push('-createdAt');
   } else {
-    sortQuery.push('createdAt');
+    sortQuery.push('-views');
   }
+
+  // 글 상태
+  const today: Date = new Date();
+  const daysAgo: Date = new Date();
+  daysAgo.setDate(today.getDate() - 7); // 7일 이내
+
   // Query
-  const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
-  const result = await this.find(query)
+  const result = await this.find({ createdAt: { $gte: daysAgo } })
     .where('isDeleted')
     .equals(false)
+    .where('isClosed')
+    .equals(false)
     .sort(sortQuery.join(' '))
-    .skip(Number(offsetQuery))
     .limit(Number(limitQuery))
     .select(
       `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,

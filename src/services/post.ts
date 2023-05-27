@@ -16,38 +16,26 @@ export class PostService {
     protected notificationModel: INotificationModel,
   ) {}
 
-  // 리팩토링필요
-  // 메인 화면에서 글 리스트를 조회한다.
-  async findPost(
-    offset: number | null,
-    limit: number | null,
-    sort: string | null,
-    language: string | null,
-    period: number | null,
-    isClosed: string | null,
-    type: string | null,
-    position: string | null,
-    search: string | null,
-  ) {
-    const posts = await this.postModel.findPost(
-      offset,
-      limit,
-      sort,
-      language,
-      period,
-      isClosed,
-      type,
-      position,
-      search,
-    );
-    // 언어 필터링 로그 생성
-    // if (language) {
-    //   await PostFilterLog.create({
-    //     viewDate: new Date(),
-    //     language: language.split(','),
-    //   });
-    // }
-    return posts;
+  // 이번주 인기글 조회
+  async findTopPost() {
+    const posts = await this.postModel.findTopPost(10, '-views');
+
+    const today: Date = new Date();
+
+    // mongoose document는 불변상태이기 때문에 POJO로 변환
+    const postArr: any = posts.map((post: any) => {
+      post = post.toObject({ virtuals: true });
+      if (post.startDate > today) {
+        post.badge = [
+          {
+            type: 'deadline',
+            name: `마감 ${this.timeForEndDate(post.startDate)}`,
+          },
+        ];
+      }
+      return post;
+    });
+    return postArr;
   }
 
   // 메인 화면에서 글 리스트를 조회한다.

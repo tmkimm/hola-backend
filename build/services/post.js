@@ -50,24 +50,30 @@ var PostService = /** @class */ (function () {
         this.userModel = userModel;
         this.notificationModel = notificationModel;
     }
-    // 리팩토링필요
-    // 메인 화면에서 글 리스트를 조회한다.
-    PostService.prototype.findPost = function (offset, limit, sort, language, period, isClosed, type, position, search) {
+    // 이번주 인기글 조회
+    PostService.prototype.findTopPost = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var posts;
+            var posts, today, postArr;
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.findPost(offset, limit, sort, language, period, isClosed, type, position, search)];
+                    case 0: return [4 /*yield*/, this.postModel.findTopPost(10, '-views')];
                     case 1:
                         posts = _a.sent();
-                        // 언어 필터링 로그 생성
-                        // if (language) {
-                        //   await PostFilterLog.create({
-                        //     viewDate: new Date(),
-                        //     language: language.split(','),
-                        //   });
-                        // }
-                        return [2 /*return*/, posts];
+                        today = new Date();
+                        postArr = posts.map(function (post) {
+                            post = post.toObject({ virtuals: true });
+                            if (post.startDate > today) {
+                                post.badge = [
+                                    {
+                                        type: 'deadline',
+                                        name: "\uB9C8\uAC10 ".concat(_this.timeForEndDate(post.startDate)),
+                                    },
+                                ];
+                            }
+                            return post;
+                        });
+                        return [2 /*return*/, postArr];
                 }
             });
         });

@@ -142,14 +142,13 @@ var makeFindPostQuery = function (language, period, isClosed, type, position, se
     return query;
 };
 // 최신, 트레딩 조회
-postSchema.statics.findPost = function (offset, limit, sort, language, period, isClosed, type, position, search) {
+postSchema.statics.findTopPost = function (limit, sort) {
     return __awaiter(this, void 0, void 0, function () {
-        var offsetQuery, limitQuery, sortQuery, sortableColumns_1, query, result;
+        var limitQuery, sortQuery, sortableColumns_1, today, daysAgo, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    offsetQuery = parseInt(offset, 10) || 0;
-                    limitQuery = parseInt(limit, 10) || 20;
+                    limitQuery = parseInt(limit, 10) || 6;
                     sortQuery = [];
                     // Sorting
                     if (sort) {
@@ -157,17 +156,19 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                         sortQuery = sort.split(',').filter(function (value) {
                             return sortableColumns_1.indexOf(value.substr(1, value.length)) !== -1 || sortableColumns_1.indexOf(value) !== -1;
                         });
-                        sortQuery.push('-createdAt');
                     }
                     else {
-                        sortQuery.push('createdAt');
+                        sortQuery.push('-views');
                     }
-                    query = makeFindPostQuery(language, period, isClosed, type, position, search);
-                    return [4 /*yield*/, this.find(query)
+                    today = new Date();
+                    daysAgo = new Date();
+                    daysAgo.setDate(today.getDate() - 7); // 7일 이내
+                    return [4 /*yield*/, this.find({ createdAt: { $gte: daysAgo } })
                             .where('isDeleted')
                             .equals(false)
+                            .where('isClosed')
+                            .equals(false)
                             .sort(sortQuery.join(' '))
-                            .skip(Number(offsetQuery))
                             .limit(Number(limitQuery))
                             .select("title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
                             .populate('author', 'nickName image')];
