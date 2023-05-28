@@ -81,52 +81,62 @@ var PostService = /** @class */ (function () {
     // 메인 화면에서 글 리스트를 조회한다.
     PostService.prototype.findPostPagination = function (page, sort, language, period, isClosed, type, position, search, userId) {
         return __awaiter(this, void 0, void 0, function () {
-            var result, documentToObject, addIsLiked;
+            var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.postModel.findPostPagination(page, sort, language, period, isClosed, type, position, search)];
                     case 1:
                         result = _a.sent();
-                        documentToObject = result.posts.map(function (post) {
-                            return post.toObject({ virtuals: true });
-                        });
-                        // 로그인하지 않은 사용자
-                        if (userId == null) {
-                            addIsLiked = documentToObject.map(function (post) {
-                                post.isLiked = false;
-                                return post;
-                            });
-                        }
-                        else {
-                            // 로그인한 사용자
-                            addIsLiked = documentToObject.map(function (post) {
-                                var isLiked = false;
-                                if (post.likes && post.likes.length > 0) {
-                                    // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
-                                    for (var _i = 0, _a = post.likes; _i < _a.length; _i++) {
-                                        var likeUserId = _a[_i];
-                                        if (likeUserId.toString() == userId.toString()) {
-                                            isLiked = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                post.isLiked = isLiked;
-                                return post;
-                            });
-                        }
-                        result.posts = addIsLiked;
-                        // 언어 필터링 로그 생성
-                        // if (language) {
-                        //   await PostFilterLog.create({
-                        //     viewDate: new Date(),
-                        //     language: language.split(','),
-                        //   });
-                        // }
-                        return [2 /*return*/, result];
+                        result = this.addPostVirtualField(result, userId);
+                        return [2 /*return*/, { posts: result }];
                 }
             });
         });
+    };
+    // mongoose virtual field 추가
+    // mongodb text search를 위해 aggregate 사용 시 virtual field가 조회되지 않음 > 수동 추가
+    // isLiked : 사용자의 관심 등록 여부
+    // state : 상태 뱃지
+    // totalComments : 댓글 수
+    PostService.prototype.addPostVirtualField = function (posts, userId) {
+        var result = [];
+        // 글 상태
+        var today = new Date();
+        var daysAgo = new Date();
+        var millisecondDay = 1000 * 60 * 60 * 24;
+        daysAgo.setDate(today.getDate() - 1); // 24시간 이내
+        result = posts.map(function (post) {
+            var isLiked = false;
+            // add isLiked
+            if (userId != null && post.likes && post.likes.length > 0) {
+                // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
+                for (var _i = 0, _a = post.likes; _i < _a.length; _i++) {
+                    var likeUserId = _a[_i];
+                    if (likeUserId.toString() == userId.toString()) {
+                        isLiked = true;
+                        break;
+                    }
+                }
+            }
+            post.isLiked = isLiked;
+            // set Author info
+            if (post.author.length > 0)
+                post.author = post.author[post.author.length - 1];
+            // add totalComments
+            post.totalComments = post.comments.length;
+            // add state
+            // 1. 3일 이내에 등록된 글이면 최신 글
+            // 2. 3일 이내 글이면 마감 임박
+            // 3. 일 조회수가 60 이상이면 인기
+            if (post.createdAt > daysAgo)
+                post.state = 'new';
+            else if (post.startDate > today && (post.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
+                post.state = 'deadline';
+            else if (Math.abs(post.views / Math.ceil((today.getTime() - post.createdAt.getTime()) / millisecondDay)) >= 60)
+                post.state = 'hot';
+            return post;
+        });
+        return result;
     };
     // Pagination을 위해 마지막 페이지를 구한다.
     PostService.prototype.findLastPage = function (language, period, isClosed, type, position, search) {

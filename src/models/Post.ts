@@ -425,29 +425,29 @@ const postSchema = new Schema<IPostDocument>(
   },
 );
 
-// 글 상태(뱃지)
-postSchema.virtual('state').get(function (this: IPost) {
-  let state = '';
+// // 글 상태(뱃지)
+// postSchema.virtual('state').get(function (this: IPost) {
+//   let state = '';
 
-  // 글 상태
-  const today: Date = new Date();
-  const daysAgo: Date = new Date();
-  const millisecondDay: number = 1000 * 60 * 60 * 24;
-  daysAgo.setDate(today.getDate() - 1); // 24시간 이내
-  // 1. 3일 이내에 등록된 글이면 최신 글
-  // 2. 3일 이내 글이면 마감 임박
-  // 3. 일 조회수가 60 이상이면 인기
-  if (this.createdAt > daysAgo) state = 'new';
-  else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
-    state = 'deadline';
-  else if (Math.abs(this.views / Math.ceil((today.getTime() - this.createdAt.getTime()) / millisecondDay)) >= 60)
-    state = 'hot';
-  return state;
-});
+//   // 글 상태
+//   const today: Date = new Date();
+//   const daysAgo: Date = new Date();
+//   const millisecondDay: number = 1000 * 60 * 60 * 24;
+//   daysAgo.setDate(today.getDate() - 1); // 24시간 이내
+//   // 1. 3일 이내에 등록된 글이면 최신 글
+//   // 2. 3일 이내 글이면 마감 임박
+//   // 3. 일 조회수가 60 이상이면 인기
+//   if (this.createdAt > daysAgo) state = 'new';
+//   else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
+//     state = 'deadline';
+//   else if (Math.abs(this.views / Math.ceil((today.getTime() - this.createdAt.getTime()) / millisecondDay)) >= 60)
+//     state = 'hot';
+//   return state;
+// });
 
-postSchema.virtual('totalComments').get(function (this: IPost) {
-  return this.comments.length;
-});
+// postSchema.virtual('totalComments').get(function (this: IPost) {
+//   return this.comments.length;
+// });
 
 // 조회 query 생성
 const makeFindPostQuery = (
@@ -481,9 +481,9 @@ const makeFindPostQuery = (
   }
 
   // 텍스트 검색
-  if (typeof search === 'string') {
-    query.$text = { $search: search };
-  }
+  // if (typeof search === 'string') {
+  //   query.$text = { $search: search };
+  // }
   return query;
 };
 
@@ -546,23 +546,60 @@ postSchema.statics.findPostPagination = async function (
     sortQuery.push('createdAt');
   }
   const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
-
   // Pagenation
   const itemsPerPage = 4 * 5; // 한 페이지에 표현할 수
   let pageToSkip = 0;
   if (isNumber(page) && Number(page) > 0) pageToSkip = (Number(page) - 1) * itemsPerPage;
-
-  const posts = await this.find(query)
-    .sort(sortQuery.join(' '))
-    .skip(pageToSkip)
-    .limit(Number(itemsPerPage))
-    .select(
-      `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
-    )
-    .populate('author', 'nickName image');
-  return {
-    posts,
-  };
+  const aggregateSearch = [];
+  if (search && typeof search === 'string') {
+    aggregateSearch.push({
+      $search: {
+        index: 'posts_text_search',
+        text: {
+          query: search,
+          path: {
+            wildcard: '*',
+          },
+        },
+      },
+    });
+  }
+  const aggregate = [
+    ...aggregateSearch,
+    { $match: query },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'author',
+        foreignField: '_id',
+        pipeline: [{ $project: { _id: 1, nickName: 1, image: 1 } }],
+        as: 'author',
+      },
+    },
+    {
+      $project: {
+        title: 1,
+        views: 1,
+        comments: 1,
+        likes: 1,
+        language: 1,
+        isClosed: 1,
+        totalLikes: 1,
+        startDate: 1,
+        endDate: 1,
+        type: 1,
+        onlineOrOffline: 1,
+        contactType: 1,
+        recruits: 1,
+        expectedPeriod: 1,
+        author: 1,
+        positions: 1,
+        createdAt: 1,
+      },
+    },
+  ];
+  const posts = await this.aggregate(aggregate).sort(sortQuery.join(' ')).skip(pageToSkip).limit(Number(itemsPerPage));
+  return posts;
 };
 // 최신, 트레딩 조회
 postSchema.statics.countPost = async function (language, period, isClosed, type, position, search) {

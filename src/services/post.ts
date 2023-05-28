@@ -50,7 +50,7 @@ export class PostService {
     search: string | null,
     userId: Types.ObjectId | null,
   ) {
-    const result: any = await this.postModel.findPostPagination(
+    let result: IPostDocument[] = await this.postModel.findPostPagination(
       page,
       sort,
       language,
@@ -60,46 +60,55 @@ export class PostService {
       position,
       search,
     );
+    result = this.addPostVirtualField(result, userId);
+    return { posts: result };
+  }
 
-    // mongoose document는 불변상태이기 때문에 POJO로 변환
-    const documentToObject = result.posts.map((post: any) => {
-      return post.toObject({ virtuals: true });
-    });
+  // mongoose virtual field 추가
+  // mongodb text search를 위해 aggregate 사용 시 virtual field가 조회되지 않음 > 수동 추가
+  // isLiked : 사용자의 관심 등록 여부
+  // state : 상태 뱃지
+  // totalComments : 댓글 수
+  addPostVirtualField(posts: IPostDocument[], userId: Types.ObjectId | null): IPostDocument[] {
+    let result = [];
+    // 글 상태
+    const today: Date = new Date();
+    const daysAgo: Date = new Date();
+    const millisecondDay: number = 1000 * 60 * 60 * 24;
+    daysAgo.setDate(today.getDate() - 1); // 24시간 이내
+    result = posts.map((post: any) => {
+      let isLiked = false;
 
-    // 관심 등록 여부 추가
-    let addIsLiked;
-    // 로그인하지 않은 사용자
-    if (userId == null) {
-      addIsLiked = documentToObject.map((post: any) => {
-        post.isLiked = false;
-        return post;
-      });
-    } else {
-      // 로그인한 사용자
-      addIsLiked = documentToObject.map((post: any) => {
-        let isLiked = false;
-        if (post.likes && post.likes.length > 0) {
-          // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
-          for (const likeUserId of post.likes) {
-            if (likeUserId.toString() == userId.toString()) {
-              isLiked = true;
-              break;
-            }
+      // add isLiked
+      if (userId != null && post.likes && post.likes.length > 0) {
+        // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
+        for (const likeUserId of post.likes) {
+          if (likeUserId.toString() == userId.toString()) {
+            isLiked = true;
+            break;
           }
         }
-        post.isLiked = isLiked;
-        return post;
-      });
-    }
-    result.posts = addIsLiked;
+      }
+      post.isLiked = isLiked;
 
-    // 언어 필터링 로그 생성
-    // if (language) {
-    //   await PostFilterLog.create({
-    //     viewDate: new Date(),
-    //     language: language.split(','),
-    //   });
-    // }
+      // set Author info
+      if (post.author.length > 0) post.author = post.author[post.author.length - 1];
+
+      // add totalComments
+      post.totalComments = post.comments.length;
+
+      // add state
+      // 1. 3일 이내에 등록된 글이면 최신 글
+      // 2. 3일 이내 글이면 마감 임박
+      // 3. 일 조회수가 60 이상이면 인기
+      if (post.createdAt > daysAgo) post.state = 'new';
+      else if (post.startDate > today && (post.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
+        post.state = 'deadline';
+      else if (Math.abs(post.views / Math.ceil((today.getTime() - post.createdAt.getTime()) / millisecondDay)) >= 60)
+        post.state = 'hot';
+      return post;
+    });
+
     return result;
   }
 
