@@ -9,6 +9,7 @@ exports.studyOrProjectCode = studyOrProjectCode;
 var onlineOrOfflineCode = {
     on: '온라인',
     off: '오프라인',
+    onOff: '온/오프라인',
 };
 exports.onlineOrOfflineCode = onlineOrOfflineCode;
 var recruitsCode = {
@@ -43,5 +44,5 @@ var expectedPeriodCode = {
     mo: '장기',
 };
 exports.expectedPeriodCode = expectedPeriodCode;
-var positionsCode = ['ALL', 'FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM'];
+var positionsCode = ['ALL', 'FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM', 'PD'];
 //# sourceMappingURL=CommonCode.js.map

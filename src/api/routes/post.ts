@@ -129,6 +129,13 @@ export default (app: Router) => {
    *          schema:
    *            type: string
    *          example: '토이프로젝트'
+   *        - name: onOffLine
+   *          in: query
+   *          description: '진행방식(on:온라인, off:오프라인, onOff: 온/오프라인)'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: 'on'
    *      responses:
    *        200:
    *          description: successful operation
@@ -147,7 +154,7 @@ export default (app: Router) => {
     '/pagination',
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { page, sort, language, period, isClosed, type, position, search } = req.query;
+      const { page, sort, language, period, isClosed, type, position, search, onOffLine } = req.query;
       const { _id: userId } = req.user as IUser;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
 
@@ -161,6 +168,7 @@ export default (app: Router) => {
         position,
         search,
         userId,
+        onOffLine,
       );
 
       return res.status(200).json(posts);
@@ -219,6 +227,13 @@ export default (app: Router) => {
    *          schema:
    *            type: string
    *          example: '토이프로젝트'
+   *        - name: onOffLine
+   *          in: query
+   *          description: '진행방식(on:온라인, off:오프라인, onOff: 온/오프라인)'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: 'on'
    *      responses:
    *        200:
    *          description: successful operation
@@ -235,9 +250,17 @@ export default (app: Router) => {
   route.get(
     '/last-page',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { language, period, isClosed, type, position, search } = req.query;
+      const { language, period, isClosed, type, position, search, onOffLine } = req.query;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const lastPage = await PostServiceInstance.findLastPage(language, period, isClosed, type, position, search);
+      const lastPage = await PostServiceInstance.findLastPage(
+        language,
+        period,
+        isClosed,
+        type,
+        position,
+        search,
+        onOffLine,
+      );
 
       return res.status(200).json({
         lastPage,

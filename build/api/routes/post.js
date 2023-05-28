@@ -161,6 +161,13 @@ exports.default = (function (app) {
      *          schema:
      *            type: string
      *          example: '토이프로젝트'
+     *        - name: onOffLine
+     *          in: query
+     *          description: '진행방식(on:온라인, off:오프라인, onOff: 온/오프라인)'
+     *          required: false
+     *          schema:
+     *            type: string
+     *          example: 'on'
      *      responses:
      *        200:
      *          description: successful operation
@@ -176,14 +183,14 @@ exports.default = (function (app) {
      */
     // #endregion
     route.get('/pagination', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, page, sort, language, period, isClosed, type, position, search, userId, PostServiceInstance, posts;
+        var _a, page, sort, language, period, isClosed, type, position, search, onOffLine, userId, PostServiceInstance, posts;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    _a = req.query, page = _a.page, sort = _a.sort, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search;
+                    _a = req.query, page = _a.page, sort = _a.sort, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search, onOffLine = _a.onOffLine;
                     userId = req.user._id;
                     PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findPostPagination(page, sort, language, period, isClosed, type, position, search, userId)];
+                    return [4 /*yield*/, PostServiceInstance.findPostPagination(page, sort, language, period, isClosed, type, position, search, userId, onOffLine)];
                 case 1:
                     posts = _b.sent();
                     return [2 /*return*/, res.status(200).json(posts)];
@@ -242,6 +249,13 @@ exports.default = (function (app) {
      *          schema:
      *            type: string
      *          example: '토이프로젝트'
+     *        - name: onOffLine
+     *          in: query
+     *          description: '진행방식(on:온라인, off:오프라인, onOff: 온/오프라인)'
+     *          required: false
+     *          schema:
+     *            type: string
+     *          example: 'on'
      *      responses:
      *        200:
      *          description: successful operation
@@ -256,13 +270,13 @@ exports.default = (function (app) {
      *                    example: 7
      */
     route.get('/last-page', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, language, period, isClosed, type, position, search, PostServiceInstance, lastPage;
+        var _a, language, period, isClosed, type, position, search, onOffLine, PostServiceInstance, lastPage;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    _a = req.query, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search;
+                    _a = req.query, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search, onOffLine = _a.onOffLine;
                     PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findLastPage(language, period, isClosed, type, position, search)];
+                    return [4 /*yield*/, PostServiceInstance.findLastPage(language, period, isClosed, type, position, search, onOffLine)];
                 case 1:
                     lastPage = _b.sent();
                     return [2 /*return*/, res.status(200).json({

@@ -79,12 +79,12 @@ var PostService = /** @class */ (function () {
         });
     };
     // 메인 화면에서 글 리스트를 조회한다.
-    PostService.prototype.findPostPagination = function (page, sort, language, period, isClosed, type, position, search, userId) {
+    PostService.prototype.findPostPagination = function (page, sort, language, period, isClosed, type, position, search, userId, onOffLine) {
         return __awaiter(this, void 0, void 0, function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.findPostPagination(page, sort, language, period, isClosed, type, position, search)];
+                    case 0: return [4 /*yield*/, this.postModel.findPostPagination(page, sort, language, period, isClosed, type, position, search, onOffLine)];
                     case 1:
                         result = _a.sent();
                         result = this.addPostVirtualField(result, userId);
@@ -139,14 +139,14 @@ var PostService = /** @class */ (function () {
         return result;
     };
     // Pagination을 위해 마지막 페이지를 구한다.
-    PostService.prototype.findLastPage = function (language, period, isClosed, type, position, search) {
+    PostService.prototype.findLastPage = function (language, period, isClosed, type, position, search, onOffLine) {
         return __awaiter(this, void 0, void 0, function () {
             var itemsPerPage, totalCount, lastPage;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         itemsPerPage = 4 * 5;
-                        return [4 /*yield*/, this.postModel.countPost(language, period, isClosed, type, position, search)];
+                        return [4 /*yield*/, this.postModel.countPost(language, period, isClosed, type, position, search, onOffLine)];
                     case 1:
                         totalCount = _a.sent();
                         lastPage = Math.ceil(totalCount / itemsPerPage);

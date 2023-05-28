@@ -98,35 +98,16 @@ var postSchema = new mongoose_1.Schema({
     toObject: { virtuals: true },
     toJSON: { virtuals: true },
 });
-// // 글 상태(뱃지)
-// postSchema.virtual('state').get(function (this: IPost) {
-//   let state = '';
-//   // 글 상태
-//   const today: Date = new Date();
-//   const daysAgo: Date = new Date();
-//   const millisecondDay: number = 1000 * 60 * 60 * 24;
-//   daysAgo.setDate(today.getDate() - 1); // 24시간 이내
-//   // 1. 3일 이내에 등록된 글이면 최신 글
-//   // 2. 3일 이내 글이면 마감 임박
-//   // 3. 일 조회수가 60 이상이면 인기
-//   if (this.createdAt > daysAgo) state = 'new';
-//   else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
-//     state = 'deadline';
-//   else if (Math.abs(this.views / Math.ceil((today.getTime() - this.createdAt.getTime()) / millisecondDay)) >= 60)
-//     state = 'hot';
-//   return state;
-// });
-// postSchema.virtual('totalComments').get(function (this: IPost) {
-//   return this.comments.length;
-// });
 // 조회 query 생성
-var makeFindPostQuery = function (language, period, isClosed, type, position, search) {
+var makeFindPostQuery = function (language, period, isClosed, type, position, search, onOffLine) {
     // Query
     var query = {};
     if (typeof language === 'string')
         query.language = { $in: language.split(',') };
     if (typeof position === 'string' && position && position !== 'ALL')
         query.positions = position;
+    if (typeof onOffLine === 'string' && onOffLine && onOffLine != 'ALL')
+        query.onlineOrOffline = onOffLine;
     if (typeof period === 'number' && !Number.isNaN(period)) {
         var today = new Date();
         query.createdAt = { $gte: today.setDate(today.getDate() - period) };
@@ -188,7 +169,7 @@ postSchema.statics.findTopPost = function (limit, sort) {
     });
 };
 // 최신, 트레딩 조회
-postSchema.statics.findPostPagination = function (page, sort, language, period, isClosed, type, position, search) {
+postSchema.statics.findPostPagination = function (page, sort, language, period, isClosed, type, position, search, onOffLine) {
     return __awaiter(this, void 0, void 0, function () {
         var sortQuery, sortableColumns_2, query, itemsPerPage, pageToSkip, aggregateSearch, aggregate, posts;
         return __generator(this, function (_a) {
@@ -206,7 +187,7 @@ postSchema.statics.findPostPagination = function (page, sort, language, period, 
                     else {
                         sortQuery.push('createdAt');
                     }
-                    query = makeFindPostQuery(language, period, isClosed, type, position, search);
+                    query = makeFindPostQuery(language, period, isClosed, type, position, search, onOffLine);
                     itemsPerPage = 4 * 5;
                     pageToSkip = 0;
                     if ((0, isNumber_1.isNumber)(page) && Number(page) > 0)
@@ -267,13 +248,13 @@ postSchema.statics.findPostPagination = function (page, sort, language, period, 
     });
 };
 // 최신, 트레딩 조회
-postSchema.statics.countPost = function (language, period, isClosed, type, position, search) {
+postSchema.statics.countPost = function (language, period, isClosed, type, position, search, onOffLine) {
     return __awaiter(this, void 0, void 0, function () {
         var query, count;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    query = makeFindPostQuery(language, period, isClosed, type, position, search);
+                    query = makeFindPostQuery(language, period, isClosed, type, position, search, onOffLine);
                     return [4 /*yield*/, this.countDocuments(query)];
                 case 1:
                     count = _a.sent();

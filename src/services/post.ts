@@ -49,6 +49,7 @@ export class PostService {
     position: string | null,
     search: string | null,
     userId: Types.ObjectId | null,
+    onOffLine: string | null,
   ) {
     let result: IPostDocument[] = await this.postModel.findPostPagination(
       page,
@@ -59,6 +60,7 @@ export class PostService {
       type,
       position,
       search,
+      onOffLine,
     );
     result = this.addPostVirtualField(result, userId);
     return { posts: result };
@@ -120,9 +122,10 @@ export class PostService {
     type: string | null,
     position: string | null,
     search: string | null,
+    onOffLine: string | null,
   ) {
     const itemsPerPage = 4 * 5; // 한 페이지에 표현할 수
-    const totalCount = await this.postModel.countPost(language, period, isClosed, type, position, search);
+    const totalCount = await this.postModel.countPost(language, period, isClosed, type, position, search, onOffLine);
     const lastPage = Math.ceil(totalCount / itemsPerPage);
     return lastPage;
   }

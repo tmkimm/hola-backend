@@ -10,6 +10,7 @@ const studyOrProjectCode: CommonCodeType = {
 const onlineOrOfflineCode: CommonCodeType = {
   on: '온라인',
   off: '오프라인',
+  onOff: '온/오프라인',
 };
 
 const recruitsCode: CommonCodeType = {
@@ -44,6 +45,6 @@ const expectedPeriodCode: CommonCodeType = {
   mo: '장기',
 };
 
-const positionsCode: string[] = ['ALL', 'FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM'];
+const positionsCode: string[] = ['ALL', 'FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM', 'PD'];
 
 export { studyOrProjectCode, onlineOrOfflineCode, recruitsCode, contactTypeCode, expectedPeriodCode };
