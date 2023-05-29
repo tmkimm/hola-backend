@@ -1,10 +1,10 @@
 import { Types } from 'mongoose';
 import AWS from 'aws-sdk';
+import { IPostDocument, IPostModel } from '../models/Post';
 import { IUserDocument, IUserModel } from '../models/User';
 import { ReadPosts } from '../models/ReadPosts';
 import { LikePosts } from '../models/LikePosts';
 import { INotificationModel } from '../models/Notification';
-import { IPostModel } from '../models/Post';
 import config from '../config/index';
 import CustomError from '../CustomError';
 import { SignOutUser } from '../models/SignOutUser';
@@ -70,7 +70,8 @@ export class UserService {
         match: { isDeleted: false },
         populate: { path: 'author', select: `nickName image` },
       })
-      .sort('-createdAt');
+      .sort('-createdAt')
+      .lean();
 
     const result = likePosts
       .filter((i) => {

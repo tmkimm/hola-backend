@@ -108,6 +108,7 @@ export class PostService {
         post.state = 'deadline';
       else if (Math.abs(post.views / Math.ceil((today.getTime() - post.createdAt.getTime()) / millisecondDay)) >= 60)
         post.state = 'hot';
+      else post.state = '';
       return post;
     });
 

@@ -38,12 +38,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mongoose_1 = require("mongoose");
+var Post_1 = require("../../models/Post");
+var post_1 = require("../../services/post");
 var isStringEmpty_1 = require("../../utills/isStringEmpty");
 var User_1 = require("../../models/User");
 var index_1 = require("../../services/index");
 var index_2 = require("../middlewares/index");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
-var Post_1 = require("../../models/Post");
 var Notification_1 = require("../../models/Notification");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
@@ -390,7 +391,7 @@ exports.default = (function (app) {
      *          description: User not found
      */
     route.get('/likes/:id', index_2.isUserIdValid, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, UserServiceInstance, user;
+        var id, UserServiceInstance, user, PostServiceInstance, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -399,7 +400,12 @@ exports.default = (function (app) {
                     return [4 /*yield*/, UserServiceInstance.findUserLikes(mongoose_1.Types.ObjectId(id))];
                 case 1:
                     user = _a.sent();
-                    return [2 /*return*/, res.status(200).json(user)];
+                    if (!user) {
+                        return [2 /*return*/, res.status(200).json({ posts: null })];
+                    }
+                    PostServiceInstance = new post_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
+                    result = PostServiceInstance.addPostVirtualField(user, id);
+                    return [2 /*return*/, res.status(200).json({ posts: result })];
             }
         });
     }); });

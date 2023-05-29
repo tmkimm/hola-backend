@@ -151,7 +151,8 @@ var UserService = /** @class */ (function () {
                             match: { isDeleted: false },
                             populate: { path: 'author', select: "nickName image" },
                         })
-                            .sort('-createdAt')];
+                            .sort('-createdAt')
+                            .lean()];
                     case 1:
                         likePosts = _a.sent();
                         result = likePosts
