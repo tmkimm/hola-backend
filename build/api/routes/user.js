@@ -384,9 +384,12 @@ exports.default = (function (app) {
      *          content:
      *            application/json:
      *              schema:
-     *                type: array
-     *                items:
-     *                  $ref: '#/components/schemas/Post'
+     *                type: object
+     *                properties:
+     *                  posts:
+     *                    type: array
+     *                    items:
+     *                      $ref: '#/components/schemas/PostMain'
      *        404:
      *          description: User not found
      */
