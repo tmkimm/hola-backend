@@ -8,7 +8,9 @@ export interface IReadPosts {
 
 export interface IReadPostsDocument extends IReadPosts, Document {}
 
-export type IReadPostsModel = Model<IReadPostsDocument>;
+export interface IReadPostsModel extends Model<IReadPostsDocument> {
+  insertIfNotExist: (postId: Types.ObjectId, userId: Types.ObjectId) => void;
+}
 
 const ReadPostsSchema = new Schema<IReadPostsDocument>(
   {
@@ -19,6 +21,19 @@ const ReadPostsSchema = new Schema<IReadPostsDocument>(
     timestamps: true,
   },
 );
+
+ReadPostsSchema.statics.insertIfNotExist = async function (postId, userId) {
+  await this.updateOne(
+    { postId, userId },
+    {
+      $setOnInsert: {
+        userId,
+        postId,
+      },
+    },
+    { upsert: true },
+  );
+};
 
 const ReadPosts = model<IReadPostsDocument, IReadPostsModel>('ReadPosts', ReadPostsSchema);
 export { ReadPosts };

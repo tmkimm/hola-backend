@@ -171,31 +171,18 @@ export class PostService {
   }
 
   // 조회수 증가
-  async increaseView(postId: Types.ObjectId, userId: Types.ObjectId, readList: string) {
-    let isAlreadyRead = true;
-    let updateReadList = readList;
-    // 조회수 중복 증가 방지
-    if (readList === undefined || (typeof readList === 'string' && readList.indexOf(postId.toString()) === -1)) {
-      if (userId)
-        await Promise.all([
-          await ReadPosts.create({
-            userId,
-            postId,
-          }),
-          this.postModel.increaseView(postId),
-        ]);
-      else await this.postModel.increaseView(postId); // 조회수 증가
-
-      if (readList === undefined) updateReadList = `${postId}`;
-      else updateReadList = `${readList}|${postId}`;
-      isAlreadyRead = false;
+  async increaseView(postId: Types.ObjectId, userId: Types.ObjectId) {
+    // 읽은 목록 중복 삽입 방지
+    if (userId) {
+      await Promise.all([await ReadPosts.insertIfNotExist(postId, userId), await this.postModel.increaseView(postId)]);
+    } else {
+      await this.postModel.increaseView(postId); // 조회수 증가
     }
-    return { updateReadList, isAlreadyRead };
   }
 
   // 상세 글 정보를 조회한다.
   // 로그인된 사용자일 경우 읽은 목록을 추가한다.
-  async findPostDetail(postId: Types.ObjectId) {
+  async findPostDetail(postId: Types.ObjectId, userId: Types.ObjectId) {
     const posts = await this.postModel.findById(postId).populate('author', 'nickName image');
     if (!posts) throw new CustomError('NotFoundError', 404, 'Post not found');
     const postToObject = posts.toObject({ virtuals: true });
@@ -208,6 +195,8 @@ export class PostService {
       });
     }
     postToObject.badge = badge;
+
+    await this.increaseView(postId, userId); // 조회수 증가
     return postToObject;
   }
 

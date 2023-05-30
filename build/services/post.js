@@ -226,47 +226,34 @@ var PostService = /** @class */ (function () {
         });
     };
     // 조회수 증가
-    PostService.prototype.increaseView = function (postId, userId, readList) {
+    PostService.prototype.increaseView = function (postId, userId) {
         return __awaiter(this, void 0, void 0, function () {
-            var isAlreadyRead, updateReadList, _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            var _a, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
-                        isAlreadyRead = true;
-                        updateReadList = readList;
-                        if (!(readList === undefined || (typeof readList === 'string' && readList.indexOf(postId.toString()) === -1))) return [3 /*break*/, 6];
-                        if (!userId) return [3 /*break*/, 3];
+                        if (!userId) return [3 /*break*/, 4];
                         _b = (_a = Promise).all;
-                        return [4 /*yield*/, ReadPosts_1.ReadPosts.create({
-                                userId: userId,
-                                postId: postId,
-                            })];
-                    case 1: return [4 /*yield*/, _b.apply(_a, [[
-                                _c.sent(),
-                                this.postModel.increaseView(postId)
-                            ]])];
-                    case 2:
-                        _c.sent();
-                        return [3 /*break*/, 5];
-                    case 3: return [4 /*yield*/, this.postModel.increaseView(postId)];
-                    case 4:
-                        _c.sent(); // 조회수 증가
-                        _c.label = 5;
+                        return [4 /*yield*/, ReadPosts_1.ReadPosts.insertIfNotExist(postId, userId)];
+                    case 1:
+                        _c = [_d.sent()];
+                        return [4 /*yield*/, this.postModel.increaseView(postId)];
+                    case 2: return [4 /*yield*/, _b.apply(_a, [_c.concat([_d.sent()])])];
+                    case 3:
+                        _d.sent();
+                        return [3 /*break*/, 6];
+                    case 4: return [4 /*yield*/, this.postModel.increaseView(postId)];
                     case 5:
-                        if (readList === undefined)
-                            updateReadList = "".concat(postId);
-                        else
-                            updateReadList = "".concat(readList, "|").concat(postId);
-                        isAlreadyRead = false;
-                        _c.label = 6;
-                    case 6: return [2 /*return*/, { updateReadList: updateReadList, isAlreadyRead: isAlreadyRead }];
+                        _d.sent(); // 조회수 증가
+                        _d.label = 6;
+                    case 6: return [2 /*return*/];
                 }
             });
         });
     };
     // 상세 글 정보를 조회한다.
     // 로그인된 사용자일 경우 읽은 목록을 추가한다.
-    PostService.prototype.findPostDetail = function (postId) {
+    PostService.prototype.findPostDetail = function (postId, userId) {
         return __awaiter(this, void 0, void 0, function () {
             var posts, postToObject, today, badge;
             return __generator(this, function (_a) {
@@ -286,6 +273,9 @@ var PostService = /** @class */ (function () {
                             });
                         }
                         postToObject.badge = badge;
+                        return [4 /*yield*/, this.increaseView(postId, userId)];
+                    case 2:
+                        _a.sent(); // 조회수 증가
                         return [2 /*return*/, postToObject];
                 }
             });

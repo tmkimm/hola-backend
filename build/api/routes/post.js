@@ -376,30 +376,16 @@ exports.default = (function (app) {
      */
     // #endregion
     route.get('/:id', index_1.isObjectIdValid, index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var postId, userId, readList, PostServiceInstance, post, _a, updateReadList, isAlreadyRead, untilMidnight;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var postId, userId, PostServiceInstance, post;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
                 case 0:
                     postId = req.params.id;
                     userId = req.user._id;
-                    readList = req.cookies.RVIEW;
                     PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                    return [4 /*yield*/, PostServiceInstance.findPostDetail(mongoose_1.Types.ObjectId(postId))];
+                    return [4 /*yield*/, PostServiceInstance.findPostDetail(mongoose_1.Types.ObjectId(postId), userId)];
                 case 1:
-                    post = _b.sent();
-                    return [4 /*yield*/, PostServiceInstance.increaseView(mongoose_1.Types.ObjectId(postId), userId, readList)];
-                case 2:
-                    _a = _b.sent(), updateReadList = _a.updateReadList, isAlreadyRead = _a.isAlreadyRead;
-                    if (!isAlreadyRead) {
-                        untilMidnight = new Date();
-                        untilMidnight.setHours(24, 0, 0, 0);
-                        res.cookie('RVIEW', updateReadList, {
-                            sameSite: 'none',
-                            httpOnly: true,
-                            secure: true,
-                            expires: untilMidnight,
-                        });
-                    }
+                    post = _a.sent();
                     return [2 /*return*/, res.status(200).json(post)];
             }
         });
