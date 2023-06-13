@@ -47,4 +47,31 @@ const expectedPeriodCode: CommonCodeType = {
 
 const positionsCode: string[] = ['ALL', 'FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM', 'PD'];
 
+const workExperienceCode: CommonCodeType = {
+  n: '학생',
+  '1': '1년',
+  '2': '2년',
+  '3': '3년',
+  '4': '4년',
+  '5': '5년',
+  '6': '6년',
+  '7': '7년',
+  '8': '8년',
+  '9': '9년',
+  mo: '10년 이상',
+};
+const urlType: string[] = [
+  'GitHub',
+  'Velog',
+  'Tistory',
+  'Notion',
+  'LinkedIn',
+  'Instargram',
+  'Brunch',
+  'Youtube',
+  'Medium',
+  'Link',
+  'Twitter',
+];
+
 export { studyOrProjectCode, onlineOrOfflineCode, recruitsCode, contactTypeCode, expectedPeriodCode };

@@ -58,15 +58,29 @@ import { Notification as NotificationModel } from './Notification';
  *      position:
  *        type: string
  *        description: 직무
- *      githubLink:
- *        type: string
- *        description: 깃허브 링크
- *      blogLink:
- *        type: string
- *        description: 블로그 링크
- *      aboutMe:
+ *      introduce:
  *        type: string
  *        description: 자기소개
+ *      workExperience:
+ *        type: string
+ *        description: 경력(n, 1, 2, 3, 4, mo ..)
+ *      organizationName:
+ *        type: string
+ *        description: 소속
+ *      organizationIsOpen:
+ *        type: boolean
+ *        description: 소속 공개 여부(true, false)
+ *      urls:
+ *        type: array
+ *        properties:
+ *          urlType:
+ *            type: string
+ *            description: url 종류(GitHub, Velog, Tistory, Notion, LinkedIn, Instargram, Brunch, Youtube ..)
+ *            example: 'Velog'
+ *          url:
+ *            type: string
+ *            description: url
+ *            example: 'https://velog.io/@seeh_h'
  *      createdAt:
  *        type: string
  *        description: 생성일
@@ -92,9 +106,16 @@ export interface IUser {
   likePosts: Types.ObjectId[] | undefined;
   readList: Types.ObjectId[] | undefined;
   position: string;
-  githubLink: string;
-  blogLink: string;
-  aboutMe: string;
+  introduce: string;
+  workExperience: string;
+  organizationName: string;
+  organizationIsOpen: boolean;
+  urls: [
+    {
+      urlType: string;
+      url: string;
+    },
+  ];
   createdAt: Date;
 }
 
@@ -112,6 +133,8 @@ export interface IUserModel extends Model<IUserDocument> {
   deleteLikePost: (postId: Types.ObjectId, userId: Types.ObjectId) => Promise<IUserDocument>;
   addReadList: (postId: Types.ObjectId, userId: Types.ObjectId) => void;
 }
+
+const UrlSchema = new Schema({ urlType: String, url: String });
 
 const userSchema = new Schema<IUserDocument>(
   {
@@ -138,9 +161,11 @@ const userSchema = new Schema<IUserDocument>(
     likePosts: [{ type: Types.ObjectId, ref: 'Post' }],
     readList: [{ type: Types.ObjectId, ref: 'Post' }],
     position: { type: String, default: '' },
-    githubLink: { type: String, default: '' },
-    blogLink: { type: String, default: '' },
-    aboutMe: { type: String, default: '' },
+    introduce: { type: String, default: '' },
+    workExperience: { type: String, default: '' },
+    organizationName: { type: String, default: '' },
+    organizationIsOpen: { type: Boolean, default: false },
+    urls: [UrlSchema],
   },
   {
     timestamps: true,

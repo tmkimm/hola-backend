@@ -41,6 +41,7 @@ var mongoose_1 = require("mongoose");
 var jwt_1 = require("../utills/jwt");
 var Post_1 = require("./Post");
 var Notification_1 = require("./Notification");
+var UrlSchema = new mongoose_1.Schema({ urlType: String, url: String });
 var userSchema = new mongoose_1.Schema({
     idToken: { type: String, required: true },
     tokenType: { type: String, required: true },
@@ -65,9 +66,11 @@ var userSchema = new mongoose_1.Schema({
     likePosts: [{ type: mongoose_1.Types.ObjectId, ref: 'Post' }],
     readList: [{ type: mongoose_1.Types.ObjectId, ref: 'Post' }],
     position: { type: String, default: '' },
-    githubLink: { type: String, default: '' },
-    blogLink: { type: String, default: '' },
-    aboutMe: { type: String, default: '' },
+    introduce: { type: String, default: '' },
+    workExperience: { type: String, default: '' },
+    organizationName: { type: String, default: '' },
+    organizationIsOpen: { type: Boolean, default: false },
+    urls: [UrlSchema],
 }, {
     timestamps: true,
 });
