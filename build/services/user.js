@@ -72,7 +72,9 @@ var UserService = /** @class */ (function () {
             var users;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.userModel.findById(id)];
+                    case 0: return [4 /*yield*/, this.userModel
+                            .findById(id)
+                            .select('_id nickName image workExperience position organizationName organizationIsOpen urls introduce likeLanguages')];
                     case 1:
                         users = _a.sent();
                         return [2 /*return*/, users];

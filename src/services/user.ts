@@ -24,7 +24,11 @@ export class UserService {
 
   // id를 이용하여 사용자 정보를 조회한다.
   async findById(id: Types.ObjectId) {
-    const users = await this.userModel.findById(id);
+    const users = await this.userModel
+      .findById(id)
+      .select(
+        '_id nickName image workExperience position organizationName organizationIsOpen urls introduce likeLanguages',
+      );
     return users;
   }
 
