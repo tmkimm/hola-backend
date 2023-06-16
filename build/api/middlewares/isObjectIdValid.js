@@ -35,32 +35,23 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReadPosts = void 0;
-var mongoose_1 = require("mongoose");
-var ReadPostsSchema = new mongoose_1.Schema({
-    userId: { type: mongoose_1.Types.ObjectId, ref: 'User' },
-    postId: { type: mongoose_1.Types.ObjectId, ref: 'Post' },
-}, {
-    timestamps: true,
-});
-ReadPostsSchema.statics.insertIfNotExist = function (postId, userId) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, this.updateOne({ postId: postId, userId: userId }, {
-                        $setOnInsert: {
-                            userId: userId,
-                            postId: postId,
-                        },
-                    }, { upsert: true })];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var ReadPosts = (0, mongoose_1.model)('ReadPosts', ReadPostsSchema);
-exports.ReadPosts = ReadPosts;
-//# sourceMappingURL=ReadPosts.js.map
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.isObjectIdValid = void 0;
+var mongoose_1 = require("mongoose");
+var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
+var CustomError_1 = __importDefault(require("../../CustomError"));
+// 글 id가 존재하는지 확인한다.
+exports.isObjectIdValid = (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var objectId;
+    return __generator(this, function (_a) {
+        objectId = req.params.id;
+        if (!mongoose_1.Types.ObjectId.isValid(objectId))
+            throw new CustomError_1.default('NotFoundError', 404, 'Post not found');
+        next();
+        return [2 /*return*/];
+    });
+}); });
+//# sourceMappingURL=isObjectIdValid.js.map

@@ -35,6 +35,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -89,36 +98,16 @@ var postSchema = new mongoose_1.Schema({
     toObject: { virtuals: true },
     toJSON: { virtuals: true },
 });
-// 글 상태(뱃지)
-postSchema.virtual('state').get(function () {
-    var state = '';
-    // 글 상태
-    var today = new Date();
-    var daysAgo = new Date();
-    var millisecondDay = 1000 * 60 * 60 * 24;
-    daysAgo.setDate(today.getDate() - 1); // 24시간 이내
-    // 1. 3일 이내에 등록된 글이면 최신 글
-    // 2. 3일 이내 글이면 마감 임박
-    // 3. 일 조회수가 60 이상이면 인기
-    if (this.createdAt > daysAgo)
-        state = 'new';
-    else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
-        state = 'deadline';
-    else if (Math.abs(this.views / Math.ceil((today.getTime() - this.createdAt.getTime()) / millisecondDay)) >= 60)
-        state = 'hot';
-    return state;
-});
-postSchema.virtual('totalComments').get(function () {
-    return this.comments.length;
-});
 // 조회 query 생성
-var makeFindPostQuery = function (language, period, isClosed, type, position, search) {
+var makeFindPostQuery = function (language, period, isClosed, type, position, search, onOffLine) {
     // Query
     var query = {};
     if (typeof language === 'string')
         query.language = { $in: language.split(',') };
     if (typeof position === 'string' && position && position !== 'ALL')
         query.positions = position;
+    if (typeof onOffLine === 'string' && onOffLine && onOffLine != 'ALL')
+        query.onlineOrOffline = onOffLine;
     if (typeof period === 'number' && !Number.isNaN(period)) {
         var today = new Date();
         query.createdAt = { $gte: today.setDate(today.getDate() - period) };
@@ -136,20 +125,19 @@ var makeFindPostQuery = function (language, period, isClosed, type, position, se
             query.type = { $eq: type };
     }
     // 텍스트 검색
-    if (typeof search === 'string') {
-        query.$text = { $search: search };
-    }
+    // if (typeof search === 'string') {
+    //   query.$text = { $search: search };
+    // }
     return query;
 };
 // 최신, 트레딩 조회
-postSchema.statics.findPost = function (offset, limit, sort, language, period, isClosed, type, position, search) {
+postSchema.statics.findTopPost = function (limit, sort) {
     return __awaiter(this, void 0, void 0, function () {
-        var offsetQuery, limitQuery, sortQuery, sortableColumns_1, query, result;
+        var limitQuery, sortQuery, sortableColumns_1, today, daysAgo, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    offsetQuery = parseInt(offset, 10) || 0;
-                    limitQuery = parseInt(limit, 10) || 20;
+                    limitQuery = parseInt(limit, 10) || 6;
                     sortQuery = [];
                     // Sorting
                     if (sort) {
@@ -157,17 +145,19 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
                         sortQuery = sort.split(',').filter(function (value) {
                             return sortableColumns_1.indexOf(value.substr(1, value.length)) !== -1 || sortableColumns_1.indexOf(value) !== -1;
                         });
-                        sortQuery.push('-createdAt');
                     }
                     else {
-                        sortQuery.push('createdAt');
+                        sortQuery.push('-views');
                     }
-                    query = makeFindPostQuery(language, period, isClosed, type, position, search);
-                    return [4 /*yield*/, this.find(query)
+                    today = new Date();
+                    daysAgo = new Date();
+                    daysAgo.setDate(today.getDate() - 7); // 7일 이내
+                    return [4 /*yield*/, this.find({ createdAt: { $gte: daysAgo } })
                             .where('isDeleted')
                             .equals(false)
+                            .where('isClosed')
+                            .equals(false)
                             .sort(sortQuery.join(' '))
-                            .skip(Number(offsetQuery))
                             .limit(Number(limitQuery))
                             .select("title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
                             .populate('author', 'nickName image')];
@@ -179,9 +169,9 @@ postSchema.statics.findPost = function (offset, limit, sort, language, period, i
     });
 };
 // 최신, 트레딩 조회
-postSchema.statics.findPostPagination = function (page, sort, language, period, isClosed, type, position, search) {
+postSchema.statics.findPostPagination = function (page, sort, language, period, isClosed, type, position, search, onOffLine) {
     return __awaiter(this, void 0, void 0, function () {
-        var sortQuery, sortableColumns_2, query, itemsPerPage, pageToSkip, posts;
+        var sortQuery, sortableColumns_2, query, itemsPerPage, pageToSkip, aggregateSearch, aggregate, posts;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -197,34 +187,74 @@ postSchema.statics.findPostPagination = function (page, sort, language, period, 
                     else {
                         sortQuery.push('createdAt');
                     }
-                    query = makeFindPostQuery(language, period, isClosed, type, position, search);
+                    query = makeFindPostQuery(language, period, isClosed, type, position, search, onOffLine);
                     itemsPerPage = 4 * 5;
                     pageToSkip = 0;
                     if ((0, isNumber_1.isNumber)(page) && Number(page) > 0)
                         pageToSkip = (Number(page) - 1) * itemsPerPage;
-                    return [4 /*yield*/, this.find(query)
-                            .sort(sortQuery.join(' '))
-                            .skip(pageToSkip)
-                            .limit(Number(itemsPerPage))
-                            .select("title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt")
-                            .populate('author', 'nickName image')];
+                    aggregateSearch = [];
+                    if (search && typeof search === 'string') {
+                        aggregateSearch.push({
+                            $search: {
+                                index: 'posts_text_search',
+                                text: {
+                                    query: search,
+                                    path: {
+                                        wildcard: '*',
+                                    },
+                                },
+                            },
+                        });
+                    }
+                    aggregate = __spreadArray(__spreadArray([], aggregateSearch, true), [
+                        { $match: query },
+                        {
+                            $lookup: {
+                                from: 'users',
+                                localField: 'author',
+                                foreignField: '_id',
+                                pipeline: [{ $project: { _id: 1, nickName: 1, image: 1 } }],
+                                as: 'author',
+                            },
+                        },
+                        {
+                            $project: {
+                                title: 1,
+                                views: 1,
+                                comments: 1,
+                                likes: 1,
+                                language: 1,
+                                isClosed: 1,
+                                totalLikes: 1,
+                                startDate: 1,
+                                endDate: 1,
+                                type: 1,
+                                onlineOrOffline: 1,
+                                contactType: 1,
+                                recruits: 1,
+                                expectedPeriod: 1,
+                                author: 1,
+                                positions: 1,
+                                createdAt: 1,
+                            },
+                        },
+                    ], false);
+                    return [4 /*yield*/, this.aggregate(aggregate).sort(sortQuery.join(' ')).skip(pageToSkip).limit(Number(itemsPerPage))];
                 case 1:
                     posts = _a.sent();
-                    return [2 /*return*/, {
-                            posts: posts,
-                        }];
+                    return [2 /*return*/, posts];
             }
         });
     });
 };
 // 최신, 트레딩 조회
-postSchema.statics.countPost = function (language, period, isClosed, type, position, search) {
+postSchema.statics.countPost = function (language, period, isClosed, type, position, search, onOffLine) {
     return __awaiter(this, void 0, void 0, function () {
         var query, count;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    query = makeFindPostQuery(language, period, isClosed, type, position, search);
+                    query = makeFindPostQuery(language, period, isClosed, type, position, search, onOffLine);
                     return [4 /*yield*/, this.countDocuments(query)];
                 case 1:
                     count = _a.sent();
@@ -268,7 +298,7 @@ postSchema.statics.findPostRecommend = function (sort, language, postId, userId,
                 case 0:
                     sortQuery = [];
                     // Sorting
-                    if (sort == false) {
+                    if (sort === false) {
                         sortQuery.push('createdAt');
                     }
                     query = {};

@@ -1,11 +1,12 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
+import { IPostDocument, Post as PostModel } from '../../models/Post';
+import { PostService } from '../../services/post';
 import { isString } from '../../utills/isStringEmpty';
 import { IUser, User as UserModel } from '../../models/User';
 import { UserService, NotificationService } from '../../services/index';
 import { nickNameDuplicationCheck, isAccessTokenValid, isUserIdValid } from '../middlewares/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
-import { Post as PostModel } from '../../models/Post';
 import { Notification as NotificationModel } from '../../models/Notification';
 
 const route = Router();
@@ -349,9 +350,12 @@ export default (app: Router) => {
    *          content:
    *            application/json:
    *              schema:
-   *                type: array
-   *                items:
-   *                  $ref: '#/components/schemas/Post'
+   *                type: object
+   *                properties:
+   *                  posts:
+   *                    type: array
+   *                    items:
+   *                      $ref: '#/components/schemas/PostMain'
    *        404:
    *          description: User not found
    */
@@ -359,7 +363,14 @@ export default (app: Router) => {
     const { id } = req.params;
     const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
     const user = await UserServiceInstance.findUserLikes(Types.ObjectId(id));
-    return res.status(200).json(user);
+
+    if (!user) {
+      return res.status(200).json({ posts: null });
+    }
+
+    const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
+    const result = PostServiceInstance.addPostVirtualField(user as unknown as IPostDocument[], id);
+    return res.status(200).json({ posts: result });
   });
 
   /**

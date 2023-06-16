@@ -7,6 +7,7 @@ import {
   isAccessTokenValid,
   getUserIdByAccessToken,
   isPostIdValid,
+  isObjectIdValid,
 } from '../middlewares/index';
 import { PostService } from '../../services/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
@@ -24,80 +25,17 @@ export default (app: Router) => {
    */
   app.use('/posts', route);
 
-  // #region 글 리스트 조회(메인)
+  // #region 이번주 인기글
   /**
    * @swagger
    * paths:
-   *   /posts:
+   *   /posts/top:
    *    get:
    *      tags:
    *        - posts
-   *      summary: 글 리스트 조회(메인)
-   *      description: 메인 페이지에서 글 리스트를 조회한다.
+   *      summary: 이번주 인기글
+   *      description: 메인 페이지에서 이번주 인기글을 조회한다.(조회수 기준 정렬)
    *      parameters:
-   *        - name: language
-   *          in: query
-   *          description: 사용 언어
-   *          required: false
-   *          schema:
-   *            type: string
-   *          example: 'react,java'
-   *        - name: offset
-   *          in: query
-   *          description: 건너뛸 개수
-   *          required: true
-   *          schema:
-   *            type: string
-   *          example: 00
-   *        - name: limit
-   *          in: query
-   *          description: 조회할 개수
-   *          required: true
-   *          schema:
-   *            type: string
-   *          example: 20
-   *        - name: sort
-   *          in: query
-   *          description: '정렬. 필드는 ,로 구분하며 +는 오름차순, -는 내림차순 '
-   *          required: false
-   *          schema:
-   *            type: string
-   *          example: '-createdAt,+views'
-   *        - name: position
-   *          in: query
-   *          description: '직군(ALL: 전체, FE: 프론트엔드, BE: 백엔드, DE: 디자이너, IOS: IOS, AND: 안드로이드, DEVOPS: DevOps, PM)'
-   *          required: false
-   *          schema:
-   *            type: string
-   *          example: 'FE,IOS'
-   *        - name: type
-   *          in: query
-   *          description: '모집 구분(1 : 프로젝트, 2: 스터디)'
-   *          required: false
-   *          schema:
-   *            type: string
-   *          example: '1'
-   *        - name: period
-   *          in: query
-   *          description: '조회 기간(일). 14일 경우 14일 이내의 글만 조회'
-   *          required: false
-   *          schema:
-   *            type: string
-   *          example: 14
-   *        - name: isClosed
-   *          in: query
-   *          description: '마감여부(true, false)'
-   *          required: false
-   *          schema:
-   *            type: string
-   *          example: true
-   *        - name: search
-   *          in: query
-   *          description: '검색'
-   *          required: false
-   *          schema:
-   *            type: string
-   *          example: '토이프로젝트'
    *      responses:
    *        200:
    *          description: successful operation
@@ -110,22 +48,10 @@ export default (app: Router) => {
    */
   // #endregion
   route.get(
-    '/',
+    '/top',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { offset, limit, sort, language, period, isClosed, type, position, search } = req.query;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const posts = await PostServiceInstance.findPost(
-        offset,
-        limit,
-        sort,
-        language,
-        period,
-        isClosed,
-        type,
-        position,
-        search,
-      );
-
+      const posts = await PostServiceInstance.findTopPost();
       return res.status(200).json(posts);
     }),
   );
@@ -203,6 +129,13 @@ export default (app: Router) => {
    *          schema:
    *            type: string
    *          example: '토이프로젝트'
+   *        - name: onOffLine
+   *          in: query
+   *          description: '진행방식(on:온라인, off:오프라인, onOff: 온/오프라인)'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: 'on'
    *      responses:
    *        200:
    *          description: successful operation
@@ -221,7 +154,7 @@ export default (app: Router) => {
     '/pagination',
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { page, sort, language, period, isClosed, type, position, search } = req.query;
+      const { page, sort, language, period, isClosed, type, position, search, onOffLine } = req.query;
       const { _id: userId } = req.user as IUser;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
 
@@ -235,6 +168,7 @@ export default (app: Router) => {
         position,
         search,
         userId,
+        onOffLine,
       );
 
       return res.status(200).json(posts);
@@ -293,6 +227,13 @@ export default (app: Router) => {
    *          schema:
    *            type: string
    *          example: '토이프로젝트'
+   *        - name: onOffLine
+   *          in: query
+   *          description: '진행방식(on:온라인, off:오프라인, onOff: 온/오프라인)'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: 'on'
    *      responses:
    *        200:
    *          description: successful operation
@@ -309,9 +250,17 @@ export default (app: Router) => {
   route.get(
     '/last-page',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { language, period, isClosed, type, position, search } = req.query;
+      const { language, period, isClosed, type, position, search, onOffLine } = req.query;
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const lastPage = await PostServiceInstance.findLastPage(language, period, isClosed, type, position, search);
+      const lastPage = await PostServiceInstance.findLastPage(
+        language,
+        period,
+        isClosed,
+        type,
+        position,
+        search,
+        onOffLine,
+      );
 
       return res.status(200).json({
         lastPage,
@@ -410,30 +359,15 @@ export default (app: Router) => {
   // #endregion
   route.get(
     '/:id',
+    isObjectIdValid,
     getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const postId = req.params.id;
       const { _id: userId } = req.user as IUser;
-      const readList = req.cookies.RVIEW;
 
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
-      const post = await PostServiceInstance.findPostDetail(Types.ObjectId(postId));
-      const { updateReadList, isAlreadyRead } = await PostServiceInstance.increaseView(
-        Types.ObjectId(postId),
-        userId,
-        readList,
-      );
-      if (!isAlreadyRead) {
-        // 쿠키는 당일만 유효
-        const untilMidnight = new Date();
-        untilMidnight.setHours(24, 0, 0, 0);
-        res.cookie('RVIEW', updateReadList, {
-          sameSite: 'none',
-          httpOnly: true,
-          secure: true,
-          expires: untilMidnight,
-        });
-      }
+      const post = await PostServiceInstance.findPostDetail(Types.ObjectId(postId), userId);
+
       return res.status(200).json(post);
     }),
   );

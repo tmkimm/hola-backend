@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isUserIdValid = exports.isPostIdValid = exports.getUserIdByAccessToken = exports.nickNameDuplicationCheck = exports.isTokenValidWithOauth = exports.isPostValid = exports.checkPost = exports.isAccessTokenValid = exports.autoSignUp = void 0;
+exports.isObjectIdValid = exports.isUserIdValid = exports.isPostIdValid = exports.getUserIdByAccessToken = exports.nickNameDuplicationCheck = exports.isTokenValidWithOauth = exports.isPostValid = exports.checkPost = exports.isAccessTokenValid = exports.autoSignUp = void 0;
 var autoSignUp_1 = require("./autoSignUp");
 Object.defineProperty(exports, "autoSignUp", { enumerable: true, get: function () { return autoSignUp_1.autoSignUp; } });
 var isAccessTokenValid_1 = require("./isAccessTokenValid");
@@ -18,4 +18,6 @@ var isPostIdValid_1 = require("./isPostIdValid");
 Object.defineProperty(exports, "isPostIdValid", { enumerable: true, get: function () { return isPostIdValid_1.isPostIdValid; } });
 var isUserIdValid_1 = require("./isUserIdValid");
 Object.defineProperty(exports, "isUserIdValid", { enumerable: true, get: function () { return isUserIdValid_1.isUserIdValid; } });
+var isObjectIdValid_1 = require("./isObjectIdValid");
+Object.defineProperty(exports, "isObjectIdValid", { enumerable: true, get: function () { return isObjectIdValid_1.isObjectIdValid; } });
 //# sourceMappingURL=index.js.map

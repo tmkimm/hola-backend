@@ -72,7 +72,9 @@ var UserService = /** @class */ (function () {
             var users;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.userModel.findById(id)];
+                    case 0: return [4 /*yield*/, this.userModel
+                            .findById(id)
+                            .select('_id nickName image workExperience position organizationName organizationIsOpen urls introduce likeLanguages')];
                     case 1:
                         users = _a.sent();
                         return [2 /*return*/, users];
@@ -151,10 +153,15 @@ var UserService = /** @class */ (function () {
                             match: { isDeleted: false },
                             populate: { path: 'author', select: "nickName image" },
                         })
-                            .sort('-createdAt')];
+                            .sort('-createdAt')
+                            .lean()];
                     case 1:
                         likePosts = _a.sent();
-                        result = likePosts.map(function (i) {
+                        result = likePosts
+                            .filter(function (i) {
+                            return i.postId && i.postId !== null;
+                        })
+                            .map(function (i) {
                             return i.postId;
                         });
                         return [2 /*return*/, result];
@@ -178,7 +185,11 @@ var UserService = /** @class */ (function () {
                             .sort('-createdAt')];
                     case 1:
                         readList = _a.sent();
-                        result = readList.map(function (i) {
+                        result = readList
+                            .filter(function (i) {
+                            return i.postId && i.postId !== null;
+                        })
+                            .map(function (i) {
                             return i.postId;
                         });
                         return [2 /*return*/, result];

@@ -1,10 +1,10 @@
 import { Types } from 'mongoose';
 import AWS from 'aws-sdk';
+import { IPostDocument, IPostModel } from '../models/Post';
 import { IUserDocument, IUserModel } from '../models/User';
 import { ReadPosts } from '../models/ReadPosts';
 import { LikePosts } from '../models/LikePosts';
 import { INotificationModel } from '../models/Notification';
-import { IPostModel } from '../models/Post';
 import config from '../config/index';
 import CustomError from '../CustomError';
 import { SignOutUser } from '../models/SignOutUser';
@@ -24,7 +24,11 @@ export class UserService {
 
   // id를 이용하여 사용자 정보를 조회한다.
   async findById(id: Types.ObjectId) {
-    const users = await this.userModel.findById(id);
+    const users = await this.userModel
+      .findById(id)
+      .select(
+        '_id nickName image workExperience position organizationName organizationIsOpen urls introduce likeLanguages',
+      );
     return users;
   }
 
@@ -70,11 +74,16 @@ export class UserService {
         match: { isDeleted: false },
         populate: { path: 'author', select: `nickName image` },
       })
-      .sort('-createdAt');
+      .sort('-createdAt')
+      .lean();
 
-    const result = likePosts.map((i) => {
-      return i.postId;
-    });
+    const result = likePosts
+      .filter((i) => {
+        return i.postId && i.postId !== null;
+      })
+      .map((i) => {
+        return i.postId;
+      });
     return result;
   }
 
@@ -89,9 +98,13 @@ export class UserService {
       })
       .sort('-createdAt');
 
-    const result = readList.map((i) => {
-      return i.postId;
-    });
+    const result = readList
+      .filter((i) => {
+        return i.postId && i.postId !== null;
+      })
+      .map((i) => {
+        return i.postId;
+      });
     return result;
   }
 

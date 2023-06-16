@@ -127,6 +127,16 @@ export interface IReply {
  *        type: array
  *        items:
  *          $ref: '#/components/schemas/Comment'
+ *      badge:
+ *        properties:
+ *          type:
+ *            type: string
+ *            description: 뱃지종류
+ *            example: 'deadline'
+ *          name:
+ *            type: string
+ *            description: 뱃지명
+ *            example: '마감 3일전'
  *   Comment:
  *     properties:
  *      _id:
@@ -288,21 +298,17 @@ export interface IPost {
   startDate: Date; // 시작예정일
   closeDate: Date; // 마감일
   deleteDate: Date; // 삭제일
+  badge: [
+    {
+      type: string;
+      name: string;
+    },
+  ];
 }
 export interface IPostDocument extends IPost, Document {}
 
 export interface IPostModel extends Model<IPostDocument> {
-  findPost: (
-    offset: number | null,
-    limit: number | null,
-    sort: string | null,
-    language: string | null,
-    period: number | null,
-    isClosed: string | null,
-    type: string | null,
-    position: string | null,
-    search: string | null,
-  ) => Promise<IPostDocument[]>;
+  findTopPost: (limit: number | null, sort: string | null) => Promise<IPostDocument[]>;
   findPostPagination: (
     page: string | null,
     sort: string | null,
@@ -312,6 +318,7 @@ export interface IPostModel extends Model<IPostDocument> {
     type: string | null,
     position: string | null,
     search: string | null,
+    onOffLine: string | null,
   ) => Promise<IPostDocument[]>;
   countPost: (
     language: string | null,
@@ -320,6 +327,7 @@ export interface IPostModel extends Model<IPostDocument> {
     type: string | null,
     position: string | null,
     search: string | null,
+    onOffLine: string | null,
   ) => Promise<number>;
   findPopularPosts: (postId: Types.ObjectId | null, userId: Types.ObjectId | null) => Promise<IPostDocument[]>;
   findPostRecommend: (
@@ -419,30 +427,6 @@ const postSchema = new Schema<IPostDocument>(
   },
 );
 
-// 글 상태(뱃지)
-postSchema.virtual('state').get(function (this: IPost) {
-  let state = '';
-
-  // 글 상태
-  const today: Date = new Date();
-  const daysAgo: Date = new Date();
-  const millisecondDay: number = 1000 * 60 * 60 * 24;
-  daysAgo.setDate(today.getDate() - 1); // 24시간 이내
-  // 1. 3일 이내에 등록된 글이면 최신 글
-  // 2. 3일 이내 글이면 마감 임박
-  // 3. 일 조회수가 60 이상이면 인기
-  if (this.createdAt > daysAgo) state = 'new';
-  else if (this.startDate > today && (this.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
-    state = 'deadline';
-  else if (Math.abs(this.views / Math.ceil((today.getTime() - this.createdAt.getTime()) / millisecondDay)) >= 60)
-    state = 'hot';
-  return state;
-});
-
-postSchema.virtual('totalComments').get(function (this: IPost) {
-  return this.comments.length;
-});
-
 // 조회 query 생성
 const makeFindPostQuery = (
   language: string | null,
@@ -451,12 +435,14 @@ const makeFindPostQuery = (
   type: string | null,
   position: string | null,
   search: string | null,
+  onOffLine: string | null,
 ) => {
   // Query
   const query: any = {};
 
   if (typeof language === 'string') query.language = { $in: language.split(',') };
   if (typeof position === 'string' && position && position !== 'ALL') query.positions = position;
+  if (typeof onOffLine === 'string' && onOffLine && onOffLine != 'ALL') query.onlineOrOffline = onOffLine;
 
   if (typeof period === 'number' && !Number.isNaN(period)) {
     const today = new Date();
@@ -475,17 +461,16 @@ const makeFindPostQuery = (
   }
 
   // 텍스트 검색
-  if (typeof search === 'string') {
-    query.$text = { $search: search };
-  }
+  // if (typeof search === 'string') {
+  //   query.$text = { $search: search };
+  // }
   return query;
 };
 
 // 최신, 트레딩 조회
-postSchema.statics.findPost = async function (offset, limit, sort, language, period, isClosed, type, position, search) {
+postSchema.statics.findTopPost = async function (limit, sort) {
   // Pagenation
-  const offsetQuery = parseInt(offset, 10) || 0;
-  const limitQuery = parseInt(limit, 10) || 20;
+  const limitQuery = parseInt(limit, 10) || 6;
 
   let sortQuery = [];
   // Sorting
@@ -494,17 +479,22 @@ postSchema.statics.findPost = async function (offset, limit, sort, language, per
     sortQuery = sort.split(',').filter((value: string) => {
       return sortableColumns.indexOf(value.substr(1, value.length)) !== -1 || sortableColumns.indexOf(value) !== -1;
     });
-    sortQuery.push('-createdAt');
   } else {
-    sortQuery.push('createdAt');
+    sortQuery.push('-views');
   }
+
+  // 글 상태
+  const today: Date = new Date();
+  const daysAgo: Date = new Date();
+  daysAgo.setDate(today.getDate() - 7); // 7일 이내
+
   // Query
-  const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
-  const result = await this.find(query)
+  const result = await this.find({ createdAt: { $gte: daysAgo } })
     .where('isDeleted')
     .equals(false)
+    .where('isClosed')
+    .equals(false)
     .sort(sortQuery.join(' '))
-    .skip(Number(offsetQuery))
     .limit(Number(limitQuery))
     .select(
       `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
@@ -523,6 +513,7 @@ postSchema.statics.findPostPagination = async function (
   type,
   position,
   search,
+  onOffLine,
 ) {
   let sortQuery = [];
   // Sorting
@@ -535,28 +526,65 @@ postSchema.statics.findPostPagination = async function (
   } else {
     sortQuery.push('createdAt');
   }
-  const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
-
+  const query = makeFindPostQuery(language, period, isClosed, type, position, search, onOffLine); // 조회 query 생성
   // Pagenation
   const itemsPerPage = 4 * 5; // 한 페이지에 표현할 수
   let pageToSkip = 0;
   if (isNumber(page) && Number(page) > 0) pageToSkip = (Number(page) - 1) * itemsPerPage;
-
-  const posts = await this.find(query)
-    .sort(sortQuery.join(' '))
-    .skip(pageToSkip)
-    .limit(Number(itemsPerPage))
-    .select(
-      `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
-    )
-    .populate('author', 'nickName image');
-  return {
-    posts,
-  };
+  const aggregateSearch = [];
+  if (search && typeof search === 'string') {
+    aggregateSearch.push({
+      $search: {
+        index: 'posts_text_search',
+        text: {
+          query: search,
+          path: {
+            wildcard: '*',
+          },
+        },
+      },
+    });
+  }
+  const aggregate = [
+    ...aggregateSearch,
+    { $match: query },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'author',
+        foreignField: '_id',
+        pipeline: [{ $project: { _id: 1, nickName: 1, image: 1 } }],
+        as: 'author',
+      },
+    },
+    {
+      $project: {
+        title: 1,
+        views: 1,
+        comments: 1,
+        likes: 1,
+        language: 1,
+        isClosed: 1,
+        totalLikes: 1,
+        startDate: 1,
+        endDate: 1,
+        type: 1,
+        onlineOrOffline: 1,
+        contactType: 1,
+        recruits: 1,
+        expectedPeriod: 1,
+        author: 1,
+        positions: 1,
+        createdAt: 1,
+      },
+    },
+  ];
+  const posts = await this.aggregate(aggregate).sort(sortQuery.join(' ')).skip(pageToSkip).limit(Number(itemsPerPage));
+  return posts;
 };
 // 최신, 트레딩 조회
-postSchema.statics.countPost = async function (language, period, isClosed, type, position, search) {
-  const query = makeFindPostQuery(language, period, isClosed, type, position, search); // 조회 query 생성
+postSchema.statics.countPost = async function (language, period, isClosed, type, position, search, onOffLine) {
+  const query = makeFindPostQuery(language, period, isClosed, type, position, search, onOffLine); // 조회 query 생성
   const count = await this.countDocuments(query);
   return count;
 };
@@ -589,7 +617,7 @@ postSchema.statics.findPopularPosts = async function (postId, userId) {
 postSchema.statics.findPostRecommend = async function (sort, language, postId, userId, limit) {
   const sortQuery = [];
   // Sorting
-  if (sort == false) {
+  if (sort === false) {
     sortQuery.push('createdAt');
   }
   // Query

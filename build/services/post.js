@@ -50,87 +50,105 @@ var PostService = /** @class */ (function () {
         this.userModel = userModel;
         this.notificationModel = notificationModel;
     }
-    // 리팩토링필요
-    // 메인 화면에서 글 리스트를 조회한다.
-    PostService.prototype.findPost = function (offset, limit, sort, language, period, isClosed, type, position, search) {
+    // 이번주 인기글 조회
+    PostService.prototype.findTopPost = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var posts;
+            var posts, today, postArr;
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.findPost(offset, limit, sort, language, period, isClosed, type, position, search)];
+                    case 0: return [4 /*yield*/, this.postModel.findTopPost(10, '-views')];
                     case 1:
                         posts = _a.sent();
-                        // 언어 필터링 로그 생성
-                        // if (language) {
-                        //   await PostFilterLog.create({
-                        //     viewDate: new Date(),
-                        //     language: language.split(','),
-                        //   });
-                        // }
-                        return [2 /*return*/, posts];
+                        today = new Date();
+                        postArr = posts.map(function (post) {
+                            post = post.toObject({ virtuals: true });
+                            if (post.startDate > today) {
+                                post.badge = [
+                                    {
+                                        type: 'deadline',
+                                        name: "\uB9C8\uAC10 ".concat(_this.timeForEndDate(post.startDate)),
+                                    },
+                                ];
+                            }
+                            return post;
+                        });
+                        return [2 /*return*/, postArr];
                 }
             });
         });
     };
     // 메인 화면에서 글 리스트를 조회한다.
-    PostService.prototype.findPostPagination = function (page, sort, language, period, isClosed, type, position, search, userId) {
+    PostService.prototype.findPostPagination = function (page, sort, language, period, isClosed, type, position, search, userId, onOffLine) {
         return __awaiter(this, void 0, void 0, function () {
-            var result, documentToObject, addIsLiked;
+            var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.postModel.findPostPagination(page, sort, language, period, isClosed, type, position, search)];
+                    case 0: return [4 /*yield*/, this.postModel.findPostPagination(page, sort, language, period, isClosed, type, position, search, onOffLine)];
                     case 1:
                         result = _a.sent();
-                        documentToObject = result.posts.map(function (post) {
-                            return post.toObject({ virtuals: true });
-                        });
-                        // 로그인하지 않은 사용자
-                        if (userId == null) {
-                            addIsLiked = documentToObject.map(function (post) {
-                                post.isLiked = false;
-                                return post;
-                            });
-                        }
-                        else {
-                            // 로그인한 사용자
-                            addIsLiked = documentToObject.map(function (post) {
-                                var isLiked = false;
-                                if (post.likes && post.likes.length > 0) {
-                                    // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
-                                    for (var _i = 0, _a = post.likes; _i < _a.length; _i++) {
-                                        var likeUserId = _a[_i];
-                                        if (likeUserId.toString() == userId.toString()) {
-                                            isLiked = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                post.isLiked = isLiked;
-                                return post;
-                            });
-                        }
-                        result.posts = addIsLiked;
-                        // 언어 필터링 로그 생성
-                        // if (language) {
-                        //   await PostFilterLog.create({
-                        //     viewDate: new Date(),
-                        //     language: language.split(','),
-                        //   });
-                        // }
-                        return [2 /*return*/, result];
+                        result = this.addPostVirtualField(result, userId);
+                        return [2 /*return*/, { posts: result }];
                 }
             });
         });
     };
+    // mongoose virtual field 추가
+    // mongodb text search를 위해 aggregate 사용 시 virtual field가 조회되지 않음 > 수동 추가
+    // isLiked : 사용자의 관심 등록 여부
+    // state : 상태 뱃지
+    // totalComments : 댓글 수
+    PostService.prototype.addPostVirtualField = function (posts, userId) {
+        var result = [];
+        // 글 상태
+        var today = new Date();
+        var daysAgo = new Date();
+        var millisecondDay = 1000 * 60 * 60 * 24;
+        daysAgo.setDate(today.getDate() - 1); // 24시간 이내
+        result = posts.map(function (post) {
+            var isLiked = false;
+            // add isLiked
+            if (userId != null && post.likes && post.likes.length > 0) {
+                // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
+                for (var _i = 0, _a = post.likes; _i < _a.length; _i++) {
+                    var likeUserId = _a[_i];
+                    if (likeUserId.toString() == userId.toString()) {
+                        isLiked = true;
+                        break;
+                    }
+                }
+            }
+            post.isLiked = isLiked;
+            // set Author info
+            if (post.author.length > 0)
+                post.author = post.author[post.author.length - 1];
+            // add totalComments
+            post.totalComments = post.comments.length;
+            // add state
+            // 1. 3일 이내에 등록된 글이면 최신 글
+            // 2. 3일 이내 글이면 마감 임박
+            // 3. 일 조회수가 60 이상이면 인기
+            if (post.createdAt > daysAgo)
+                post.state = 'new';
+            else if (post.startDate > today && (post.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
+                post.state = 'deadline';
+            else if (Math.abs(post.views / Math.ceil((today.getTime() - post.createdAt.getTime()) / millisecondDay)) >= 60)
+                post.state = 'hot';
+            else
+                post.state = '';
+            return post;
+        });
+        return result;
+    };
     // Pagination을 위해 마지막 페이지를 구한다.
-    PostService.prototype.findLastPage = function (language, period, isClosed, type, position, search) {
+    PostService.prototype.findLastPage = function (language, period, isClosed, type, position, search, onOffLine) {
         return __awaiter(this, void 0, void 0, function () {
             var itemsPerPage, totalCount, lastPage;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         itemsPerPage = 4 * 5;
-                        return [4 /*yield*/, this.postModel.countPost(language, period, isClosed, type, position, search)];
+                        return [4 /*yield*/, this.postModel.countPost(language, period, isClosed, type, position, search, onOffLine)];
                     case 1:
                         totalCount = _a.sent();
                         lastPage = Math.ceil(totalCount / itemsPerPage);
@@ -208,49 +226,36 @@ var PostService = /** @class */ (function () {
         });
     };
     // 조회수 증가
-    PostService.prototype.increaseView = function (postId, userId, readList) {
+    PostService.prototype.increaseView = function (postId, userId) {
         return __awaiter(this, void 0, void 0, function () {
-            var isAlreadyRead, updateReadList, _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            var _a, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
-                        isAlreadyRead = true;
-                        updateReadList = readList;
-                        if (!(readList === undefined || (typeof readList === 'string' && readList.indexOf(postId.toString()) === -1))) return [3 /*break*/, 6];
-                        if (!userId) return [3 /*break*/, 3];
+                        if (!userId) return [3 /*break*/, 4];
                         _b = (_a = Promise).all;
-                        return [4 /*yield*/, ReadPosts_1.ReadPosts.create({
-                                userId: userId,
-                                postId: postId,
-                            })];
-                    case 1: return [4 /*yield*/, _b.apply(_a, [[
-                                _c.sent(),
-                                this.postModel.increaseView(postId)
-                            ]])];
-                    case 2:
-                        _c.sent();
-                        return [3 /*break*/, 5];
-                    case 3: return [4 /*yield*/, this.postModel.increaseView(postId)];
-                    case 4:
-                        _c.sent(); // 조회수 증가
-                        _c.label = 5;
+                        return [4 /*yield*/, ReadPosts_1.ReadPosts.insertIfNotExist(postId, userId)];
+                    case 1:
+                        _c = [_d.sent()];
+                        return [4 /*yield*/, this.postModel.increaseView(postId)];
+                    case 2: return [4 /*yield*/, _b.apply(_a, [_c.concat([_d.sent()])])];
+                    case 3:
+                        _d.sent();
+                        return [3 /*break*/, 6];
+                    case 4: return [4 /*yield*/, this.postModel.increaseView(postId)];
                     case 5:
-                        if (readList === undefined)
-                            updateReadList = "".concat(postId);
-                        else
-                            updateReadList = "".concat(readList, "|").concat(postId);
-                        isAlreadyRead = false;
-                        _c.label = 6;
-                    case 6: return [2 /*return*/, { updateReadList: updateReadList, isAlreadyRead: isAlreadyRead }];
+                        _d.sent(); // 조회수 증가
+                        _d.label = 6;
+                    case 6: return [2 /*return*/];
                 }
             });
         });
     };
     // 상세 글 정보를 조회한다.
     // 로그인된 사용자일 경우 읽은 목록을 추가한다.
-    PostService.prototype.findPostDetail = function (postId) {
+    PostService.prototype.findPostDetail = function (postId, userId) {
         return __awaiter(this, void 0, void 0, function () {
-            var posts;
+            var posts, postToObject, today, badge;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.postModel.findById(postId).populate('author', 'nickName image')];
@@ -258,10 +263,33 @@ var PostService = /** @class */ (function () {
                         posts = _a.sent();
                         if (!posts)
                             throw new CustomError_1.default('NotFoundError', 404, 'Post not found');
-                        return [2 /*return*/, posts];
+                        postToObject = posts.toObject({ virtuals: true });
+                        today = new Date();
+                        badge = [];
+                        if (postToObject.startDate > today) {
+                            badge.push({
+                                type: 'deadline',
+                                name: "\uB9C8\uAC10 ".concat(this.timeForEndDate(postToObject.startDate)),
+                            });
+                        }
+                        postToObject.badge = badge;
+                        return [4 /*yield*/, this.increaseView(postId, userId)];
+                    case 2:
+                        _a.sent(); // 조회수 증가
+                        return [2 /*return*/, postToObject];
                 }
             });
         });
+    };
+    PostService.prototype.timeForEndDate = function (endDate) {
+        var today = new Date();
+        var betweenTime = Math.floor((endDate.getTime() - today.getTime()) / 1000 / 60);
+        var betweenTimeDay = Math.floor(betweenTime / 60 / 24);
+        if (betweenTimeDay > 1 && betweenTimeDay < 365) {
+            return "".concat(betweenTimeDay, "\uC77C\uC804");
+        }
+        var betweenTimeHour = Math.floor(betweenTime / 60);
+        return "".concat(betweenTimeHour, "\uC2DC\uAC04\uC804");
     };
     // 사용자의 관심 등록 여부를 조회한다.
     PostService.prototype.findUserLiked = function (postId, userId) {

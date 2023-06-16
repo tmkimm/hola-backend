@@ -9,6 +9,7 @@ exports.studyOrProjectCode = studyOrProjectCode;
 var onlineOrOfflineCode = {
     on: '온라인',
     off: '오프라인',
+    onOff: '온/오프라인',
 };
 exports.onlineOrOfflineCode = onlineOrOfflineCode;
 var recruitsCode = {
@@ -43,5 +44,31 @@ var expectedPeriodCode = {
     mo: '장기',
 };
 exports.expectedPeriodCode = expectedPeriodCode;
-var positionsCode = ['ALL', 'FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM'];
+var positionsCode = ['ALL', 'FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM', 'PD'];
+var workExperienceCode = {
+    n: '학생',
+    '1': '1년',
+    '2': '2년',
+    '3': '3년',
+    '4': '4년',
+    '5': '5년',
+    '6': '6년',
+    '7': '7년',
+    '8': '8년',
+    '9': '9년',
+    mo: '10년 이상',
+};
+var urlType = [
+    'GitHub',
+    'Velog',
+    'Tistory',
+    'Notion',
+    'LinkedIn',
+    'Instargram',
+    'Brunch',
+    'Youtube',
+    'Medium',
+    'Link',
+    'Twitter',
+];
 //# sourceMappingURL=CommonCode.js.map

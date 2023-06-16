@@ -16,38 +16,26 @@ export class PostService {
     protected notificationModel: INotificationModel,
   ) {}
 
-  // 리팩토링필요
-  // 메인 화면에서 글 리스트를 조회한다.
-  async findPost(
-    offset: number | null,
-    limit: number | null,
-    sort: string | null,
-    language: string | null,
-    period: number | null,
-    isClosed: string | null,
-    type: string | null,
-    position: string | null,
-    search: string | null,
-  ) {
-    const posts = await this.postModel.findPost(
-      offset,
-      limit,
-      sort,
-      language,
-      period,
-      isClosed,
-      type,
-      position,
-      search,
-    );
-    // 언어 필터링 로그 생성
-    // if (language) {
-    //   await PostFilterLog.create({
-    //     viewDate: new Date(),
-    //     language: language.split(','),
-    //   });
-    // }
-    return posts;
+  // 이번주 인기글 조회
+  async findTopPost() {
+    const posts = await this.postModel.findTopPost(10, '-views');
+
+    const today: Date = new Date();
+
+    // mongoose document는 불변상태이기 때문에 POJO로 변환
+    const postArr: any = posts.map((post: any) => {
+      post = post.toObject({ virtuals: true });
+      if (post.startDate > today) {
+        post.badge = [
+          {
+            type: 'deadline',
+            name: `마감 ${this.timeForEndDate(post.startDate)}`,
+          },
+        ];
+      }
+      return post;
+    });
+    return postArr;
   }
 
   // 메인 화면에서 글 리스트를 조회한다.
@@ -61,8 +49,9 @@ export class PostService {
     position: string | null,
     search: string | null,
     userId: Types.ObjectId | null,
+    onOffLine: string | null,
   ) {
-    const result: any = await this.postModel.findPostPagination(
+    let result: IPostDocument[] = await this.postModel.findPostPagination(
       page,
       sort,
       language,
@@ -71,47 +60,58 @@ export class PostService {
       type,
       position,
       search,
+      onOffLine,
     );
+    result = this.addPostVirtualField(result, userId);
+    return { posts: result };
+  }
 
-    // mongoose document는 불변상태이기 때문에 POJO로 변환
-    const documentToObject = result.posts.map((post: any) => {
-      return post.toObject({ virtuals: true });
-    });
+  // mongoose virtual field 추가
+  // mongodb text search를 위해 aggregate 사용 시 virtual field가 조회되지 않음 > 수동 추가
+  // isLiked : 사용자의 관심 등록 여부
+  // state : 상태 뱃지
+  // totalComments : 댓글 수
+  addPostVirtualField(posts: IPostDocument[], userId: Types.ObjectId | null): IPostDocument[] {
+    let result = [];
+    // 글 상태
+    const today: Date = new Date();
+    const daysAgo: Date = new Date();
+    const millisecondDay: number = 1000 * 60 * 60 * 24;
+    daysAgo.setDate(today.getDate() - 1); // 24시간 이내
+    result = posts.map((post: any) => {
+      let isLiked = false;
 
-    // 관심 등록 여부 추가
-    let addIsLiked;
-    // 로그인하지 않은 사용자
-    if (userId == null) {
-      addIsLiked = documentToObject.map((post: any) => {
-        post.isLiked = false;
-        return post;
-      });
-    } else {
-      // 로그인한 사용자
-      addIsLiked = documentToObject.map((post: any) => {
-        let isLiked = false;
-        if (post.likes && post.likes.length > 0) {
-          // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
-          for (const likeUserId of post.likes) {
-            if (likeUserId.toString() == userId.toString()) {
-              isLiked = true;
-              break;
-            }
+      // add isLiked
+      if (userId != null && post.likes && post.likes.length > 0) {
+        // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
+        for (const likeUserId of post.likes) {
+          if (likeUserId.toString() == userId.toString()) {
+            isLiked = true;
+            break;
           }
         }
-        post.isLiked = isLiked;
-        return post;
-      });
-    }
-    result.posts = addIsLiked;
+      }
+      post.isLiked = isLiked;
 
-    // 언어 필터링 로그 생성
-    // if (language) {
-    //   await PostFilterLog.create({
-    //     viewDate: new Date(),
-    //     language: language.split(','),
-    //   });
-    // }
+      // set Author info
+      if (post.author.length > 0) post.author = post.author[post.author.length - 1];
+
+      // add totalComments
+      post.totalComments = post.comments.length;
+
+      // add state
+      // 1. 3일 이내에 등록된 글이면 최신 글
+      // 2. 3일 이내 글이면 마감 임박
+      // 3. 일 조회수가 60 이상이면 인기
+      if (post.createdAt > daysAgo) post.state = 'new';
+      else if (post.startDate > today && (post.startDate.getTime() - today.getTime()) / millisecondDay <= 3)
+        post.state = 'deadline';
+      else if (Math.abs(post.views / Math.ceil((today.getTime() - post.createdAt.getTime()) / millisecondDay)) >= 60)
+        post.state = 'hot';
+      else post.state = '';
+      return post;
+    });
+
     return result;
   }
 
@@ -123,9 +123,10 @@ export class PostService {
     type: string | null,
     position: string | null,
     search: string | null,
+    onOffLine: string | null,
   ) {
     const itemsPerPage = 4 * 5; // 한 페이지에 표현할 수
-    const totalCount = await this.postModel.countPost(language, period, isClosed, type, position, search);
+    const totalCount = await this.postModel.countPost(language, period, isClosed, type, position, search, onOffLine);
     const lastPage = Math.ceil(totalCount / itemsPerPage);
     return lastPage;
   }
@@ -170,34 +171,45 @@ export class PostService {
   }
 
   // 조회수 증가
-  async increaseView(postId: Types.ObjectId, userId: Types.ObjectId, readList: string) {
-    let isAlreadyRead = true;
-    let updateReadList = readList;
-    // 조회수 중복 증가 방지
-    if (readList === undefined || (typeof readList === 'string' && readList.indexOf(postId.toString()) === -1)) {
-      if (userId)
-        await Promise.all([
-          await ReadPosts.create({
-            userId,
-            postId,
-          }),
-          this.postModel.increaseView(postId),
-        ]);
-      else await this.postModel.increaseView(postId); // 조회수 증가
-
-      if (readList === undefined) updateReadList = `${postId}`;
-      else updateReadList = `${readList}|${postId}`;
-      isAlreadyRead = false;
+  async increaseView(postId: Types.ObjectId, userId: Types.ObjectId) {
+    // 읽은 목록 중복 삽입 방지
+    if (userId) {
+      await Promise.all([await ReadPosts.insertIfNotExist(postId, userId), await this.postModel.increaseView(postId)]);
+    } else {
+      await this.postModel.increaseView(postId); // 조회수 증가
     }
-    return { updateReadList, isAlreadyRead };
   }
 
   // 상세 글 정보를 조회한다.
   // 로그인된 사용자일 경우 읽은 목록을 추가한다.
-  async findPostDetail(postId: Types.ObjectId) {
+  async findPostDetail(postId: Types.ObjectId, userId: Types.ObjectId) {
     const posts = await this.postModel.findById(postId).populate('author', 'nickName image');
     if (!posts) throw new CustomError('NotFoundError', 404, 'Post not found');
-    return posts;
+    const postToObject = posts.toObject({ virtuals: true });
+    const today: Date = new Date();
+    const badge = [];
+    if (postToObject.startDate > today) {
+      badge.push({
+        type: 'deadline',
+        name: `마감 ${this.timeForEndDate(postToObject.startDate)}`,
+      });
+    }
+    postToObject.badge = badge;
+
+    await this.increaseView(postId, userId); // 조회수 증가
+    return postToObject;
+  }
+
+  timeForEndDate(endDate: Date): string {
+    const today: Date = new Date();
+    const betweenTime: number = Math.floor((endDate.getTime() - today.getTime()) / 1000 / 60);
+
+    const betweenTimeDay = Math.floor(betweenTime / 60 / 24);
+    if (betweenTimeDay > 1 && betweenTimeDay < 365) {
+      return `${betweenTimeDay}일전`;
+    }
+    const betweenTimeHour = Math.floor(betweenTime / 60);
+    return `${betweenTimeHour}시간전`;
   }
 
   // 사용자의 관심 등록 여부를 조회한다.
