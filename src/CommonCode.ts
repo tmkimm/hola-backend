@@ -2,17 +2,20 @@ interface CommonCodeType {
   [key: string]: string;
 }
 
+// 모집 글 종류
 const studyOrProjectCode: CommonCodeType = {
   '1': '프로젝트',
   '2': '스터디',
 };
 
+// 온, 오프라인 구분
 const onlineOrOfflineCode: CommonCodeType = {
   on: '온라인',
   off: '오프라인',
   onOff: '온/오프라인',
 };
 
+// 모집인원
 const recruitsCode: CommonCodeType = {
   und: '인원 미정',
   '1': '1명',
@@ -27,6 +30,7 @@ const recruitsCode: CommonCodeType = {
   mo: '10명 이상',
 };
 
+// 연락방법
 const contactTypeCode: CommonCodeType = {
   ok: '오픈 카카오톡',
   pk: '개인 카카오톡',
@@ -34,6 +38,7 @@ const contactTypeCode: CommonCodeType = {
   gf: '구글폼',
 };
 
+// 예상진행기간
 const expectedPeriodCode: CommonCodeType = {
   und: '기간 미정',
   '1': '1개월',
@@ -45,8 +50,10 @@ const expectedPeriodCode: CommonCodeType = {
   mo: '장기',
 };
 
+// 포지션
 const positionsCode: string[] = ['ALL', 'FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM', 'PD'];
 
+// 경력
 const workExperienceCode: CommonCodeType = {
   n: '학생',
   '1': '1년',
@@ -60,18 +67,21 @@ const workExperienceCode: CommonCodeType = {
   '9': '9년',
   mo: '10년 이상',
 };
+
+// URL Type
 const urlType: string[] = [
   'GitHub',
-  'Velog',
-  'Tistory',
   'Notion',
   'LinkedIn',
   'Instargram',
   'Brunch',
   'Youtube',
-  'Medium',
+  'Blog',
   'Link',
   'Twitter',
 ];
+// add
+// Pinterest
+// 
 
 export { studyOrProjectCode, onlineOrOfflineCode, recruitsCode, contactTypeCode, expectedPeriodCode };

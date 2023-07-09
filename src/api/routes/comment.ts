@@ -118,10 +118,7 @@ export default (app: Router) => {
     isPostIdValid,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { postId, content } = req.body;
-      let { nickName } = req.body;
-      const { _id: userId } = req.user as IUser;
-
-      if (!nickName) nickName = `사용자`;
+      const { _id: userId, nickName } = req.user as IUser;
       const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
       const post = await CommentServiceInstance.registerComment(userId, postId, content, nickName);
 
