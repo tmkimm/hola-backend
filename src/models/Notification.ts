@@ -20,11 +20,11 @@ export interface INotificationModel extends Model<INotificationDocument> {
   findNotification: (_id: Types.ObjectId) => Promise<INotificationDocument>;
   findUnReadCount: (targetUserId: Types.ObjectId) => Promise<number>;
   registerNotification: (
-    postId: Types.ObjectId,
+    postId: Types.ObjectId | null,
     targetUserId: Types.ObjectId,
-    generateUserId: Types.ObjectId,
+    generateUserId: Types.ObjectId  | null,
     noticeType: string,
-    generateObjectId: Types.ObjectId,
+    generateObjectId: Types.ObjectId  | null,
     nickName: string,
   ) => Promise<void>;
   deleteNotification: (generateObjectId: Types.ObjectId) => Promise<void>;
@@ -90,11 +90,11 @@ notificationSchema.statics.findUnReadCount = async function (targetUserId: Types
 
 // 신규 알림 등록
 notificationSchema.statics.registerNotification = async function (
-  postId: Types.ObjectId,
+  postId: Types.ObjectId  | null,
   targetUserId: Types.ObjectId,
-  generateUserId: Types.ObjectId,
+  generateUserId: Types.ObjectId  | null,
   noticeType: string,
-  generateObjectId: Types.ObjectId,
+  generateObjectId: Types.ObjectId  | null,
   nickName: string,
 ): Promise<void> {
 
@@ -104,17 +104,24 @@ notificationSchema.statics.registerNotification = async function (
   let buttonLabel: string = '';
   let title: string = '';
   let href: string = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://holaworld.io';
+  let hrefPost = (postId) ? postId :'';
+
 // // 알림 구분(comment, reply, couphone, notice)
   switch (noticeType) {
     case 'comment':
-      href = href + `/study/${postId.toString()}`;
+      href = href + `/study/${hrefPost.toString()}`;
       title = `👀 ${nickName}님이 내 글에 댓글을 남겼어요.`;
       buttonLabel = `확인하기`;
       break;
     case 'reply':
-      href = href + `/study/${postId.toString()}`
+      href = href + `/study/${hrefPost.toString()}`
       title = `👀 ${nickName}님이 내 글에 답글을 남겼어요.`;
       buttonLabel = `확인하기`;
+      break;
+    case 'signup':
+      href = href + `/setting`
+      title = `${nickName}님 반가워요👋 `;
+      buttonLabel = `프로필 완성하기`;
       break;
   }
   await this.create({ targetUserId, generateUserId, href, title, noticeType, generateObjectId, buttonLabel, parentObjectId: postId });

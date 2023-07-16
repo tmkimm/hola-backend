@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { AuthService, UserService } from '../../services/index';
+import { AuthService, NotificationService, UserService } from '../../services/index';
 import { isUserIdValid, isTokenValidWithOauth, nickNameDuplicationCheck, autoSignUp } from '../middlewares/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Post as PostModel } from '../../models/Post';
@@ -174,6 +174,11 @@ export default (app: Router) => {
       // 회원 정보 수정(등록)
       const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
       const { userRecord } = await UserServiceInstance.modifyUser(id, id, userDTO);
+
+      // 회원 가입 알림 발송
+      const noticeServiceInstance = new NotificationService(NotificationModel);
+      await noticeServiceInstance.registerNotification(null, id, null, 'signup', null, userRecord.nickName);
+
       // AccessToken, RefreshToken 발급
       const AuthServiceInstance = new AuthService(UserModel);
       const { accessToken, refreshToken } = await AuthServiceInstance.SignIn(userRecord.idToken);

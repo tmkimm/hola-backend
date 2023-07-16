@@ -31,4 +31,14 @@ export class NotificationService {
   async readAll(targetUserId: Types.ObjectId) {
     await this.notificationModel.readAll(targetUserId);
   }
+
+  // 알림 등록
+  async registerNotification(postId: Types.ObjectId | null,
+    targetUserId: Types.ObjectId,
+    generateUserId: Types.ObjectId | null,
+    noticeType: string,
+    generateObjectId: Types.ObjectId | null,
+    nickName: string) {
+      await this.notificationModel.registerNotification(postId, targetUserId, generateUserId, noticeType, generateObjectId, nickName);
+    }
 }
