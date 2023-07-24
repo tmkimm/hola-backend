@@ -120,12 +120,11 @@ export default (app: Router) => {
       const { postId, content } = req.body;
       const { _id: userId, nickName } = req.user as IUser;
       const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
-      const post = await CommentServiceInstance.registerComment(userId, postId, content, nickName);
+      const {post, commentId} = await CommentServiceInstance.registerComment(userId, postId, content, nickName);
 
-    
       // 댓글 등록 알림 발송
-      // const noticeServiceInstance = new NotificationService(NotificationModel);
-      // await noticeServiceInstance.createCommentNotice(post.author, nickName, postId, );
+      const noticeServiceInstance = new NotificationService(NotificationModel);
+      await noticeServiceInstance.createCommentNotice(post.author, nickName, postId, userId, commentId, content);
 
       return res.status(201).json(post);
     }),
@@ -183,10 +182,14 @@ export default (app: Router) => {
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const commentDTO = req.body;
       commentDTO._id = req.params.id;
-      const { _id: tokenUserId, tokenType } = req.user as IUser;
+      const { _id: tokenUserId, tokenType, nickName } = req.user as IUser;
 
       const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
       const comment = await CommentServiceInstance.modifyComment(commentDTO, tokenUserId, tokenType);
+
+      // 댓글 알림 수정
+      const noticeServiceInstance = new NotificationService(NotificationModel);
+      await noticeServiceInstance.modifyCommentContent(commentDTO._id, nickName, commentDTO.content);
 
       return res.status(200).json(comment);
     }),

@@ -1,19 +1,19 @@
 import { Types } from 'mongoose';
-import { INotificationModel } from '../models/Notification';
+import { INotification, INotificationDocument, INotificationModel } from '../models/Notification';
+import { timeForCreatedAt } from '../utills/timeForCreatedAt';
 
 export class NotificationService {
   constructor(protected notificationModel: INotificationModel) {}
 
   // 알림 리스트를 조회한다.
   async findNotifications(userId: Types.ObjectId) {
-    const notice = await this.notificationModel.findNotifications(userId);
-    return notice;
-  }
-
-  // 알림을 조회한다.
-  async findNotification(_id: Types.ObjectId) {
-    const notice = await this.notificationModel.findNotification(_id);
-    return notice;
+    const notice: INotificationDocument[] = await this.notificationModel.findNotifications(userId);
+    // 시간 전 계산
+    const result = notice.map((item: INotificationDocument) => {
+      item.timeAgo = timeForCreatedAt(item.createdAt);
+      return item;
+    })
+    return result;
   }
 
   // 읽지 않은 알림 수를 조회한다.
@@ -42,11 +42,16 @@ export class NotificationService {
   }
 
   // 댓글 알림
-  async createCommentNotice(targetUserId: Types.ObjectId, nickName: string, postId: Types.ObjectId, createUserId: Types.ObjectId, createObjectId: Types.ObjectId, parentObjectId: Types.ObjectId ,commentContent: string) {
+  async createCommentNotice(targetUserId: Types.ObjectId, nickName: string, postId: Types.ObjectId, createUserId: Types.ObjectId, createObjectId: Types.ObjectId, commentContent: string) {
     let icon = `💬`;
     let urn = `/study/${postId.toString()}`;
     let title = `${nickName}이 댓글을 남겼어요: ${commentContent}`;
     let buttonLabel = `확인하기`;
-    await this.notificationModel.createNotification('comment', targetUserId, urn, title, icon, buttonLabel, createUserId, createObjectId, parentObjectId);
-  }  
+    await this.notificationModel.createNotification('comment', targetUserId, urn, title, icon, buttonLabel, createUserId, createObjectId, postId);
+  }
+  
+  async modifyCommentContent(commentId: Types.ObjectId, nickName: string, content: string) {
+    let title = `${nickName}이 댓글을 남겼어요: ${content}`;
+    await this.notificationModel.modifyNotificationTitle(commentId, title);
+  }
 }
