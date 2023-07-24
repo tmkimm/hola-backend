@@ -17,7 +17,7 @@ export class CommentService {
   // 신규 댓글을 추가한다.
   async registerComment(userID: Types.ObjectId, postId: Types.ObjectId, content: string, nickName: string) {
     const { post, commentId } = await this.postModel.registerComment(postId, content, userID);
-    await this.notificationModel.registerNotification(postId, post.author, userID, 'comment', commentId, nickName); // 알림 등록
+    //await this.notificationModel.createCommentNotice(postId, post.author, userID, 'comment', commentId, nickName); // 알림 등록
     return post;
   }
 

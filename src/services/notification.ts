@@ -32,13 +32,21 @@ export class NotificationService {
     await this.notificationModel.readAll(targetUserId);
   }
 
-  // 알림 등록
-  async registerNotification(postId: Types.ObjectId | null,
-    targetUserId: Types.ObjectId,
-    generateUserId: Types.ObjectId | null,
-    noticeType: string,
-    generateObjectId: Types.ObjectId | null,
-    nickName: string) {
-      await this.notificationModel.registerNotification(postId, targetUserId, generateUserId, noticeType, generateObjectId, nickName);
-    }
+    // 회원 가입 알림
+  async createSignUpNotice(targetUserId: Types.ObjectId, nickName: string) {
+    let icon = `👋`;
+    let urn = `/setting`;
+    let title = `${nickName}님 반가워요 🥳 올라에서 원하는 팀원을 만나보세요 :)`;
+    let buttonLabel = `프로필 완성하기`;
+    await this.notificationModel.createNotification('signup', targetUserId, urn, title, icon, buttonLabel);
+  }
+
+  // 댓글 알림
+  async createCommentNotice(targetUserId: Types.ObjectId, nickName: string, postId: Types.ObjectId, createUserId: Types.ObjectId, createObjectId: Types.ObjectId, parentObjectId: Types.ObjectId ,commentContent: string) {
+    let icon = `💬`;
+    let urn = `/study/${postId.toString()}`;
+    let title = `${nickName}이 댓글을 남겼어요: ${commentContent}`;
+    let buttonLabel = `확인하기`;
+    await this.notificationModel.createNotification('comment', targetUserId, urn, title, icon, buttonLabel, createUserId, createObjectId, parentObjectId);
+  }  
 }

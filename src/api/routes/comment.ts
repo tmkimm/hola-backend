@@ -3,7 +3,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { isPostIdValid } from '../middlewares/isPostIdValid';
 import { IUser } from '../../models/User';
 import { isAccessTokenValid } from '../middlewares/index';
-import { CommentService } from '../../services/index';
+import { CommentService, NotificationService } from '../../services/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Post as PostModel } from '../../models/Post';
 import { Notification as NotificationModel } from '../../models/Notification';
@@ -121,6 +121,11 @@ export default (app: Router) => {
       const { _id: userId, nickName } = req.user as IUser;
       const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
       const post = await CommentServiceInstance.registerComment(userId, postId, content, nickName);
+
+    
+      // 댓글 등록 알림 발송
+      // const noticeServiceInstance = new NotificationService(NotificationModel);
+      // await noticeServiceInstance.createCommentNotice(post.author, nickName, postId, );
 
       return res.status(201).json(post);
     }),

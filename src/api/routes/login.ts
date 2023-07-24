@@ -177,7 +177,7 @@ export default (app: Router) => {
 
       // 회원 가입 알림 발송
       const noticeServiceInstance = new NotificationService(NotificationModel);
-      await noticeServiceInstance.registerNotification(null, id, null, 'signup', null, userRecord.nickName);
+      await noticeServiceInstance.createSignUpNotice(id, userRecord.nickName);
 
       // AccessToken, RefreshToken 발급
       const AuthServiceInstance = new AuthService(UserModel);
