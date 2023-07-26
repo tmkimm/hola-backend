@@ -42,19 +42,19 @@ import { Model, Schema, model, Types } from 'mongoose';
  */
 
 export interface INotification {
-  title: string;
-  isRead: boolean;
-  targetUserId: Types.ObjectId;
+    title: string;
+    isRead: boolean;
+    targetUserId: Types.ObjectId;
   createUserId: Types.ObjectId;
   createObjectId: Types.ObjectId;
-  href: string;
+    href: string;
   readDate?: Date;
-  noticeType: string;
-  buttonType: string;
-  buttonLabel: string;
-  icon: string;
-  timeAgo: string;
-  createdAt: Date;
+    noticeType: string;
+    buttonType: string;
+    buttonLabel: string;
+    con: string;
+    timeAgo: string;
+    createdAt: Date;
 }
 
 export interface INotificationDocument extends INotification, Document {}
@@ -114,7 +114,7 @@ notificationSchema.statics.findNotifications = async function (
   const result = await this.find({ targetUserId, createdAt: { $gte: oneMonthAgo} })
     .populate('createUserId', 'nickName')
     .sort('isRead -createdAt')
-    .select(`title isRead href createUserId noticeType createdAt icon`)
+    .select(`title isRead href createUserId noticeType createdAt icon buttonLabel`)
     .lean();
   return result;
 };

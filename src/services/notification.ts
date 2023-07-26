@@ -43,6 +43,9 @@ export class NotificationService {
 
   // 댓글 알림
   async createCommentNotice(targetUserId: Types.ObjectId, nickName: string, postId: Types.ObjectId, createUserId: Types.ObjectId, createObjectId: Types.ObjectId, commentContent: string) {
+    if(targetUserId.toString() === createUserId.toString())
+      return;
+
     let icon = `💬`;
     let urn = `/study/${postId.toString()}`;
     let title = `${nickName}이 댓글을 남겼어요: ${commentContent}`;

@@ -585,8 +585,33 @@ postSchema.statics.findPostPagination = async function (
 // 최신, 트레딩 조회
 postSchema.statics.countPost = async function (language, period, isClosed, type, position, search, onOffLine) {
   const query = makeFindPostQuery(language, period, isClosed, type, position, search, onOffLine); // 조회 query 생성
-  const count = await this.countDocuments(query);
-  return count;
+  const aggregateSearch = [];
+  if (search && typeof search === 'string') {
+    aggregateSearch.push({
+      $search: {
+        index: 'posts_text_search',
+        text: {
+          query: search,
+          path: {
+            wildcard: '*',
+          },
+        },
+      },
+    });
+  }
+
+  const aggregate = [
+    ...aggregateSearch,
+    { $match: query },
+    {
+      $count: "postCount"
+    }
+  ];
+  const result: any = await this.aggregate(aggregate);
+  if(result && result.length > 0)
+    return result[0].postCount; 
+  else
+    return 0;
 };
 
 // 인기글 조회
