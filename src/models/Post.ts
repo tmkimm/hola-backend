@@ -576,9 +576,20 @@ postSchema.statics.findPostPagination = async function (
         author: 1,
         positions: 1,
         createdAt: 1,
+        score: { $meta: "searchScore" }
       },
     },
   ];
+
+  if (search && typeof search === 'string') {
+    aggregate.push({
+      $match : {
+        score: {
+          $gte: 2
+        }
+      }
+    });
+  }
   const posts = await this.aggregate(aggregate).sort(sortQuery.join(' ')).skip(pageToSkip).limit(Number(itemsPerPage));
   return posts;
 };
