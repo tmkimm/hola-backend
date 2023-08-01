@@ -487,9 +487,9 @@ postSchema.statics.findTopPost = async function (limit, sort) {
   const today: Date = new Date();
   const daysAgo: Date = new Date();
   daysAgo.setDate(today.getDate() - 7); // 7일 이내
-
+  
   // Query
-  const result = await this.find({ createdAt: { $gte: daysAgo } })
+  const result = await this.find({ createdAt: { $gte: daysAgo }, startDate : { $gte: today} })
     .where('isDeleted')
     .equals(false)
     .where('isClosed')
@@ -635,7 +635,7 @@ postSchema.statics.findPopularPosts = async function (postId, userId) {
   query.createdAt = { $gte: today.setDate(today.getDate() - 14) };
 
   // 현재 읽고 있는 글은 제외하고 조회
-  query._id = { $ne: postId };
+  query._id = { $ne: postId }; 
 
   // 사용자가 작성한 글 제외하고 조회
   if (userId) query.author = { $ne: userId };
@@ -643,7 +643,7 @@ postSchema.statics.findPopularPosts = async function (postId, userId) {
   // 마감글, 인기글 제외
   query.isDeleted = { $eq: false };
   query.isClosed = { $eq: false };
-
+  console.log(query);
   const posts = await this.find(query).sort('-views').limit(10).select('title').lean();
 
   return posts;

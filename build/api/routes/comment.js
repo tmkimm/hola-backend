@@ -152,19 +152,20 @@ exports.default = (function (app) {
      *          description: Post not found
      */
     route.post('/', index_1.isAccessTokenValid, isPostIdValid_1.isPostIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, postId, content, nickName, userId, CommentServiceInstance, post;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var _a, postId, content, _b, userId, nickName, CommentServiceInstance, _c, post, commentId, noticeServiceInstance;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
                 case 0:
                     _a = req.body, postId = _a.postId, content = _a.content;
-                    nickName = req.body.nickName;
-                    userId = req.user._id;
-                    if (!nickName)
-                        nickName = "\uC0AC\uC6A9\uC790";
+                    _b = req.user, userId = _b._id, nickName = _b.nickName;
                     CommentServiceInstance = new index_2.CommentService(Post_1.Post, Notification_1.Notification);
                     return [4 /*yield*/, CommentServiceInstance.registerComment(userId, postId, content, nickName)];
                 case 1:
-                    post = _b.sent();
+                    _c = _d.sent(), post = _c.post, commentId = _c.commentId;
+                    noticeServiceInstance = new index_2.NotificationService(Notification_1.Notification);
+                    return [4 /*yield*/, noticeServiceInstance.createCommentNotice(post.author, nickName, postId, userId, commentId, content)];
+                case 2:
+                    _d.sent();
                     return [2 /*return*/, res.status(201).json(post)];
             }
         });
@@ -216,17 +217,21 @@ exports.default = (function (app) {
      *          $ref: '#/components/responses/UnauthorizedError'
      */
     route.patch('/:id', index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var commentDTO, _a, tokenUserId, tokenType, CommentServiceInstance, comment;
+        var commentDTO, _a, tokenUserId, tokenType, nickName, CommentServiceInstance, comment, noticeServiceInstance;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     commentDTO = req.body;
                     commentDTO._id = req.params.id;
-                    _a = req.user, tokenUserId = _a._id, tokenType = _a.tokenType;
+                    _a = req.user, tokenUserId = _a._id, tokenType = _a.tokenType, nickName = _a.nickName;
                     CommentServiceInstance = new index_2.CommentService(Post_1.Post, Notification_1.Notification);
                     return [4 /*yield*/, CommentServiceInstance.modifyComment(commentDTO, tokenUserId, tokenType)];
                 case 1:
                     comment = _b.sent();
+                    noticeServiceInstance = new index_2.NotificationService(Notification_1.Notification);
+                    return [4 /*yield*/, noticeServiceInstance.modifyCommentContent(commentDTO._id, nickName, commentDTO.content)];
+                case 2:
+                    _b.sent();
                     return [2 /*return*/, res.status(200).json(comment)];
             }
         });

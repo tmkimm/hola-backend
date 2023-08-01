@@ -70,18 +70,22 @@ const workExperienceCode: CommonCodeType = {
 
 // URL Type
 const urlType: string[] = [
-  'GitHub',
-  'Notion',
-  'LinkedIn',
-  'Instargram',
-  'Brunch',
-  'Youtube',
-  'Blog',
   'Link',
+  'Behance',
+  'Brunch',
+  'Dribble',
+  'Facebook',
+  'GitHub',
+  'Instargram',
+  'LinkedIn',
+  'Naverblog',
+  'Notefolio',
+  'Notion',
+  'Pinterest',
+  'Youtube',
   'Twitter',
+  'Tistory',
+  'Velog',
 ];
-// add
-// Pinterest
-// 
 
 export { studyOrProjectCode, onlineOrOfflineCode, recruitsCode, contactTypeCode, expectedPeriodCode };

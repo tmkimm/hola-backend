@@ -199,7 +199,7 @@ exports.default = (function (app) {
      *          description: User not found
      */
     route.post('/signup', index_2.nickNameDuplicationCheck, index_2.isUserIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, userDTO, UserServiceInstance, userRecord, AuthServiceInstance, _a, accessToken, refreshToken;
+        var id, userDTO, UserServiceInstance, userRecord, noticeServiceInstance, AuthServiceInstance, _a, accessToken, refreshToken;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -210,9 +210,13 @@ exports.default = (function (app) {
                     return [4 /*yield*/, UserServiceInstance.modifyUser(id, id, userDTO)];
                 case 1:
                     userRecord = (_b.sent()).userRecord;
+                    noticeServiceInstance = new index_1.NotificationService(Notification_1.Notification);
+                    return [4 /*yield*/, noticeServiceInstance.createSignUpNotice(id, userRecord.nickName)];
+                case 2:
+                    _b.sent();
                     AuthServiceInstance = new index_1.AuthService(User_1.User);
                     return [4 /*yield*/, AuthServiceInstance.SignIn(userRecord.idToken)];
-                case 2:
+                case 3:
                     _a = _b.sent(), accessToken = _a.accessToken, refreshToken = _a.refreshToken;
                     res.cookie('R_AUTH', refreshToken, {
                         sameSite: 'none',

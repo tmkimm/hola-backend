@@ -54,10 +54,7 @@ var ReplyService = /** @class */ (function () {
                         return [4 /*yield*/, this.postModel.findAuthorByCommentId(commentId)];
                     case 2:
                         author = _b.sent();
-                        if (author !== null)
-                            // await this.notificationModel.registerNotification(postId, author, userID, 'reply', replyId, nickName); // 알림 등록
-                            return [2 /*return*/, post];
-                        return [2 /*return*/];
+                        return [2 /*return*/, post];
                 }
             });
         });
