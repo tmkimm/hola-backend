@@ -315,7 +315,6 @@ postSchema.statics.findPopularPosts = function (postId, userId) {
                     // 마감글, 인기글 제외
                     query.isDeleted = { $eq: false };
                     query.isClosed = { $eq: false };
-                    console.log(query);
                     return [4 /*yield*/, this.find(query).sort('-views').limit(10).select('title').lean()];
                 case 1:
                     posts = _a.sent();

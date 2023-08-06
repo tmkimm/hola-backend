@@ -123,8 +123,8 @@ export default (app: Router) => {
       const {post, commentId} = await CommentServiceInstance.registerComment(userId, postId, content, nickName);
 
       // 댓글 등록 알림 발송
-      const noticeServiceInstance = new NotificationService(NotificationModel);
-      await noticeServiceInstance.createCommentNotice(post.author, nickName, postId, userId, commentId, content);
+      // const noticeServiceInstance = new NotificationService(NotificationModel);
+      // await noticeServiceInstance.createCommentNotice(post.author, nickName, postId, userId, commentId, content);
 
       return res.status(201).json(post);
     }),
@@ -188,8 +188,8 @@ export default (app: Router) => {
       const comment = await CommentServiceInstance.modifyComment(commentDTO, tokenUserId, tokenType);
 
       // 댓글 알림 수정
-      const noticeServiceInstance = new NotificationService(NotificationModel);
-      await noticeServiceInstance.modifyCommentContent(commentDTO._id, nickName, commentDTO.content);
+      // const noticeServiceInstance = new NotificationService(NotificationModel);
+      // await noticeServiceInstance.modifyCommentContent(commentDTO._id, nickName, commentDTO.content);
 
       return res.status(200).json(comment);
     }),

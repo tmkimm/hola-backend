@@ -152,7 +152,7 @@ exports.default = (function (app) {
      *          description: Post not found
      */
     route.post('/', index_1.isAccessTokenValid, isPostIdValid_1.isPostIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, postId, content, _b, userId, nickName, CommentServiceInstance, _c, post, commentId, noticeServiceInstance;
+        var _a, postId, content, _b, userId, nickName, CommentServiceInstance, _c, post, commentId;
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0:
@@ -162,10 +162,9 @@ exports.default = (function (app) {
                     return [4 /*yield*/, CommentServiceInstance.registerComment(userId, postId, content, nickName)];
                 case 1:
                     _c = _d.sent(), post = _c.post, commentId = _c.commentId;
-                    noticeServiceInstance = new index_2.NotificationService(Notification_1.Notification);
-                    return [4 /*yield*/, noticeServiceInstance.createCommentNotice(post.author, nickName, postId, userId, commentId, content)];
-                case 2:
-                    _d.sent();
+                    // 댓글 등록 알림 발송
+                    // const noticeServiceInstance = new NotificationService(NotificationModel);
+                    // await noticeServiceInstance.createCommentNotice(post.author, nickName, postId, userId, commentId, content);
                     return [2 /*return*/, res.status(201).json(post)];
             }
         });
@@ -217,7 +216,7 @@ exports.default = (function (app) {
      *          $ref: '#/components/responses/UnauthorizedError'
      */
     route.patch('/:id', index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var commentDTO, _a, tokenUserId, tokenType, nickName, CommentServiceInstance, comment, noticeServiceInstance;
+        var commentDTO, _a, tokenUserId, tokenType, nickName, CommentServiceInstance, comment;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -228,10 +227,9 @@ exports.default = (function (app) {
                     return [4 /*yield*/, CommentServiceInstance.modifyComment(commentDTO, tokenUserId, tokenType)];
                 case 1:
                     comment = _b.sent();
-                    noticeServiceInstance = new index_2.NotificationService(Notification_1.Notification);
-                    return [4 /*yield*/, noticeServiceInstance.modifyCommentContent(commentDTO._id, nickName, commentDTO.content)];
-                case 2:
-                    _b.sent();
+                    // 댓글 알림 수정
+                    // const noticeServiceInstance = new NotificationService(NotificationModel);
+                    // await noticeServiceInstance.modifyCommentContent(commentDTO._id, nickName, commentDTO.content);
                     return [2 /*return*/, res.status(200).json(comment)];
             }
         });
