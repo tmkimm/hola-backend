@@ -55,7 +55,7 @@ const positionsCode: string[] = ['ALL', 'FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS'
 
 // 경력
 const workExperienceCode: CommonCodeType = {
-  n: '학생',
+  0: '0년',
   '1': '1년',
   '2': '2년',
   '3': '3년',
