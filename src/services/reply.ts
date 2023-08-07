@@ -17,10 +17,8 @@ export class ReplyService {
 
     // 대댓글 등록 시 댓글 등록자에게 달림 추가
     const author = await this.postModel.findAuthorByCommentId(commentId);
-    if (author !== null)
-      // await this.notificationModel.registerNotification(postId, author, userID, 'reply', replyId, nickName); // 알림 등록
 
-      return post;
+    return post;
   }
 
   // 대댓글을 수정한다.

@@ -176,8 +176,8 @@ export default (app: Router) => {
       const { userRecord } = await UserServiceInstance.modifyUser(id, id, userDTO);
 
       // 회원 가입 알림 발송
-      const noticeServiceInstance = new NotificationService(NotificationModel);
-      await noticeServiceInstance.registerNotification(null, id, null, 'signup', null, userRecord.nickName);
+      // const noticeServiceInstance = new NotificationService(NotificationModel);
+      // await noticeServiceInstance.createSignUpNotice(id, userRecord.nickName);
 
       // AccessToken, RefreshToken 발급
       const AuthServiceInstance = new AuthService(UserModel);

@@ -5,7 +5,7 @@ import { INotificationModel } from '../models/Notification';
 import { PostFilterLog } from '../models/PostFilterLog';
 import { ReadPosts } from '../models/ReadPosts';
 import { LikePosts } from '../models/LikePosts';
-
+import { timeForEndDate} from '../utills/timeForEndDate';
 import { IUserModel } from '../models/User';
 import CustomError from '../CustomError';
 
@@ -25,13 +25,14 @@ export class PostService {
     // mongoose document는 불변상태이기 때문에 POJO로 변환
     const postArr: any = posts.map((post: any) => {
       post = post.toObject({ virtuals: true });
+      post.badge = [];
       if (post.startDate > today) {
-        post.badge = [
+        post.badge.push(
           {
             type: 'deadline',
-            name: `마감 ${this.timeForEndDate(post.startDate)}`,
+            name: `${timeForEndDate(post.startDate)}`,
           },
-        ];
+        );
       }
       return post;
     });
@@ -191,25 +192,13 @@ export class PostService {
     if (postToObject.startDate > today) {
       badge.push({
         type: 'deadline',
-        name: `마감 ${this.timeForEndDate(postToObject.startDate)}`,
+        name: `${timeForEndDate(postToObject.startDate)}`,
       });
     }
     postToObject.badge = badge;
 
     await this.increaseView(postId, userId); // 조회수 증가
     return postToObject;
-  }
-
-  timeForEndDate(endDate: Date): string {
-    const today: Date = new Date();
-    const betweenTime: number = Math.floor((endDate.getTime() - today.getTime()) / 1000 / 60);
-
-    const betweenTimeDay = Math.floor(betweenTime / 60 / 24);
-    if (betweenTimeDay > 1 && betweenTimeDay < 365) {
-      return `${betweenTimeDay}일전`;
-    }
-    const betweenTimeHour = Math.floor(betweenTime / 60);
-    return `${betweenTimeHour}시간전`;
   }
 
   // 사용자의 관심 등록 여부를 조회한다.
@@ -267,7 +256,6 @@ export class PostService {
     const { post, isLikeExist } = await this.postModel.addLike(postId, userId);
     if (!isLikeExist) {
       await LikePosts.add(postId, userId);
-      // await this.notificationModel.registerNotification(postId, post.author, userId, 'like');   // 알림 등록
     }
     return post;
   }
@@ -277,7 +265,6 @@ export class PostService {
     const { post, isLikeExist } = await this.postModel.deleteLike(postId, userId);
     if (isLikeExist) {
       await LikePosts.delete(postId, userId);
-      // await this.notificationModel.deleteNotification(postId, post.author, userId, 'like');   // 알림 삭제
     }
     return post;
   }

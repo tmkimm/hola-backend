@@ -67,15 +67,51 @@ export class UserService {
 
   // 사용자가 관심 등록한 글 리스트를 조회한다.
   async findUserLikes(id: Types.ObjectId) {
-    const likePosts = await LikePosts.find({ userId: id })
-      .populate({
-        path: 'postId',
-        select: `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
-        match: { isDeleted: false },
-        populate: { path: 'author', select: `nickName image` },
-      })
-      .sort('-createdAt')
-      .lean();
+
+    const likePosts = await LikePosts.aggregate([
+      { $match: { userId: id }},
+      {
+        $lookup: {
+          from : 'posts',
+          localField: 'postId',
+          foreignField: '_id',
+          pipeline: [{ $project: { 
+            title: 1,
+            views: 1,
+            comments: 1,
+            likes: 1,
+            language: 1,
+            isClosed: 1,
+            totalLikes: 1,
+            startDate: 1,
+            endDate: 1,
+            type: 1,
+            onlineOrOffline: 1,
+            contactType: 1,
+            recruits: 1,
+            expectedPeriod: 1,
+            author: 1,
+            positions: 1,
+            createdAt: 1,
+           } }],
+          as: 'postId',
+        }
+      },
+      {
+        $unwind: '$postId'
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'postId.author',
+          foreignField: '_id',
+          pipeline: [{ $project: { _id: 1, nickName: 1, image: 1 } }],
+          as: 'postId.author',
+        },        
+      },
+    ]).sort({
+      'postId.createdAt': -1
+    });
 
     const result = likePosts
       .filter((i) => {

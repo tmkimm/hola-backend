@@ -152,7 +152,7 @@ postSchema.statics.findTopPost = function (limit, sort) {
                     today = new Date();
                     daysAgo = new Date();
                     daysAgo.setDate(today.getDate() - 7); // 7일 이내
-                    return [4 /*yield*/, this.find({ createdAt: { $gte: daysAgo } })
+                    return [4 /*yield*/, this.find({ createdAt: { $gte: daysAgo }, startDate: { $gte: today } })
                             .where('isDeleted')
                             .equals(false)
                             .where('isClosed')
@@ -236,9 +236,19 @@ postSchema.statics.findPostPagination = function (page, sort, language, period, 
                                 author: 1,
                                 positions: 1,
                                 createdAt: 1,
+                                score: { $meta: "searchScore" }
                             },
                         },
                     ], false);
+                    if (search && typeof search === 'string') {
+                        aggregate.push({
+                            $match: {
+                                score: {
+                                    $gte: 2
+                                }
+                            }
+                        });
+                    }
                     return [4 /*yield*/, this.aggregate(aggregate).sort(sortQuery.join(' ')).skip(pageToSkip).limit(Number(itemsPerPage))];
                 case 1:
                     posts = _a.sent();
@@ -250,15 +260,39 @@ postSchema.statics.findPostPagination = function (page, sort, language, period, 
 // 최신, 트레딩 조회
 postSchema.statics.countPost = function (language, period, isClosed, type, position, search, onOffLine) {
     return __awaiter(this, void 0, void 0, function () {
-        var query, count;
+        var query, aggregateSearch, aggregate, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = makeFindPostQuery(language, period, isClosed, type, position, search, onOffLine);
-                    return [4 /*yield*/, this.countDocuments(query)];
+                    aggregateSearch = [];
+                    if (search && typeof search === 'string') {
+                        aggregateSearch.push({
+                            $search: {
+                                index: 'posts_text_search',
+                                text: {
+                                    query: search,
+                                    path: {
+                                        wildcard: '*',
+                                    },
+                                },
+                            },
+                        });
+                    }
+                    aggregate = __spreadArray(__spreadArray([], aggregateSearch, true), [
+                        { $match: query },
+                        {
+                            $count: "postCount"
+                        }
+                    ], false);
+                    return [4 /*yield*/, this.aggregate(aggregate)];
                 case 1:
-                    count = _a.sent();
-                    return [2 /*return*/, count];
+                    result = _a.sent();
+                    if (result && result.length > 0)
+                        return [2 /*return*/, result[0].postCount];
+                    else
+                        return [2 /*return*/, 0];
+                    return [2 /*return*/];
             }
         });
     });

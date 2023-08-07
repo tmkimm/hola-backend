@@ -487,9 +487,9 @@ postSchema.statics.findTopPost = async function (limit, sort) {
   const today: Date = new Date();
   const daysAgo: Date = new Date();
   daysAgo.setDate(today.getDate() - 7); // 7일 이내
-
+  
   // Query
-  const result = await this.find({ createdAt: { $gte: daysAgo } })
+  const result = await this.find({ createdAt: { $gte: daysAgo }, startDate : { $gte: today} })
     .where('isDeleted')
     .equals(false)
     .where('isClosed')
@@ -576,17 +576,53 @@ postSchema.statics.findPostPagination = async function (
         author: 1,
         positions: 1,
         createdAt: 1,
+        score: { $meta: "searchScore" }
       },
     },
   ];
+
+  if (search && typeof search === 'string') {
+    aggregate.push({
+      $match : {
+        score: {
+          $gte: 2
+        }
+      }
+    });
+  }
   const posts = await this.aggregate(aggregate).sort(sortQuery.join(' ')).skip(pageToSkip).limit(Number(itemsPerPage));
   return posts;
 };
 // 최신, 트레딩 조회
 postSchema.statics.countPost = async function (language, period, isClosed, type, position, search, onOffLine) {
   const query = makeFindPostQuery(language, period, isClosed, type, position, search, onOffLine); // 조회 query 생성
-  const count = await this.countDocuments(query);
-  return count;
+  const aggregateSearch = [];
+  if (search && typeof search === 'string') {
+    aggregateSearch.push({
+      $search: {
+        index: 'posts_text_search',
+        text: {
+          query: search,
+          path: {
+            wildcard: '*',
+          },
+        },
+      },
+    });
+  }
+
+  const aggregate = [
+    ...aggregateSearch,
+    { $match: query },
+    {
+      $count: "postCount"
+    }
+  ];
+  const result: any = await this.aggregate(aggregate);
+  if(result && result.length > 0)
+    return result[0].postCount; 
+  else
+    return 0;
 };
 
 // 인기글 조회
@@ -599,7 +635,7 @@ postSchema.statics.findPopularPosts = async function (postId, userId) {
   query.createdAt = { $gte: today.setDate(today.getDate() - 14) };
 
   // 현재 읽고 있는 글은 제외하고 조회
-  query._id = { $ne: postId };
+  query._id = { $ne: postId }; 
 
   // 사용자가 작성한 글 제외하고 조회
   if (userId) query.author = { $ne: userId };
@@ -607,7 +643,6 @@ postSchema.statics.findPopularPosts = async function (postId, userId) {
   // 마감글, 인기글 제외
   query.isDeleted = { $eq: false };
   query.isClosed = { $eq: false };
-
   const posts = await this.find(query).sort('-views').limit(10).select('title').lean();
 
   return posts;
