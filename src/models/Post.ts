@@ -585,7 +585,7 @@ postSchema.statics.findPostPagination = async function (
     aggregate.push({
       $match : {
         score: {
-          $gte: 2
+          $gte: 1
         }
       }
     });

@@ -244,7 +244,7 @@ postSchema.statics.findPostPagination = function (page, sort, language, period, 
                         aggregate.push({
                             $match: {
                                 score: {
-                                    $gte: 2
+                                    $gte: 1
                                 }
                             }
                         });
