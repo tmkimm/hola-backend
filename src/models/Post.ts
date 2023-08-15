@@ -585,7 +585,7 @@ postSchema.statics.findPostPagination = async function (
     aggregate.push({
       $match : {
         score: {
-          $gte: 1
+          $gte: 0.5
         }
       }
     });
@@ -611,13 +611,30 @@ postSchema.statics.countPost = async function (language, period, isClosed, type,
     });
   }
 
-  const aggregate = [
+  const aggregate: any = [
     ...aggregateSearch,
     { $match: query },
     {
-      $count: "postCount"
-    }
+      $project: {
+        title: 1,
+        score: { $meta: "searchScore" }
+      },
+    },
   ];
+
+  if (search && typeof search === 'string') {
+    aggregate.push({
+      $match : {
+        score: {
+          $gte: 0.5
+        }
+      }
+    });
+  }
+  aggregate.push({
+    $count: "postCount"
+  });
+
   const result: any = await this.aggregate(aggregate);
   if(result && result.length > 0)
     return result[0].postCount; 
