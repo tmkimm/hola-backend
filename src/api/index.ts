@@ -10,6 +10,7 @@ import reply from './routes/reply';
 import notifications from './routes/notifications';
 import admin from './routes/admin';
 import dashboard from './routes/dashboard';
+import event from './routes/event';
 
 export default () => {
   const app = Router();
@@ -24,5 +25,6 @@ export default () => {
   notifications(app);
   admin(app);
   dashboard(app);
+  event(app);
   return app;
 };

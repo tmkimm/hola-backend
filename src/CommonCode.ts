@@ -65,7 +65,7 @@ const workExperienceCode: CommonCodeType = {
   '7': '7년',
   '8': '8년',
   '9': '9년',
-  mo: '10년 이상',
+  '10': '10년 이상',
 };
 
 // URL Type
