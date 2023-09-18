@@ -3,7 +3,6 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Event as EventModel } from '../../models/Event';
-import mockData from './mockData';
 
 const route = Router();
 
