@@ -227,15 +227,6 @@ eventSchema.statics.findEventPagination = async function (
     { $match: query },
   ];
 
-  if (search && typeof search === 'string') {
-    aggregate.push({
-      $match : {
-        score: {
-          $gte: 0.5
-        }
-      }
-    });
-  }
   const events = await this.aggregate(aggregate).sort(sortQuery.join(' ')).skip(pageToSkip).limit(Number(itemsPerPage));
   return events;
 };
@@ -268,15 +259,6 @@ eventSchema.statics.countEvent = async function (eventType, onOffLine, search) {
       },
     },
   ];
-  if (search && typeof search === 'string') {
-    aggregate.push({
-      $match : {
-        score: {
-          $gte: 0.5
-        }
-      }
-    });
-  }
   aggregate.push({
     $count: "eventCount"
   });
