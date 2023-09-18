@@ -1,4 +1,5 @@
 import { Model, Schema, model, Types } from 'mongoose';
+import { isNumber } from '../utills/isNumber';
 
 // #region Swagger schema - Event
 
@@ -26,7 +27,7 @@ import { Model, Schema, model, Types } from 'mongoose';
  *        example: 'conference'
  *      onlineOrOffline:
  *        type: string
- *        description: 이름
+ *        description: 온오프라인 구분(on, off, onOff)
  *        example: 'on'
  *      place:
  *        type: string
@@ -43,11 +44,11 @@ import { Model, Schema, model, Types } from 'mongoose';
  *      imageUrl:
  *        type: string
  *        description: '이미지 URL'
- *        example: 'https://hola-post-image.s3.ap-northeast-2.amazonaws.com/Tony%20Lee_2023-02-22_15-31-09.png'
+ *        example: 'https://hola-event-image.s3.ap-northeast-2.amazonaws.com/Tony%20Lee_2023-02-22_15-31-09.png'
  *      smallImageUrl:
  *        type: string
  *        description: '이미지 URL(모바일용)'
- *        example: 'https://hola-post-image.s3.ap-northeast-2.amazonaws.com/Tony%20Lee_2023-02-22_15-31-09.png'
+ *        example: 'https://hola-event-image.s3.ap-northeast-2.amazonaws.com/Tony%20Lee_2023-02-22_15-31-09.png'
  *      startDate:
  *        type: string
  *        description: 시작일
@@ -118,8 +119,11 @@ export interface IEventDocument extends IEvent, Document {
 
 export interface IEventModel extends Model<IEventDocument> {
   deleteEvent: (id: Types.ObjectId) => void;
-  modifyEvent: (id: Types.ObjectId, event: IEventDocument) => Promise<IEventDocument>;
+  modifyEvent: (id: Types.ObjectId, event: IEventDocument) => Promise<IEventDocument[]>;
+  findEventPagination: (page: string | null, sort: string | null, eventType: string | null, search: string | null, onOffLine: string | null) => Promise<IEventDocument[]>;
+  countEvent: (eventType: string | null, onOffLine: string | null, search: string | null) => Promise<number>;
 }
+
 
 const eventSchema = new Schema<IEventDocument>(
   {
@@ -155,6 +159,134 @@ eventSchema.statics.modifyEvent = async function (id, event) {
   });
   return eventRecord;
 };
+
+eventSchema.statics.deleteEvent = async function (id) {
+  await this.findOneAndUpdate({ _id: id }, { isDeleted: true });
+};
+
+// 조회 query 생성
+const makeFindEventQuery = (
+  eventType: string | null,
+  onOffLine: string | null,
+) => {
+  // Query
+  const query: any = {};
+
+  if (typeof onOffLine === 'string' && onOffLine && onOffLine != 'ALL') query.onlineOrOffline = onOffLine;
+
+  query.isClosed = { $eq: false };
+  query.isDeleted = { $eq: false };
+
+  // 공모전 구분(conference, hackathon, contest, bootcamp, others)
+  if (typeof eventType === 'string' && eventType && eventType != 'ALL') {
+    query.eventType = { $eq: eventType };
+  }
+  return query;
+};
+
+// 최신, 트레딩 조회
+eventSchema.statics.findEventPagination = async function (
+  page: string | null,
+  sort: string | null,
+  eventType: string | null,
+  search: string | null,
+  onOffLine: string | null,
+) {
+  let sortQuery = [];
+  // Sorting
+  if (sort) {
+    const sortableColumns = ['views', 'createdAt'];
+    sortQuery = sort.split(',').filter((value: string) => {
+      return sortableColumns.indexOf(value.substr(1, value.length)) !== -1 || sortableColumns.indexOf(value) !== -1;
+    });
+    sortQuery.push('-createdAt');
+  } else {
+    sortQuery.push('createdAt');
+  }
+  const query = makeFindEventQuery(eventType, onOffLine); // 조회 query 생성
+  // Pagenation
+  const itemsPerPage = 4 * 5; // 한 페이지에 표현할 수
+  let pageToSkip = 0;
+  if (isNumber(page) && Number(page) > 0) pageToSkip = (Number(page) - 1) * itemsPerPage;
+  const aggregateSearch = [];
+  if (search && typeof search === 'string') {
+    aggregateSearch.push({
+      $search: {
+        index: 'events_text_search',
+        text: {
+          query: search,
+          path: {
+            wildcard: '*',
+          },
+        },
+      },
+    });
+  }
+  const aggregate = [
+    ...aggregateSearch,
+    { $match: query },
+  ];
+
+  if (search && typeof search === 'string') {
+    aggregate.push({
+      $match : {
+        score: {
+          $gte: 0.5
+        }
+      }
+    });
+  }
+  const events = await this.aggregate(aggregate).sort(sortQuery.join(' ')).skip(pageToSkip).limit(Number(itemsPerPage));
+  return events;
+};
+
+// 총 Page 수 계산
+eventSchema.statics.countEvent = async function (eventType, onOffLine, search) {
+  const query = makeFindEventQuery(eventType, onOffLine); // 조회 query 생성
+  const aggregateSearch = [];
+  if (search && typeof search === 'string') {
+    aggregateSearch.push({
+      $search: {
+        index: 'events_text_search',
+        text: {
+          query: search,
+          path: {
+            wildcard: '*',
+          },
+        },
+      },
+    });
+  }
+
+  const aggregate: any = [
+    ...aggregateSearch,
+    { $match: query },
+    {
+      $project: {
+        title: 1,
+        score: { $meta: "searchScore" }
+      },
+    },
+  ];
+  if (search && typeof search === 'string') {
+    aggregate.push({
+      $match : {
+        score: {
+          $gte: 0.5
+        }
+      }
+    });
+  }
+  aggregate.push({
+    $count: "eventCount"
+  });
+
+  const result: any = await this.aggregate(aggregate);
+  if(result && result.length > 0)
+    return result[0].eventCount; 
+  else
+    return 0;
+}  
 
 const Event = model<IEventDocument, IEventModel>('Event', eventSchema);
 export { Event };

@@ -6,6 +6,24 @@ export class EventService {
     protected eventModel: IEventModel
   ) {}
 
+  // 메인 화면에서 글 리스트를 조회한다.
+  async findPostPagination(
+    page: string | null,
+    sort: string | null,
+    eventType: string | null,
+    search: string | null,
+    onOffLine: string | null,
+  ) {
+    let result: IEventDocument[] = await this.eventModel.findEventPagination(
+      page,
+      sort,
+      eventType,
+      search,
+      onOffLine,
+    );
+    return result;
+  }
+
   // 공모전 등록
   async createEvent(post: IEventDocument) {
     // TODO 사용자 정보 기입
@@ -30,6 +48,6 @@ export class EventService {
     // TODO 공모전 권한 관리
     // if (id.toString() !== tokenEventId.toString())
     //   throw new CustomError('NotAuthenticatedError', 401, 'Event does not match');
-      await this.eventModel.findOneAndDelete({ _id: id });
+      await this.eventModel.deleteEvent(id);
   }
 }

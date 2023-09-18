@@ -16,16 +16,52 @@ export default (app: Router) => {
    */
   app.use('/events', route);
 
-  // #region 공모전 리스트 조회
+  // #region 공모전 리스트 조회(페이징)
   /**
    * @swagger
    * paths:
    *   /events:
-   *     get:
+   *    get:
    *      tags:
    *        - events
-   *      summary: 공모전 리스트 조회(리스트 뷰)
+   *      summary: 공모전 리스트 조회(Pagination)
+   *      description: 공모전 리스트를 조회한다.
    *      parameters:
+   *        - name: page
+   *          in: query
+   *          description: 현재 페이지(기본 1)
+   *          required: true
+   *          schema:
+   *            type: number
+   *          example: 1
+   *        - name: sort
+   *          in: query
+   *          description: '정렬. 필드는 ,로 구분하며 +는 오름차순, -는 내림차순 '
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: '-createdAt'
+   *        - name: eventType
+   *          in: query
+   *          description: '공모전 구분(conference, hackathon, contest, bootcamp, others)'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: '1'
+   *        - name: search
+   *          in: query
+   *          description: '검색'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: '토이프로젝트'
+   *        - name: onOffLine
+   *          in: query
+   *          description: '진행방식(on:온라인, off:오프라인, onOff: 온/오프라인)'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: 'on'
    *      responses:
    *        200:
    *          description: successful operation
@@ -34,19 +70,23 @@ export default (app: Router) => {
    *              schema:
    *                type: object
    *                properties:
-   *                  events:
+   *                  posts:
    *                    type: array
    *                    items:
-   *                      $ref: '#/components/schemas/PostMain'
+   *                      $ref: '#/components/schemas/Event'
    */
   // #endregion
   route.get(
     '/',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      return res.status(200).json(mockData.events);
+      const { page, sort, eventType, search, onOffLine } = req.query;
+      const EventServiceInstance = new EventService(EventModel);
+      const events = await EventServiceInstance.findPostPagination(
+        page, sort, eventType, search, onOffLine
+      );
+      return res.status(200).json(events);
     }),
   );
-
 
   // #region POST - 공모전 등록
   /**
