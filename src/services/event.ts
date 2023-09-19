@@ -54,6 +54,11 @@ export class EventService {
     return event;
   }
 
+  // 추천 이벤트
+  async findRecommendEventList() {
+    const events = await this.eventModel.findRecommendEventList();
+    return events;
+  }
 
   // 공모전 등록
   async createEvent(post: IEventDocument) {

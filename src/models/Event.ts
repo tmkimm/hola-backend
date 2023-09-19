@@ -123,6 +123,7 @@ export interface IEventModel extends Model<IEventDocument> {
   findEventPagination: (page: string | null, sort: string | null, eventType: string | null, search: string | null, onOffLine: string | null) => Promise<IEventDocument[]>;
   findEventCalendar: (year: number, month: number, eventType: string | null, search: string | null) => Promise<IEventDocument[]>;
   countEvent: (eventType: string | null, onOffLine: string | null, search: string | null) => Promise<number>;
+  findRecommendEventList: () => Promise<IEventDocument[]>;
 }
 
 
@@ -263,7 +264,7 @@ eventSchema.statics.findEventCalendar = async function (
     { $match: query },
   ];
 
-  const events = await this.aggregate(aggregate).sort('createdAt');
+  const events = await this.aggregate(aggregate).sort('startDate');
   return events;
 };
 
@@ -305,6 +306,19 @@ eventSchema.statics.countEvent = async function (eventType, onOffLine, search) {
   else
     return 0;
 }  
+
+// 추천 이벤트 조회
+eventSchema.statics.findRecommendEventList = async function () {
+  let query = makeFindEventQuery(null, null); // 조회 query 생성
+
+  // TODO 추천 이벤트 로직 정비(광고연계)
+  // 14일 이내 조회
+  const today = new Date();
+  query.startDate = { $gte: today.setDate(today.getDate() - 180) };
+  const events = await this.find(query).sort('-views').limit(10);
+  return events;
+};
+
 
 const Event = model<IEventDocument, IEventModel>('Event', eventSchema);
 export { Event };

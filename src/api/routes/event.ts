@@ -149,6 +149,36 @@ export default (app: Router) => {
   );
 
 
+  // #region 추천 공모전
+  /**
+   * @swagger
+   * paths:
+   *   /recommend:
+   *    get:
+   *      tags:
+   *        - events
+   *      summary: 추천 공모전 조회(AD)
+   *      description: 추천 공모전을 조회한다.
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/Event'
+   */
+  // #endregion
+  route.get(
+    '/recommend',
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const EventServiceInstance = new EventService(EventModel);
+      const events = await EventServiceInstance.findRecommendEventList();
+      return res.status(200).json(events);
+    }),
+  );
+
   // #region 공모전 상세 보기
   /**
    * @swagger
@@ -297,7 +327,7 @@ export default (app: Router) => {
     }),
   );
 
-  // #region 글 삭제
+  // #region 공모전 삭제
   /**
    * @swagger
    * paths:
@@ -310,7 +340,7 @@ export default (app: Router) => {
    *      parameters:
    *        - name: id
    *          in: path
-   *          description: 글 Id
+   *          description: 공모전 Id
    *          required: true
    *          example: '60213d1c3126991a7cd1d287'
    *          schema:
