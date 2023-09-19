@@ -67,12 +67,9 @@ export default (app: Router) => {
    *          content:
    *            application/json:
    *              schema:
-   *                type: object
-   *                properties:
-   *                  posts:
-   *                    type: array
-   *                    items:
-   *                      $ref: '#/components/schemas/Event'
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/Event'
    */
   // #endregion
   route.get(
@@ -80,10 +77,114 @@ export default (app: Router) => {
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { page, sort, eventType, search, onOffLine } = req.query;
       const EventServiceInstance = new EventService(EventModel);
-      const events = await EventServiceInstance.findPostPagination(
+      const events = await EventServiceInstance.findEventList(
         page, sort, eventType, search, onOffLine
       );
       return res.status(200).json(events);
+    }),
+  );
+
+
+  // #region 공모전 캘린더뷰 조회
+  /**
+   * @swagger
+   * paths:
+   *   /calendar/{year}/{month}:
+   *    get:
+   *      tags:
+   *        - events
+   *      summary: 공모전 캘린더뷰 조회
+   *      description: 공모전 캘린더뷰를 조회한다.
+   *      parameters:
+   *        - name: year
+   *          in: path
+   *          description: 년도
+   *          required: true
+   *          schema:
+   *            type: number
+   *          example: 2023
+   *        - name: month
+   *          in: path
+   *          description: 달
+   *          required: true
+   *          schema:
+   *            type: string
+   *          example: 09
+   *        - name: eventType
+   *          in: query
+   *          description: '공모전 구분(conference, hackathon, contest, bootcamp, others)'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: '1'
+   *        - name: search
+   *          in: query
+   *          description: '검색'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: '토이프로젝트'
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/Event'
+   */
+  // #endregion
+  route.get(
+    '/calendar/:year/:month',
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const { year, month }= req.params;
+      const { eventType, search } = req.query;
+      const EventServiceInstance = new EventService(EventModel);
+      const events = await EventServiceInstance.findEventListInCalendar(
+        year, month, eventType, search
+      );
+      return res.status(200).json(events);
+    }),
+  );
+
+
+  // #region 공모전 상세 보기
+  /**
+   * @swagger
+   * paths:
+   *   /events/{id}:
+   *    get:
+   *      tags:
+   *        - events
+   *      summary: 공모전 상세 보기
+   *      description: '공모전 상세 정보를 조회한다.'
+   *      parameters:
+   *        - name: id
+   *          in: path
+   *          description: 공모전 Id
+   *          required: true
+   *          example: '635a91e837ad67001412321a'
+   *          schema:
+   *            type: string
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                $ref: '#/components/schemas/Event'
+   *        404:
+   *          description: Event not found
+   */
+  // #endregion
+  route.get(
+    '/:id',
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const eventId = req.params.id;
+      const EventServiceInstance = new EventService(EventModel);
+      const event = await EventServiceInstance.findEvent(eventId);
+      return res.status(200).json(event);
     }),
   );
 

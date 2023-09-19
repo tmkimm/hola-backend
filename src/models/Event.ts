@@ -1,4 +1,4 @@
-import { Model, Schema, model, Types } from 'mongoose';
+import { Model, Schema, model, Types, Number } from 'mongoose';
 import { isNumber } from '../utills/isNumber';
 
 // #region Swagger schema - Event
@@ -121,6 +121,7 @@ export interface IEventModel extends Model<IEventDocument> {
   deleteEvent: (id: Types.ObjectId) => void;
   modifyEvent: (id: Types.ObjectId, event: IEventDocument) => Promise<IEventDocument[]>;
   findEventPagination: (page: string | null, sort: string | null, eventType: string | null, search: string | null, onOffLine: string | null) => Promise<IEventDocument[]>;
+  findEventCalendar: (year: number, month: number, eventType: string | null, search: string | null) => Promise<IEventDocument[]>;
   countEvent: (eventType: string | null, onOffLine: string | null, search: string | null) => Promise<number>;
 }
 
@@ -228,6 +229,41 @@ eventSchema.statics.findEventPagination = async function (
   ];
 
   const events = await this.aggregate(aggregate).sort(sortQuery.join(' ')).skip(pageToSkip).limit(Number(itemsPerPage));
+  return events;
+};
+
+// 공모전 캘린더뷰 조회
+eventSchema.statics.findEventCalendar = async function (
+  year: number,
+  month: number,
+  eventType: string | null,
+  search: string | null,
+) {
+  const query = makeFindEventQuery(eventType, null); // 조회 query 생성
+  const firstDay = new Date(year, month - 1, 1);
+  const lastDay = new Date(year, month, 0);
+  query.startDate = { $gte : firstDay, $lte : lastDay };
+
+  const aggregateSearch = [];
+  if (search && typeof search === 'string') {
+    aggregateSearch.push({
+      $search: {
+        index: 'events_text_search',
+        text: {
+          query: search,
+          path: {
+            wildcard: '*',
+          },
+        },
+      },
+    });
+  }
+  const aggregate = [
+    ...aggregateSearch,
+    { $match: query },
+  ];
+
+  const events = await this.aggregate(aggregate).sort('createdAt');
   return events;
 };
 

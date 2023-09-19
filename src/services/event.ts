@@ -1,5 +1,7 @@
+import { isNumber } from './../utills/isNumber';
 import { Types } from 'mongoose';
 import { IEventDocument, IEventModel } from '../models/Event';
+import CustomError from '../CustomError';
 
 export class EventService {
   constructor(
@@ -7,7 +9,7 @@ export class EventService {
   ) {}
 
   // 메인 화면에서 글 리스트를 조회한다.
-  async findPostPagination(
+  async findEventList(
     page: string | null,
     sort: string | null,
     eventType: string | null,
@@ -23,6 +25,35 @@ export class EventService {
     );
     return result;
   }
+
+  // 메인 화면에서 글 리스트를 조회한다.
+  async findEventListInCalendar(
+    year: string | null,
+    month: string | null,
+    eventType: string | null,
+    search: string | null,
+  ) {
+    if (!isNumber(year) || !isNumber(month)) throw new CustomError('IllegalArgumentError', 400, 'Date format is incorrect'); 
+
+    let result: IEventDocument[] = await this.eventModel.findEventCalendar(
+      Number(year),
+      Number(month),
+      eventType,
+      search,
+    );
+    return result;
+  }
+
+  
+  // 메인 화면에서 글 리스트를 조회한다.
+  async findEvent(
+    eventId: Types.ObjectId
+  ) {
+    const event = await this.eventModel.findById(eventId);
+    if (!event) throw new CustomError('NotFoundError', 404, 'Event not found');
+    return event;
+  }
+
 
   // 공모전 등록
   async createEvent(post: IEventDocument) {
