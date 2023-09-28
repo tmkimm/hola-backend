@@ -11,6 +11,8 @@ import notifications from './routes/notifications';
 import admin from './routes/admin';
 import dashboard from './routes/dashboard';
 import event from './routes/event';
+import campaign from './routes/campaign';
+import advertisement from './routes/advertisement';
 
 export default () => {
   const app = Router();
@@ -26,5 +28,7 @@ export default () => {
   admin(app);
   dashboard(app);
   event(app);
+  campaign(app);
+  advertisement(app);
   return app;
 };

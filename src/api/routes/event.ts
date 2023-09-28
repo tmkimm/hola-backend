@@ -241,9 +241,9 @@ export default (app: Router) => {
    *              schema:
    *                type: array
    *                items:
-   *                  $ref: '#/components/schemas/Post'
+   *                  $ref: '#/components/schemas/Event'
    *        400:
-   *          description: Invaild post data
+   *          description: Invaild event data
    *        401:
    *          $ref: '#/components/responses/UnauthorizedError'
    */
@@ -308,7 +308,7 @@ export default (app: Router) => {
    *                items:
    *                  $ref: '#/components/schemas/Event'
    *        400:
-   *          description: Invaild post data
+   *          description: Invaild event data
    *        401:
    *          $ref: '#/components/responses/UnauthorizedError'
    */
@@ -351,7 +351,7 @@ export default (app: Router) => {
    *        401:
    *          $ref: '#/components/responses/UnauthorizedError'
    *        404:
-   *          description: Post not found
+   *          description: Event not found
    */
   // #endregion
   route.delete(

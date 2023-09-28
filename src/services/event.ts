@@ -61,11 +61,11 @@ export class EventService {
   }
 
   // 공모전 등록
-  async createEvent(post: IEventDocument) {
+  async createEvent(event: IEventDocument) {
     // TODO 사용자 정보 기입
-    //post.author = userID;
-    const postRecord = await this.eventModel.create(post);
-    return postRecord;
+    //event.author = userID;
+    const eventRecord = await this.eventModel.create(event);
+    return eventRecord;
   }
 
   // 공모전 수정

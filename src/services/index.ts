@@ -7,4 +7,7 @@ export { CommentService } from './comment';
 export { ReplyService } from './reply';
 export { DashboardService } from './dashboard';
 export { EventService } from './event';
+export { CampaignService } from './campaign';
+export { AdvertisementService } from './advertisement';
+
 

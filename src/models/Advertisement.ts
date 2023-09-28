@@ -92,6 +92,8 @@ export interface IAdvertisementDocument extends IAdvertisement, Document {
 }
 
 export interface IAdvertisementModel extends Model<IAdvertisementDocument> {
+  findAdvertisement: (id: Types.ObjectId) => Promise<IAdvertisementDocument>;
+  findAdvertisementInCampaign: (campaignId: Types.ObjectId) => Promise<IAdvertisementDocument[]>;
   deleteAdvertisement: (id: Types.ObjectId) => void;
   modifyAdvertisement: (id: Types.ObjectId, advertisement: IAdvertisementDocument) => Promise<IAdvertisementDocument[]>;
 }
@@ -118,6 +120,11 @@ const advertisementSchema = new Schema<IAdvertisementDocument>(
   },
 );
 
+// 광고 상세 조회
+advertisementSchema.statics.findAdvertisement = async function (id) {
+  return await this.findById(id);
+};
+
 advertisementSchema.statics.modifyAdvertisement = async function (id, advertisement) {
   const advertisementRecord = await this.findByIdAndUpdate(id, advertisement, {
     new: true,
@@ -126,8 +133,14 @@ advertisementSchema.statics.modifyAdvertisement = async function (id, advertisem
 };
 
 advertisementSchema.statics.deleteAdvertisement = async function (id) {
-  await this.findOneAndDelete(id);
+  await this.findByIdAndDelete(id);
 };
+
+  // 캠페인의 광고 리스트 조회
+advertisementSchema.statics.findAdvertisementInCampaign = async function (campaignId: Types.ObjectId) {
+    const result = await this.find({campaignId}).select(`advertisementType startDate endDate advertisementStatus`);
+    return result;
+}
 
 
 const Advertisement = model<IAdvertisementDocument, IAdvertisementModel>('Advertisement', advertisementSchema);

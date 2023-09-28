@@ -63,6 +63,10 @@ import { isNumber } from '../utills/isNumber';
  *        type: number
  *        description: 예상노출수
  *        example: 56000
+ *      remark:
+ *        type: string
+ *        description: '비고'
+ *        example: '비비고 만두'
  */
 // #endregion
 
@@ -79,12 +83,15 @@ export interface ICampaign {
   conversionCost: number;
   campaignStatus: string;
   expectedImpressions: number;
+  remark: string;
 }
 
 export interface ICampaignDocument extends ICampaign, Document {
 }
 
 export interface ICampaignModel extends Model<ICampaignDocument> {
+  findCampaign: (id: Types.ObjectId) => Promise<ICampaignDocument>;
+  findCampaignListInPagination: (page: string | null) => Promise<ICampaignDocument[]>;
   deleteCampaign: (id: Types.ObjectId) => void;
   modifyCampaign: (id: Types.ObjectId, campaign: ICampaignDocument) => Promise<ICampaignDocument[]>;
 }
@@ -100,15 +107,33 @@ const campaignSchema = new Schema<ICampaignDocument>(
     startDate: { type: Date, required: true }, //  시작일
     endDate: { type: Date, required: false }, //  종료일 
     basicAdvertisingFee: { type: Number, default: 0 }, // 기본광고비
-    conversionType: { type: String, required: true }, // 광고유형(전환형, 노출형)
+    conversionType: { type: String, required: true }, // 광고유형(conversion 전환형, view 노출형)
     conversionCost: { type: Number, default: 0 }, // 전환당 단가
     campaignStatus: { type: String, default: 'before' }, // 상태(before 진행전, active 진행중, close종료)
     expectedImpressions: { type: Number, default: 0 }, // 예상노출수
+    remark: { type: String, required: false },  // 비고
   },
   {
     timestamps: true,
   },
 );
+
+campaignSchema.statics.findCampaign = async function (id) {
+  const campaign = await this.findById(id);
+  return campaign;
+};
+
+// 캠페인 목록 조회
+campaignSchema.statics.findCampaignListInPagination = async function (
+  page: string | null,
+) {
+  // Pagenation
+  const itemsPerPage = 4 * 5; // 한 페이지에 표현할 수
+  let pageToSkip = 0;
+  if (isNumber(page) && Number(page) > 0) pageToSkip = (Number(page) - 1) * itemsPerPage;
+  const result = await this.find().sort('-createdAt').skip(pageToSkip).limit(Number(itemsPerPage));
+  return result;
+};
 
 campaignSchema.statics.modifyCampaign = async function (id, campaign) {
   const campaignRecord = await this.findByIdAndUpdate(id, campaign, {
@@ -118,9 +143,8 @@ campaignSchema.statics.modifyCampaign = async function (id, campaign) {
 };
 
 campaignSchema.statics.deleteCampaign = async function (id) {
-  await this.findOneAndDelete(id);
+  await this.findByIdAndDelete(id);
 };
-
 
 const Campaign = model<ICampaignDocument, ICampaignModel>('Campaign', campaignSchema);
 export { Campaign };
