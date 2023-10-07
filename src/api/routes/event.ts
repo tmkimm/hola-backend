@@ -35,7 +35,7 @@ export default (app: Router) => {
    *          example: 1
    *        - name: sort
    *          in: query
-   *          description: '정렬. 필드는 ,로 구분하며 +는 오름차순, -는 내림차순 '
+   *          description: '정렬(최신순: -createdAt, 인기순: -views)'
    *          required: false
    *          schema:
    *            type: string
