@@ -2,10 +2,12 @@ import { isNumber } from './../utills/isNumber';
 import { Types } from 'mongoose';
 import { IEventDocument, IEventModel } from '../models/Event';
 import CustomError from '../CustomError';
+import { IAdvertisementDocument, IAdvertisementModel } from '../models/Advertisement';
 
 export class EventService {
   constructor(
-    protected eventModel: IEventModel
+    protected eventModel: IEventModel,
+    protected adverisementModel: IAdvertisementModel
   ) {}
 
   // 메인 화면에서 글 리스트를 조회한다.
@@ -56,8 +58,25 @@ export class EventService {
 
   // 추천 이벤트
   async findRecommendEventList() {
-    const events = await this.eventModel.findRecommendEventList();
-    return events;
+    const activeADInEvent = await this.adverisementModel.findActiveADListInEvent(); // 광고 진행중인 공모전 조회
+    // event 정보만 분리(filter > map)
+    const adEventList = activeADInEvent
+    .filter((i: any) => {
+      return i.event && i.event.length > 0 && i.event[0] !== null && i.event[0] !== undefined;
+    })
+    .map((i: any) => {
+      return i.event[0];
+    });
+    // 인기 공모전 조회 시 광고로 조회된 공모전 제외
+    const notInEventId = adEventList.map((event: IEventDocument) => {
+      return event._id;
+     });
+
+    // id를 분리하여 not in으로 
+    // 진행중인 광고가 없을 수 있음
+    const events = await this.eventModel.findRecommendEventList(notInEventId);
+    adEventList.push(...events);
+    return adEventList;
   }
 
   // 공모전 등록

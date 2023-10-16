@@ -19,7 +19,7 @@ import { isNumber } from '../utills/isNumber';
  *        example: '611dbf22739c10ccdbffad39'
  *      advertisementType:
  *        type: string
- *        description: 광고유형(banner 배너, event 공모전)
+ *        description: 광고유형(banner 메인 배너, event 공모전, modalBanner 모달 상세 배너)
  *        example: banner
  *      startDate:
  *        type: string
@@ -94,6 +94,7 @@ export interface IAdvertisementDocument extends IAdvertisement, Document {
 export interface IAdvertisementModel extends Model<IAdvertisementDocument> {
   findAdvertisement: (id: Types.ObjectId) => Promise<IAdvertisementDocument>;
   findAdvertisementInCampaign: (campaignId: Types.ObjectId) => Promise<IAdvertisementDocument[]>;
+  findActiveADListInEvent: () => Promise<IAdvertisementDocument[]>;
   deleteAdvertisement: (id: Types.ObjectId) => void;
   modifyAdvertisement: (id: Types.ObjectId, advertisement: IAdvertisementDocument) => Promise<IAdvertisementDocument[]>;
 }
@@ -102,7 +103,7 @@ export interface IAdvertisementModel extends Model<IAdvertisementDocument> {
 const advertisementSchema = new Schema<IAdvertisementDocument>(
   {
     campaignId: { type: Types.ObjectId, ref: 'Campaign', required: true }, // 캠페인 Id
-    advertisementType: { type: String, required: true }, // 광고유형(banner 배너, event 공모전)
+    advertisementType: { type: String, required: true }, // 광고유형(banner 메인배너, event 공모전, modalBanner 모달 상세 배너)
     startDate: { type: Date, required: true }, //  시작일
     endDate: { type: Date, required: false }, //  종료일 
     realEndDate: { type: Date, required: false }, //  실제 종료일(종료 처리된 날짜)
@@ -123,6 +124,27 @@ const advertisementSchema = new Schema<IAdvertisementDocument>(
 // 광고 상세 조회
 advertisementSchema.statics.findAdvertisement = async function (id) {
   return await this.findById(id);
+};
+
+
+// 진행중인 공모전 광고 조회
+advertisementSchema.statics.findActiveADListInEvent = async function () {
+  const adEvent =  await this.aggregate([ 
+    { $match: { advertisementType: 'event', advertisementStatus: 'active'}}
+    , { $sample: { size: 2 } } 
+    ,  {
+      $lookup: {
+        from: 'events',
+        localField: 'eventId',
+        foreignField: '_id',
+        // pipeline: [{ $project: { _id: 1, nickName: 1, image: 1 } }],
+        as: 'event',
+      },
+    },
+    {
+      $project: {event: 1},
+    },]);
+    return adEvent;
 };
 
 advertisementSchema.statics.modifyAdvertisement = async function (id, advertisement) {
