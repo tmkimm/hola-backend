@@ -84,6 +84,61 @@ export default (app: Router) => {
     }),
   );
 
+  // #region 공모전 리스트 조회(페이징)
+  /**
+   * @swagger
+   * paths:
+   *   /events/last-page:
+   *    get:
+   *      tags:
+   *        - events
+   *      summary: 공모전 리스트 조회 - 마지막 페이지 조회
+   *      description: Pagination에서 마지막 페이지를 조회한다.
+   *      parameters:
+   *        - name: eventType
+   *          in: query
+   *          description: '공모전 구분(conference, hackathon, contest, bootcamp, others)'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: '1'
+   *        - name: search
+   *          in: query
+   *          description: '검색'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: '토이프로젝트'
+   *        - name: onOffLine
+   *          in: query
+   *          description: '진행방식(on:온라인, off:오프라인, onOff: 온/오프라인)'
+   *          required: false
+   *          schema:
+   *            type: string
+   *          example: 'on'
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: object
+   *                properties:
+   *                  lastPage:
+   *                    type: number
+   *                    description : '전체 페이지 수'
+   *                    example: 7
+   */
+  // #endregion
+  route.get(
+    '/last-page',
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const { eventType, search, onOffLine } = req.query;
+      const EventServiceInstance = new EventService(EventModel);
+      const lastPage = await EventServiceInstance.findEventLastPage(eventType, search, onOffLine);
+      return res.status(200).json({lastPage});
+    }),
+  );
 
   // #region 공모전 캘린더뷰 조회
   /**

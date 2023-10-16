@@ -26,6 +26,20 @@ export class EventService {
     return result;
   }
 
+  
+  // Pagination을 위해 마지막 페이지를 구한다.
+  async findEventLastPage(
+    eventType: string | null,
+    search: string | null,
+    onOffLine: string | null,
+  ) {
+    
+    const itemsPerPage = 4 * 5; // 한 페이지에 표현할 수
+    let count = await this.eventModel.countEvent(eventType, search, onOffLine);
+    const lastPage = Math.ceil(count / itemsPerPage);
+    return lastPage;
+  }
+
   // 메인 화면에서 글 리스트를 조회한다.
   async findEventListInCalendar(
     year: string | null,
