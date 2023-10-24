@@ -3,6 +3,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Event as EventModel } from '../../models/Event';
+import { Advertisement as AdvertisementModel } from '../../models/Advertisement';
 
 const route = Router();
 
@@ -76,7 +77,7 @@ export default (app: Router) => {
     '/',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { page, sort, eventType, search, onOffLine } = req.query;
-      const EventServiceInstance = new EventService(EventModel);
+      const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
       const events = await EventServiceInstance.findEventList(
         page, sort, eventType, search, onOffLine
       );
@@ -144,7 +145,7 @@ export default (app: Router) => {
   /**
    * @swagger
    * paths:
-   *   /calendar/{year}/{month}:
+   *   /events/calendar/{year}/{month}:
    *    get:
    *      tags:
    *        - events
@@ -195,7 +196,7 @@ export default (app: Router) => {
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { year, month }= req.params;
       const { eventType, search } = req.query;
-      const EventServiceInstance = new EventService(EventModel);
+      const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
       const events = await EventServiceInstance.findEventListInCalendar(
         year, month, eventType, search
       );
@@ -208,7 +209,7 @@ export default (app: Router) => {
   /**
    * @swagger
    * paths:
-   *   /recommend:
+   *   /events/recommend:
    *    get:
    *      tags:
    *        - events
@@ -228,7 +229,7 @@ export default (app: Router) => {
   route.get(
     '/recommend',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const EventServiceInstance = new EventService(EventModel);
+      const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
       const events = await EventServiceInstance.findRecommendEventList();
       return res.status(200).json(events);
     }),
@@ -267,7 +268,7 @@ export default (app: Router) => {
     '/:id',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const eventId = req.params.id;
-      const EventServiceInstance = new EventService(EventModel);
+      const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
       const event = await EventServiceInstance.findEvent(eventId);
       return res.status(200).json(event);
     }),
@@ -296,9 +297,9 @@ export default (app: Router) => {
    *              schema:
    *                type: array
    *                items:
-   *                  $ref: '#/components/schemas/Post'
+   *                  $ref: '#/components/schemas/Event'
    *        400:
-   *          description: Invaild post data
+   *          description: Invaild event data
    *        401:
    *          $ref: '#/components/responses/UnauthorizedError'
    */
@@ -311,7 +312,7 @@ export default (app: Router) => {
         // TODO 공모전 등록 권한 관리
         //const { _id: userId } = req.user as IUser;
 
-        const EventServiceInstance = new EventService(EventModel);
+        const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
         const event = await EventServiceInstance.createEvent(eventDTO);
         return res.status(201).json(event);
       } catch (error) {
@@ -363,7 +364,7 @@ export default (app: Router) => {
    *                items:
    *                  $ref: '#/components/schemas/Event'
    *        400:
-   *          description: Invaild post data
+   *          description: Invaild event data
    *        401:
    *          $ref: '#/components/responses/UnauthorizedError'
    */
@@ -375,7 +376,7 @@ export default (app: Router) => {
       //const { _id: tokenUserId, tokenType } = req.user as IUser;
       // TODO event id validation check
       const eventDTO = req.body;
-      const EventServiceInstance = new EventService(EventModel);
+      const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
       const event = await EventServiceInstance.modifyEvent(Types.ObjectId(id), eventDTO);
 
       return res.status(200).json(event);
@@ -406,7 +407,7 @@ export default (app: Router) => {
    *        401:
    *          $ref: '#/components/responses/UnauthorizedError'
    *        404:
-   *          description: Post not found
+   *          description: Event not found
    */
   // #endregion
   route.delete(
@@ -415,7 +416,7 @@ export default (app: Router) => {
       const { id } = req.params;
       //const { _id: tokenUserId, tokenType } = req.user as IUser;
 
-      const EventServiceInstance = new EventService(EventModel);
+      const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
       await EventServiceInstance.deleteEvent(Types.ObjectId(id));
       return res.status(204).json();
     }),
