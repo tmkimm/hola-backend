@@ -90,7 +90,7 @@ export default (app: Router) => {
   /**
    * @swagger
    * paths:
-   *   /calendar/{year}/{month}:
+   *   /events/calendar/{year}/{month}:
    *    get:
    *      tags:
    *        - events
@@ -154,7 +154,7 @@ export default (app: Router) => {
   /**
    * @swagger
    * paths:
-   *   /recommend:
+   *   /events/recommend:
    *    get:
    *      tags:
    *        - events

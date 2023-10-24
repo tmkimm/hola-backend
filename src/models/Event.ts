@@ -314,7 +314,7 @@ eventSchema.statics.findRecommendEventList = async function (notInEventId: Types
   let limit = 10 - notInEventId.length;
   const today = new Date();
   query.startDate = { $gte: today.setDate(today.getDate() - 180) };
-  const events = await this.find(query).sort('-views').limit(limit);
+  const events = await this.find(query).sort('-views').limit(limit).lean();
   return events;
 };
 
