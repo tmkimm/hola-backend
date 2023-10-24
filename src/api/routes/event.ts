@@ -135,7 +135,7 @@ export default (app: Router) => {
     '/last-page',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { eventType, search, onOffLine } = req.query;
-      const EventServiceInstance = new EventService(EventModel);
+      const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
       const lastPage = await EventServiceInstance.findEventLastPage(eventType, search, onOffLine);
       return res.status(200).json({lastPage});
     }),
@@ -223,7 +223,7 @@ export default (app: Router) => {
    *              schema:
    *                type: array
    *                items:
-   *                  $ref: '#/components/schemas/Event'
+   *                  $ref: '#/components/schemas/RecommendedEvent'
    */
   // #endregion
   route.get(

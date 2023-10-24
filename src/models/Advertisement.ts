@@ -137,7 +137,7 @@ advertisementSchema.statics.findActiveADListInEvent = async function () {
         from: 'events',
         localField: 'eventId',
         foreignField: '_id',
-        // pipeline: [{ $project: { _id: 1, nickName: 1, image: 1 } }],
+        pipeline: [{ $project: { _id: 1, title: 1, eventType: 1, imageUrl: 1, smallImageUrl: 1, startDate: 1, endDate: 1, views: 1 } }],
         as: 'event',
       },
     },

@@ -91,6 +91,63 @@ import { isNumber } from '../utills/isNumber';
  */
 // #endregion
 
+/**
+ * @swagger
+ *  components:
+ *  schemas:
+ *   RecommendedEvent:
+ *     properties:
+ *      _id:
+ *        type: string
+ *        description: 공모전 ID
+ *        example: '611dbf22739c10ccdbffad39'
+ *      title:
+ *        type: string
+ *        description: '제목'
+ *        example: '인프콘 2023'
+ *      eventType:
+ *        type: string
+ *        description: '공모전 구분(conference, hackathon, contest, bootcamp, others)'
+ *        example: 'conference'
+ *      imageUrl:
+ *        type: string
+ *        description: '이미지 URL'
+ *        example: 'https://hola-event-image.s3.ap-northeast-2.amazonaws.com/Tony%20Lee_2023-02-22_15-31-09.png'
+ *      smallImageUrl:
+ *        type: string
+ *        description: '이미지 URL(모바일용)'
+ *        example: 'https://hola-event-image.s3.ap-northeast-2.amazonaws.com/Tony%20Lee_2023-02-22_15-31-09.png'
+ *      startDate:
+ *        type: string
+ *        description: 시작일
+ *        format: date-time
+ *        example: "2023-08-15T08:30:00Z"
+ *      endDate:
+ *        type: string
+ *        description: 종료일
+ *        format: date-time
+ *        example: "2023-08-15T08:30:00Z"
+ *      views:
+ *        type: number
+ *        description: 조회수
+ *        example: 497
+ *      isAD:
+ *        type: boolean
+ *        description: 광고 여부
+ *        example: false
+ *      badge:
+ *        properties:
+ *          type:
+ *            type: string
+ *            description: 뱃지종류
+ *            example: 'deadline'
+ *          name:
+ *            type: string
+ *            description: 뱃지명
+ *            example: '마감 3일전'
+ */
+// #endregion
+
 export interface IEvent {
   _id: Types.ObjectId;
   title: string;
@@ -308,13 +365,14 @@ eventSchema.statics.countEvent = async function (eventType, onOffLine, search) {
 }  
 
 // 추천 이벤트 조회
+// TODO startDate 조건 변경
 eventSchema.statics.findRecommendEventList = async function (notInEventId: Types.ObjectId[]) {
   let query = makeFindEventQuery(null, null); // 조회 query 생성
   query._id = { $nin: notInEventId };
   let limit = 10 - notInEventId.length;
   const today = new Date();
   query.startDate = { $gte: today.setDate(today.getDate() - 180) };
-  const events = await this.find(query).sort('-views').limit(limit).lean();
+  const events = await this.find(query).select('_id title eventType imageUrl smallImageUrl startDate endDate views').sort('-views').limit(limit).lean();
   return events;
 };
 
