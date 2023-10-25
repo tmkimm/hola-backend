@@ -1,9 +1,9 @@
-import { IPostDocument } from '../../../models/Post';
-import request from 'supertest';
-import 'regenerator-runtime/runtime';
-import mongoose from 'mongoose';
-import server from '../../../app';
 import 'dotenv/config';
+import mongoose from 'mongoose';
+import 'regenerator-runtime/runtime';
+import request from 'supertest';
+import server from '../../../app';
+import { IPostDocument } from '../../../models/Post';
 import mockData from '../../mockData';
 
 let accessToken: string;

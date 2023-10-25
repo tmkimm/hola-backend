@@ -12,8 +12,8 @@ export class AuthService {
 
     // Access Token, Refresh Token 발급
     const { _id, nickName, image, likeLanguages } = user;
-    const [accessToken, refreshToken] = await Promise.all([user.generateAccessToken(), user.generateRefreshToken()])
-    
+    const [accessToken, refreshToken] = await Promise.all([user.generateAccessToken(), user.generateRefreshToken()]);
+
     return { _id, nickName, image, likeLanguages, accessToken, refreshToken };
   }
 

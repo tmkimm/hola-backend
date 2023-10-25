@@ -1,4 +1,4 @@
-import { Model, Schema, model, Types } from 'mongoose';
+import { Model, Schema, Types, model } from 'mongoose';
 
 export interface ILikePosts {
   viewDate: Date;
@@ -20,7 +20,7 @@ const LikePostsSchema = new Schema<ILikePostsDocument>(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 LikePostsSchema.statics.add = async function (postId, userId) {

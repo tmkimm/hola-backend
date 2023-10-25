@@ -1,8 +1,8 @@
 import schedule from 'node-schedule';
-import { IUser, User as UserModel } from '../models/User';
-import { PostService } from '../services/index';
-import { Post as PostModel } from '../models/Post';
 import { Notification as NotificationModel } from '../models/Notification';
+import { Post as PostModel } from '../models/Post';
+import { User as UserModel } from '../models/User';
+import { PostService } from '../services/index';
 /*
   글에 관련된 Schedule을 정의한다.
 */

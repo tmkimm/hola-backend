@@ -1,18 +1,18 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
 import { Types } from 'mongoose';
+import { asyncErrorWrapper } from '../../asyncErrorWrapper';
+import { Notification as NotificationModel } from '../../models/Notification';
+import { Post as PostModel } from '../../models/Post';
 import { IUser, User as UserModel } from '../../models/User';
+import { PostService } from '../../services/index';
 import {
   checkPost,
-  isPostValid,
-  isAccessTokenValid,
   getUserIdByAccessToken,
-  isPostIdValid,
+  isAccessTokenValid,
   isObjectIdValid,
+  isPostIdValid,
+  isPostValid,
 } from '../middlewares/index';
-import { PostService } from '../../services/index';
-import { asyncErrorWrapper } from '../../asyncErrorWrapper';
-import { Post as PostModel } from '../../models/Post';
-import { Notification as NotificationModel } from '../../models/Notification';
 
 const route = Router();
 

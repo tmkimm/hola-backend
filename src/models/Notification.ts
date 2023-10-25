@@ -1,4 +1,4 @@
-import { Model, Schema, model, Types } from 'mongoose';
+import { Model, Schema, Types, model } from 'mongoose';
 
 /**
  * @swagger
@@ -42,19 +42,19 @@ import { Model, Schema, model, Types } from 'mongoose';
  */
 
 export interface INotification {
-    title: string;
-    isRead: boolean;
-    targetUserId: Types.ObjectId;
+  title: string;
+  isRead: boolean;
+  targetUserId: Types.ObjectId;
   createUserId: Types.ObjectId;
   createObjectId: Types.ObjectId;
-    href: string;
+  href: string;
   readDate?: Date;
-    noticeType: string;
-    buttonType: string;
-    buttonLabel: string;
-    con: string;
-    timeAgo: string;
-    createdAt: Date;
+  noticeType: string;
+  buttonType: string;
+  buttonLabel: string;
+  con: string;
+  timeAgo: string;
+  createdAt: Date;
 }
 
 export interface INotificationDocument extends INotification, Document {}
@@ -71,8 +71,8 @@ export interface INotificationModel extends Model<INotificationDocument> {
     buttonLabel: string,
     createUserId?: Types.ObjectId,
     createObjectId?: Types.ObjectId,
-    parentObjectId?: Types.ObjectId,
-  ) => Promise<void>;  
+    parentObjectId?: Types.ObjectId
+  ) => Promise<void>;
   modifyNotificationTitle: (createObjectId: Types.ObjectId, title: string) => Promise<void>;
   deleteNotification: (createObjectId: Types.ObjectId) => Promise<void>;
   deleteNotificationByPost: (href: Types.ObjectId) => Promise<void>;
@@ -88,12 +88,12 @@ const notificationSchema = new Schema<INotification>(
     targetUserId: { type: Types.ObjectId, ref: 'User' }, // 알림 받을사람 id
     createUserId: { type: Types.ObjectId, ref: 'User' }, // 알림 보낸사람 id
     href: { type: String, default: null }, // 이동할 링크
-    readDate: {type: Date, default: null}, // 읽은 시간
+    readDate: { type: Date, default: null }, // 읽은 시간
     buttonType: { type: String, default: 'BUTTON' },
     buttonLabel: { type: String, default: null },
     noticeType: String, // 알림 구분(like, comment, reply, couphone, notice)
     createObjectId: { type: Types.ObjectId }, // 알림 대상 Object Id(글, 댓글 등)
-    parentObjectId: { type: Types.ObjectId },   // 알림 발생한 곳 Id(삭제 용도)
+    parentObjectId: { type: Types.ObjectId }, // 알림 발생한 곳 Id(삭제 용도)
     icon: String,
   },
   {
@@ -101,17 +101,17 @@ const notificationSchema = new Schema<INotification>(
     timestamps: true,
     toObject: { virtuals: true },
     toJSON: { virtuals: true },
-  },
+  }
 );
 
 // 알림 리스트 조회
 notificationSchema.statics.findNotifications = async function (
-  targetUserId: Types.ObjectId,
+  targetUserId: Types.ObjectId
 ): Promise<INotificationDocument> {
   const today: Date = new Date();
   const oneMonthAgo = new Date(today.setMonth(today.getMonth() - 1));
 
-  const result = await this.find({ targetUserId, createdAt: { $gte: oneMonthAgo} })
+  const result = await this.find({ targetUserId, createdAt: { $gte: oneMonthAgo } })
     .populate('createUserId', 'nickName')
     .sort('isRead -createdAt')
     .select(`title isRead href createUserId noticeType createdAt icon buttonLabel`)
@@ -123,10 +123,9 @@ notificationSchema.statics.findNotifications = async function (
 notificationSchema.statics.findUnReadCount = async function (targetUserId: Types.ObjectId): Promise<number> {
   const today: Date = new Date();
   const oneMonthAgo = new Date(today.setMonth(today.getMonth() - 1));
-  const unReadCount = await this.countDocuments({ targetUserId, isRead: false, createdAt: { $gte: oneMonthAgo} });
+  const unReadCount = await this.countDocuments({ targetUserId, isRead: false, createdAt: { $gte: oneMonthAgo } });
   return unReadCount;
 };
-
 
 // 신규 알림 등록
 notificationSchema.statics.createNotification = async function (
@@ -138,16 +137,29 @@ notificationSchema.statics.createNotification = async function (
   buttonLabel: string,
   createUserId?: Types.ObjectId,
   createObjectId?: Types.ObjectId,
-  parentObjectId?: Types.ObjectId,
+  parentObjectId?: Types.ObjectId
 ): Promise<void> {
   let domain: string = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://holaworld.io';
   let href = domain + urn;
-  await this.create({ targetUserId, createUserId, href, title, noticeType, createObjectId, buttonLabel, parentObjectId, icon });
+  await this.create({
+    targetUserId,
+    createUserId,
+    href,
+    title,
+    noticeType,
+    createObjectId,
+    buttonLabel,
+    parentObjectId,
+    icon,
+  });
 };
 
 // 알림 삭제
-notificationSchema.statics.modifyNotificationTitle = async function (createObjectId: Types.ObjectId, title): Promise<void> {
-  await this.findOneAndUpdate({createObjectId}, {title: title});
+notificationSchema.statics.modifyNotificationTitle = async function (
+  createObjectId: Types.ObjectId,
+  title
+): Promise<void> {
+  await this.findOneAndUpdate({ createObjectId }, { title: title });
 };
 
 // 알림 삭제
@@ -157,7 +169,7 @@ notificationSchema.statics.deleteNotification = async function (createObjectId: 
 
 // 글 삭제 시 관련 알림 제거
 notificationSchema.statics.deleteNotificationByPost = async function (postId: string): Promise<void> {
-  await this.deleteMany({ parentObjectId:postId });
+  await this.deleteMany({ parentObjectId: postId });
 };
 
 // 회원 탈퇴 시 관련 알림 제거
@@ -175,7 +187,7 @@ notificationSchema.statics.readNotification = async function (_id: Types.ObjectI
     {
       readDate: new Date(),
       isRead: true,
-    },
+    }
   );
 };
 // 알림 전체 읽음 처리
@@ -188,7 +200,7 @@ notificationSchema.statics.readAll = async function (targetUserId: Types.ObjectI
     {
       readDate: new Date(),
       isRead: true,
-    },
+    }
   );
 };
 

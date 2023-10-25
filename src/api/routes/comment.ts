@@ -1,13 +1,13 @@
+import { NextFunction, Request, Response, Router } from 'express';
 import { Types } from 'mongoose';
-import { Router, Request, Response, NextFunction } from 'express';
-import { isPostIdValid } from '../middlewares/isPostIdValid';
-import { IUser } from '../../models/User';
-import { isAccessTokenValid } from '../middlewares/index';
-import { CommentService, NotificationService } from '../../services/index';
-import { asyncErrorWrapper } from '../../asyncErrorWrapper';
-import { Post as PostModel } from '../../models/Post';
-import { Notification as NotificationModel } from '../../models/Notification';
 import CustomError from '../../CustomError';
+import { asyncErrorWrapper } from '../../asyncErrorWrapper';
+import { Notification as NotificationModel } from '../../models/Notification';
+import { Post as PostModel } from '../../models/Post';
+import { IUser } from '../../models/User';
+import { CommentService } from '../../services/index';
+import { isAccessTokenValid } from '../middlewares/index';
+import { isPostIdValid } from '../middlewares/isPostIdValid';
 
 const route = Router();
 export default (app: Router) => {
@@ -65,7 +65,7 @@ export default (app: Router) => {
       const comments = await CommentServiceInstance.findComments(Types.ObjectId(id));
 
       return res.status(200).json(comments);
-    }),
+    })
   );
 
   /**
@@ -120,14 +120,14 @@ export default (app: Router) => {
       const { postId, content } = req.body;
       const { _id: userId, nickName } = req.user as IUser;
       const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
-      const {post, commentId} = await CommentServiceInstance.registerComment(userId, postId, content, nickName);
+      const { post, commentId } = await CommentServiceInstance.registerComment(userId, postId, content, nickName);
 
       // 댓글 등록 알림 발송
       // const noticeServiceInstance = new NotificationService(NotificationModel);
       // await noticeServiceInstance.createCommentNotice(post.author, nickName, postId, userId, commentId, content);
 
       return res.status(201).json(post);
-    }),
+    })
   );
 
   // 댓글 수정.
@@ -192,7 +192,7 @@ export default (app: Router) => {
       // await noticeServiceInstance.modifyCommentContent(commentDTO._id, nickName, commentDTO.content);
 
       return res.status(200).json(comment);
-    }),
+    })
   );
 
   /**
@@ -230,6 +230,6 @@ export default (app: Router) => {
       const CommentServiceInstance = new CommentService(PostModel, NotificationModel);
       await CommentServiceInstance.deleteComment(Types.ObjectId(commentId), userId, tokenType);
       return res.status(204).json();
-    }),
+    })
   );
 };

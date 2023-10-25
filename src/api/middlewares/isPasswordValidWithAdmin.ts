@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
-import config from '../../config/index';
-import { asyncErrorWrapper } from '../../asyncErrorWrapper';
+import { NextFunction, Request, Response } from 'express';
 import CustomError from '../../CustomError';
+import { asyncErrorWrapper } from '../../asyncErrorWrapper';
+import config from '../../config/index';
 
 // Admin Login
 const isPasswordValidWithAdmin = asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {

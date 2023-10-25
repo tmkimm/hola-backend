@@ -1,19 +1,19 @@
-import { Types } from 'mongoose';
 import AWS from 'aws-sdk';
-import { IPostDocument, IPostModel } from '../models/Post';
-import { IUserDocument, IUserModel } from '../models/User';
-import { ReadPosts } from '../models/ReadPosts';
+import { Types } from 'mongoose';
+import CustomError from '../CustomError';
+import config from '../config/index';
 import { LikePosts } from '../models/LikePosts';
 import { INotificationModel } from '../models/Notification';
-import config from '../config/index';
-import CustomError from '../CustomError';
+import { IPostModel } from '../models/Post';
+import { ReadPosts } from '../models/ReadPosts';
 import { SignOutUser } from '../models/SignOutUser';
+import { IUserDocument, IUserModel } from '../models/User';
 
 export class UserService {
   constructor(
     protected postModel: IPostModel,
     protected userModel: IUserModel,
-    protected notificationModel: INotificationModel,
+    protected notificationModel: INotificationModel
   ) {}
 
   // 닉네임을 이용하여 사용자 정보를 조회한다.
@@ -27,7 +27,7 @@ export class UserService {
     const users = await this.userModel
       .findById(id)
       .select(
-        '_id nickName image workExperience position organizationName organizationIsOpen urls introduce likeLanguages',
+        '_id nickName image workExperience position organizationName organizationIsOpen urls introduce likeLanguages'
       );
     return users;
   }
@@ -67,38 +67,41 @@ export class UserService {
 
   // 사용자가 관심 등록한 글 리스트를 조회한다.
   async findUserLikes(id: Types.ObjectId) {
-
     const likePosts = await LikePosts.aggregate([
-      { $match: { userId: id }},
+      { $match: { userId: id } },
       {
         $lookup: {
-          from : 'posts',
+          from: 'posts',
           localField: 'postId',
           foreignField: '_id',
-          pipeline: [{ $project: { 
-            title: 1,
-            views: 1,
-            comments: 1,
-            likes: 1,
-            language: 1,
-            isClosed: 1,
-            totalLikes: 1,
-            startDate: 1,
-            endDate: 1,
-            type: 1,
-            onlineOrOffline: 1,
-            contactType: 1,
-            recruits: 1,
-            expectedPeriod: 1,
-            author: 1,
-            positions: 1,
-            createdAt: 1,
-           } }],
+          pipeline: [
+            {
+              $project: {
+                title: 1,
+                views: 1,
+                comments: 1,
+                likes: 1,
+                language: 1,
+                isClosed: 1,
+                totalLikes: 1,
+                startDate: 1,
+                endDate: 1,
+                type: 1,
+                onlineOrOffline: 1,
+                contactType: 1,
+                recruits: 1,
+                expectedPeriod: 1,
+                author: 1,
+                positions: 1,
+                createdAt: 1,
+              },
+            },
+          ],
           as: 'postId',
-        }
+        },
       },
       {
-        $unwind: '$postId'
+        $unwind: '$postId',
       },
       {
         $lookup: {
@@ -107,10 +110,10 @@ export class UserService {
           foreignField: '_id',
           pipeline: [{ $project: { _id: 1, nickName: 1, image: 1 } }],
           as: 'postId.author',
-        },        
+        },
       },
     ]).sort({
-      'postId.createdAt': -1
+      'postId.createdAt': -1,
     });
 
     const result = likePosts

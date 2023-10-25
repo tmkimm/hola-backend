@@ -1,7 +1,7 @@
-import request from 'supertest';
+import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import 'regenerator-runtime/runtime';
-import jwt from 'jsonwebtoken';
+import request from 'supertest';
 import server from '../../../app';
 import config from '../../../config/index';
 import mockData from '../../mockData';

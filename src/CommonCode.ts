@@ -17,7 +17,7 @@ const onlineOrOfflineCode: CommonCodeType = {
 
 // 모집인원
 const recruitsCode: CommonCodeType = {
-  und: '인원 미정',
+  'und': '인원 미정',
   '1': '1명',
   '2': '2명',
   '3': '3명',
@@ -27,7 +27,7 @@ const recruitsCode: CommonCodeType = {
   '7': '7명',
   '8': '8명',
   '9': '9명',
-  mo: '10명 이상',
+  'mo': '10명 이상',
 };
 
 // 연락방법
@@ -40,14 +40,14 @@ const contactTypeCode: CommonCodeType = {
 
 // 예상진행기간
 const expectedPeriodCode: CommonCodeType = {
-  und: '기간 미정',
+  'und': '기간 미정',
   '1': '1개월',
   '2': '2개월',
   '3': '3개월',
   '4': '4개월',
   '5': '5개월',
   '6': '6개월',
-  mo: '장기',
+  'mo': '장기',
 };
 
 // 포지션
@@ -88,4 +88,4 @@ const urlType: string[] = [
   'Velog',
 ];
 
-export { studyOrProjectCode, onlineOrOfflineCode, recruitsCode, contactTypeCode, expectedPeriodCode };
+export { contactTypeCode, expectedPeriodCode, onlineOrOfflineCode, recruitsCode, studyOrProjectCode };

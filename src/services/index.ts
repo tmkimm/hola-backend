@@ -1,13 +1,11 @@
+export { AdvertisementService } from './advertisement';
 export { AuthService } from './auth';
-export { PostService } from './post';
-export { UserService } from './user';
-export { FeedbackService } from './feedback';
-export { NotificationService } from './notification';
+export { CampaignService } from './campaign';
 export { CommentService } from './comment';
-export { ReplyService } from './reply';
 export { DashboardService } from './dashboard';
 export { EventService } from './event';
-export { CampaignService } from './campaign';
-export { AdvertisementService } from './advertisement';
-
-
+export { FeedbackService } from './feedback';
+export { NotificationService } from './notification';
+export { PostService } from './post';
+export { ReplyService } from './reply';
+export { UserService } from './user';

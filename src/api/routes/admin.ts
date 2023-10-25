@@ -1,8 +1,7 @@
-import { Router, Request, Response, NextFunction } from 'express';
-import { FeedbackService, AuthService, UserService } from '../../services/index';
-import { Feedback as FeedbackModel } from '../../models/Feedback';
+import { NextFunction, Request, Response, Router } from 'express';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { IUser, User as UserModel } from '../../models/User';
+import { AuthService } from '../../services/index';
 import { isPasswordValidWithAdmin } from '../middlewares/isPasswordValidWithAdmin';
 
 const route = Router();
@@ -77,9 +76,8 @@ export default (app: Router) => {
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { idToken } = req.user as IUser;
       const AuthServiceInstance = new AuthService(UserModel);
-      const { _id, nickName, image, likeLanguages, accessToken, refreshToken } = await AuthServiceInstance.SignIn(
-        idToken,
-      );
+      const { _id, nickName, image, likeLanguages, accessToken, refreshToken } =
+        await AuthServiceInstance.SignIn(idToken);
       res.cookie('R_AUTH', refreshToken, {
         sameSite: 'none',
         httpOnly: true,
@@ -94,6 +92,6 @@ export default (app: Router) => {
         likeLanguages,
         accessToken,
       });
-    }),
+    })
   );
 };

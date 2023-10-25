@@ -1,8 +1,8 @@
+import { NextFunction, Request, Response } from 'express';
 import { Types } from 'mongoose';
-import { Request, Response, NextFunction } from 'express';
-import { Post } from '../../models/Post';
-import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import CustomError from '../../CustomError';
+import { asyncErrorWrapper } from '../../asyncErrorWrapper';
+import { Post } from '../../models/Post';
 
 // 글 id가 존재하는지 확인한다.
 export const isPostIdValid = asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {

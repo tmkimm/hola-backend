@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
-import { User } from '../../models/User';
-import { asyncErrorWrapper } from '../../asyncErrorWrapper';
-import { isValidAccessToken, verifyJWT } from '../../utills/jwt';
+import { NextFunction, Request, Response } from 'express';
 import CustomError from '../../CustomError';
+import { asyncErrorWrapper } from '../../asyncErrorWrapper';
+import { User } from '../../models/User';
+import { isValidAccessToken, verifyJWT } from '../../utills/jwt';
 
 // Access Token이 유효한지 확인한다.
 const isAccessTokenValid = asyncErrorWrapper(async function (req: Request, res: Response, next: NextFunction) {

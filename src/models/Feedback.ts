@@ -1,4 +1,4 @@
-import { Model, Schema, model, Types, Document } from 'mongoose';
+import { Document, Model, Schema, model } from 'mongoose';
 
 interface IFeedback {
   rating: number;
@@ -16,7 +16,7 @@ const feedbackSchema = new Schema<IFeedback>(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 const Feedback = model<IFeedbackDocument, IFeedbackModel>('Feedback', feedbackSchema);

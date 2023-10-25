@@ -1,6 +1,6 @@
+import { RewriteFrames } from '@sentry/integrations';
 import * as Sentry from '@sentry/node';
 import * as Tracing from '@sentry/tracing';
-import { RewriteFrames } from '@sentry/integrations';
 
 import express from 'express';
 import config from '../config/index';

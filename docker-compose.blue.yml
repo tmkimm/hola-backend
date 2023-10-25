@@ -3,5 +3,5 @@ services:
   hola-backend:
     image: tmkimm/hola-backend:0.3
     ports:
-      - "5001:5000"
-    restart: "unless-stopped"
+      - '5001:5000'
+    restart: 'unless-stopped'

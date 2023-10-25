@@ -1,11 +1,9 @@
-import { CampaignService } from '../../services/campaign';
-import { Router, Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
 import { Types } from 'mongoose';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
-import { Campaign as CampaignModel } from '../../models/Campaign';
 import { Advertisement as AdvertisementModel } from '../../models/Advertisement';
-
-
+import { Campaign as CampaignModel } from '../../models/Campaign';
+import { CampaignService } from '../../services/campaign';
 
 const route = Router();
 
@@ -54,7 +52,7 @@ export default (app: Router) => {
       const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel);
       const campaigns = await CampaignServiceInstance.findCampaignList(page);
       return res.status(200).json(campaigns);
-    }),
+    })
   );
 
   // #region 캠페인 상세 보기
@@ -93,11 +91,10 @@ export default (app: Router) => {
       const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel);
       const campaign = await CampaignServiceInstance.findCampaign(campaignId);
       return res.status(200).json(campaign);
-    }),
+    })
   );
 
-
-    // #region 캠페인의 광고 리스트 보기
+  // #region 캠페인의 광고 리스트 보기
   /**
    * @swagger
    * paths:
@@ -131,7 +128,7 @@ export default (app: Router) => {
       const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel);
       const campaign = await CampaignServiceInstance.findAdvertisementInCampaign(campaignId);
       return res.status(200).json(campaign);
-    }),
+    })
   );
 
   // #region POST - 캠페인 등록
@@ -185,7 +182,7 @@ export default (app: Router) => {
           error,
         });
       }
-    }),
+    })
   );
 
   // #region 캠페인 수정
@@ -235,7 +232,7 @@ export default (app: Router) => {
       const campaign = await CampaignServiceInstance.modifyCampaign(Types.ObjectId(id), campaignDTO);
 
       return res.status(200).json(campaign);
-    }),
+    })
   );
 
   // #region 캠페인 삭제
@@ -272,7 +269,6 @@ export default (app: Router) => {
       const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel);
       await CampaignServiceInstance.deleteCampaign(Types.ObjectId(id));
       return res.status(204).json();
-    }),
+    })
   );
-
 };

@@ -1,12 +1,12 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
 import { Types } from 'mongoose';
-import { isPostIdValid } from '../middlewares/isPostIdValid';
-import { IUser } from '../../models/User';
-import { isAccessTokenValid } from '../middlewares/index';
-import { ReplyService } from '../../services/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
-import { Post as PostModel } from '../../models/Post';
 import { Notification as NotificationModel } from '../../models/Notification';
+import { Post as PostModel } from '../../models/Post';
+import { IUser } from '../../models/User';
+import { ReplyService } from '../../services/index';
+import { isAccessTokenValid } from '../middlewares/index';
+import { isPostIdValid } from '../middlewares/isPostIdValid';
 
 const route = Router();
 
@@ -35,7 +35,7 @@ export default (app: Router) => {
       const post = await ReplyServiceInstance.registerReply(userId, postId, commentId, content, nickName);
 
       return res.status(201).json(post);
-    }),
+    })
   );
 
   // 대댓글 수정
@@ -51,7 +51,7 @@ export default (app: Router) => {
       const comment = await ReplyServiceInstance.modifyReply(commentDTO, tokenUserId);
 
       return res.status(200).json(comment);
-    }),
+    })
   );
   // 대댓글 삭제
   route.delete(
@@ -65,6 +65,6 @@ export default (app: Router) => {
       await ReplyServiceInstance.deleteReply(Types.ObjectId(replyId), userId);
 
       return res.status(204).json();
-    }),
+    })
   );
 };

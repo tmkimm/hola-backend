@@ -1,27 +1,22 @@
-import { isNumber } from '../utills/isNumber';
 import { Types } from 'mongoose';
-import { ICampaignDocument, ICampaignModel } from '../models/Campaign';
-import { IAdvertisementDocument, IAdvertisementModel } from '../models/Advertisement';
 import CustomError from '../CustomError';
+import { IAdvertisementModel } from '../models/Advertisement';
+import { ICampaignDocument, ICampaignModel } from '../models/Campaign';
 
 export class CampaignService {
   constructor(
     protected campaignModel: ICampaignModel,
-    protected advertisementModel: IAdvertisementModel,
+    protected advertisementModel: IAdvertisementModel
   ) {}
 
   // 캠페인 리스트 조회
-  async findCampaignList(
-    page: string | null,
-  ) {
+  async findCampaignList(page: string | null) {
     let result: ICampaignDocument[] = await this.campaignModel.findCampaignListInPagination(page);
     return result;
   }
-  
+
   // 캠페인 상세 조회
-  async findCampaign(
-    campaignId: Types.ObjectId
-  ) {
+  async findCampaign(campaignId: Types.ObjectId) {
     const campaign = await this.campaignModel.findCampaign(campaignId);
     if (!campaign) throw new CustomError('NotFoundError', 404, 'Campaign not found');
     return campaign;
@@ -41,7 +36,7 @@ export class CampaignService {
 
   // 캠페인 삭제
   async deleteCampaign(id: Types.ObjectId) {
-      await this.campaignModel.deleteCampaign(id);
+    await this.campaignModel.deleteCampaign(id);
   }
 
   // 캠페인의 광고 리스트 조회

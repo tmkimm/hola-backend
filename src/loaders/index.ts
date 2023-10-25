@@ -1,7 +1,7 @@
 import express from 'express';
-import mongooseLoader from './mongoose';
-import expressLoader from './express';
 import errorHandler from './errorHandler';
+import expressLoader from './express';
+import mongooseLoader from './mongoose';
 import sentry from './sentry';
 
 export default (app: express.Application) => {

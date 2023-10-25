@@ -1,9 +1,12 @@
 import { Types } from 'mongoose';
-import { IReplyDocument, IPostModel, IComment } from '../models/Post';
 import { INotificationModel } from '../models/Notification';
+import { IPostModel, IReplyDocument } from '../models/Post';
 
 export class ReplyService {
-  constructor(protected postModel: IPostModel, protected notificationModel: INotificationModel) {}
+  constructor(
+    protected postModel: IPostModel,
+    protected notificationModel: INotificationModel
+  ) {}
 
   // 신규 대댓글을 추가한다.
   async registerReply(
@@ -11,7 +14,7 @@ export class ReplyService {
     postId: Types.ObjectId,
     commentId: Types.ObjectId,
     content: string,
-    nickName: string,
+    nickName: string
   ) {
     const { post, replyId } = await this.postModel.registerReply(postId, commentId, content, userID);
 

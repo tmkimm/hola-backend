@@ -1,9 +1,9 @@
-import { EventService } from './../../services/event';
-import { Router, Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
 import { Types } from 'mongoose';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
-import { Event as EventModel } from '../../models/Event';
 import { Advertisement as AdvertisementModel } from '../../models/Advertisement';
+import { Event as EventModel } from '../../models/Event';
+import { EventService } from './../../services/event';
 
 const route = Router();
 
@@ -78,11 +78,9 @@ export default (app: Router) => {
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { page, sort, eventType, search, onOffLine } = req.query;
       const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
-      const events = await EventServiceInstance.findEventList(
-        page, sort, eventType, search, onOffLine
-      );
+      const events = await EventServiceInstance.findEventList(page, sort, eventType, search, onOffLine);
       return res.status(200).json(events);
-    }),
+    })
   );
 
   // #region 공모전 리스트 조회(페이징)
@@ -137,8 +135,8 @@ export default (app: Router) => {
       const { eventType, search, onOffLine } = req.query;
       const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
       const lastPage = await EventServiceInstance.findEventLastPage(eventType, search, onOffLine);
-      return res.status(200).json({lastPage});
-    }),
+      return res.status(200).json({ lastPage });
+    })
   );
 
   // #region 공모전 캘린더뷰 조회
@@ -194,16 +192,13 @@ export default (app: Router) => {
   route.get(
     '/calendar/:year/:month',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
-      const { year, month }= req.params;
+      const { year, month } = req.params;
       const { eventType, search } = req.query;
       const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
-      const events = await EventServiceInstance.findEventListInCalendar(
-        year, month, eventType, search
-      );
+      const events = await EventServiceInstance.findEventListInCalendar(year, month, eventType, search);
       return res.status(200).json(events);
-    }),
+    })
   );
-
 
   // #region 추천 공모전
   /**
@@ -232,7 +227,7 @@ export default (app: Router) => {
       const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
       const events = await EventServiceInstance.findRecommendEventList();
       return res.status(200).json(events);
-    }),
+    })
   );
 
   // #region 공모전 상세 보기
@@ -271,7 +266,7 @@ export default (app: Router) => {
       const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
       const event = await EventServiceInstance.findEvent(eventId);
       return res.status(200).json(event);
-    }),
+    })
   );
 
   // #region POST - 공모전 등록
@@ -328,7 +323,7 @@ export default (app: Router) => {
           error,
         });
       }
-    }),
+    })
   );
 
   // #region 공모전 수정
@@ -380,7 +375,7 @@ export default (app: Router) => {
       const event = await EventServiceInstance.modifyEvent(Types.ObjectId(id), eventDTO);
 
       return res.status(200).json(event);
-    }),
+    })
   );
 
   // #region 공모전 삭제
@@ -419,7 +414,6 @@ export default (app: Router) => {
       const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
       await EventServiceInstance.deleteEvent(Types.ObjectId(id));
       return res.status(204).json();
-    }),
+    })
   );
-
 };

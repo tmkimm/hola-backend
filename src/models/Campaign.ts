@@ -1,4 +1,4 @@
-import { Model, Schema, model, Types, Number } from 'mongoose';
+import { Model, Schema, Types, model } from 'mongoose';
 import { isNumber } from '../utills/isNumber';
 
 // #region Swagger schema - Campaign
@@ -86,8 +86,7 @@ export interface ICampaign {
   remark: string;
 }
 
-export interface ICampaignDocument extends ICampaign, Document {
-}
+export interface ICampaignDocument extends ICampaign, Document {}
 
 export interface ICampaignModel extends Model<ICampaignDocument> {
   findCampaign: (id: Types.ObjectId) => Promise<ICampaignDocument>;
@@ -96,26 +95,25 @@ export interface ICampaignModel extends Model<ICampaignDocument> {
   modifyCampaign: (id: Types.ObjectId, campaign: ICampaignDocument) => Promise<ICampaignDocument[]>;
 }
 
-
 const campaignSchema = new Schema<ICampaignDocument>(
   {
-    title: { type: String, required: true },  // 캠페인명
-    companyName: { type: String, required: true },  // 회사명
-    managerName: { type: String, required: false },  // 담당자명
-    managerEmail: { type: String, required: false },  // 담당자 메일
-    managerPhone: { type: String, required: false },  // 담당자 핸드폰 번호
+    title: { type: String, required: true }, // 캠페인명
+    companyName: { type: String, required: true }, // 회사명
+    managerName: { type: String, required: false }, // 담당자명
+    managerEmail: { type: String, required: false }, // 담당자 메일
+    managerPhone: { type: String, required: false }, // 담당자 핸드폰 번호
     startDate: { type: Date, required: true }, //  시작일
-    endDate: { type: Date, required: false }, //  종료일 
+    endDate: { type: Date, required: false }, //  종료일
     basicAdvertisingFee: { type: Number, default: 0 }, // 기본광고비
     conversionType: { type: String, required: true }, // 광고유형(conversion 전환형, view 노출형)
     conversionCost: { type: Number, default: 0 }, // 전환당 단가
     campaignStatus: { type: String, default: 'before' }, // 상태(before 진행전, active 진행중, close종료)
     expectedImpressions: { type: Number, default: 0 }, // 예상노출수
-    remark: { type: String, required: false },  // 비고
+    remark: { type: String, required: false }, // 비고
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 campaignSchema.statics.findCampaign = async function (id) {
@@ -124,9 +122,7 @@ campaignSchema.statics.findCampaign = async function (id) {
 };
 
 // 캠페인 목록 조회
-campaignSchema.statics.findCampaignListInPagination = async function (
-  page: string | null,
-) {
+campaignSchema.statics.findCampaignListInPagination = async function (page: string | null) {
   // Pagenation
   const itemsPerPage = 4 * 5; // 한 페이지에 표현할 수
   let pageToSkip = 0;

@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import { User } from '../../models/User';
+import { NextFunction, Request, Response } from 'express';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
+import { User } from '../../models/User';
 
 // 회원 정보 수정 시 닉네임이 중복되었는지 체크한다.
 const nickNameDuplicationCheck = asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {

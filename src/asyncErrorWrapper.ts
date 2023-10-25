@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
 function asyncErrorWrapper(fn: any) {
   return function (req: Request, res: Response, next: NextFunction) {

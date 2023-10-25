@@ -1,13 +1,13 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
 import { Types } from 'mongoose';
-import { IPostDocument, Post as PostModel } from '../../models/Post';
-import { PostService } from '../../services/post';
-import { isString } from '../../utills/isStringEmpty';
-import { IUser, User as UserModel } from '../../models/User';
-import { UserService, NotificationService } from '../../services/index';
-import { nickNameDuplicationCheck, isAccessTokenValid, isUserIdValid } from '../middlewares/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Notification as NotificationModel } from '../../models/Notification';
+import { IPostDocument, Post as PostModel } from '../../models/Post';
+import { IUser, User as UserModel } from '../../models/User';
+import { UserService } from '../../services/index';
+import { PostService } from '../../services/post';
+import { isString } from '../../utills/isStringEmpty';
+import { isAccessTokenValid, isUserIdValid, nickNameDuplicationCheck } from '../middlewares/index';
 
 const route = Router();
 
@@ -31,7 +31,7 @@ export default (app: Router) => {
       return res.status(200).json({
         preSignUrl: signedUrlPut,
       });
-    }),
+    })
   );
 
   /**
@@ -76,7 +76,7 @@ export default (app: Router) => {
       const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
       const user = await UserServiceInstance.findByNickName(nickName);
       return res.status(200).json(user);
-    }),
+    })
   );
 
   /**
@@ -118,7 +118,7 @@ export default (app: Router) => {
       const user = await UserServiceInstance.findById(Types.ObjectId(id));
 
       return res.status(200).json(user);
-    }),
+    })
   );
 
   //
@@ -210,7 +210,7 @@ export default (app: Router) => {
       const { userRecord, accessToken, refreshToken } = await UserServiceInstance.modifyUser(
         Types.ObjectId(id),
         tokenUserId,
-        userDTO,
+        userDTO
       );
 
       res.cookie('R_AUTH', refreshToken, {
@@ -227,7 +227,7 @@ export default (app: Router) => {
         accessToken,
         isExists: false,
       });
-    }),
+    })
   );
 
   /**
@@ -278,7 +278,7 @@ export default (app: Router) => {
       return res.status(200).json({
         isExists: false,
       });
-    }),
+    })
   );
 
   /**
@@ -324,7 +324,7 @@ export default (app: Router) => {
       await UserServiceInstance.deleteUser(Types.ObjectId(id), tokenUserId);
       res.clearCookie('R_AUTH');
       return res.status(204).json();
-    }),
+    })
   );
 
   /**
@@ -410,7 +410,7 @@ export default (app: Router) => {
       const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
       const user = await UserServiceInstance.findReadList(Types.ObjectId(id));
       return res.status(200).json(user);
-    }),
+    })
   );
 
   /**
@@ -450,6 +450,6 @@ export default (app: Router) => {
       const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
       const user = await UserServiceInstance.findMyPosts(Types.ObjectId(id));
       return res.status(200).json(user);
-    }),
+    })
   );
 };

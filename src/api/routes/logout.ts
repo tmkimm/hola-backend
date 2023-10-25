@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
 
 const route = Router();
 
@@ -17,7 +17,7 @@ export default (app: Router) => {
    *      responses:
    *        204:
    *          description: successful operation
-   */ 
+   */
 
   route.post('/', (req: Request, res: Response, next: NextFunction) => {
     res.clearCookie('R_AUTH');

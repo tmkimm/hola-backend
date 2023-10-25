@@ -1,10 +1,10 @@
 {
-    "moduleFileExtensions": ["js", "mjs", "ts", "json"],
-    "transform": {
-      "^.+\\.js$": "babel-jest",
-      "^.+\\.ts$": "babel-jest",
-      "^.+\\.mjs$": "babel-jest"
-    },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$",
-    "testEnvironment": "node"
+  "moduleFileExtensions": ["js", "mjs", "ts", "json"],
+  "transform": {
+    "^.+\\.js$": "babel-jest",
+    "^.+\\.ts$": "babel-jest",
+    "^.+\\.mjs$": "babel-jest"
+  },
+  "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$",
+  "testEnvironment": "node"
 }

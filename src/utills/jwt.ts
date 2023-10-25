@@ -1,6 +1,6 @@
 import JWT, { JwtPayload } from 'jsonwebtoken';
-import { isString } from './isStringEmpty';
 import config from '../config/index';
+import { isString } from './isStringEmpty';
 
 type jwtPayload = {
   nickName?: string;
@@ -19,7 +19,7 @@ export function signJWT(payload: jwtPayload, expiresIn: string): Promise<JWT.Sec
       (err, token) => {
         if (err || !isString(token)) reject(err);
         resolve(token as string);
-      },
+      }
     );
   });
 }

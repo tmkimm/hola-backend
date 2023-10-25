@@ -1,17 +1,12 @@
-import { isNumber } from '../utills/isNumber';
 import { Types } from 'mongoose';
-import { IAdvertisementDocument, IAdvertisementModel } from '../models/Advertisement';
 import CustomError from '../CustomError';
+import { IAdvertisementDocument, IAdvertisementModel } from '../models/Advertisement';
 
 export class AdvertisementService {
-  constructor(
-    protected advertisementModel: IAdvertisementModel
-  ) {}
-  
+  constructor(protected advertisementModel: IAdvertisementModel) {}
+
   // 광고 상세 조회
-  async findAdvertisement(
-    advertisementId: Types.ObjectId
-  ) {
+  async findAdvertisement(advertisementId: Types.ObjectId) {
     const advertisement = await this.advertisementModel.findAdvertisement(advertisementId);
     if (!advertisement) throw new CustomError('NotFoundError', 404, 'Advertisement not found');
     return advertisement;
@@ -31,6 +26,6 @@ export class AdvertisementService {
 
   // 광고 삭제
   async deleteAdvertisement(id: Types.ObjectId) {
-      await this.advertisementModel.deleteAdvertisement(id);
+    await this.advertisementModel.deleteAdvertisement(id);
   }
 }

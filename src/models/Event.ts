@@ -1,4 +1,4 @@
-import { Model, Schema, model, Types, Number } from 'mongoose';
+import { Model, Schema, Types, model } from 'mongoose';
 import { isNumber } from '../utills/isNumber';
 
 // #region Swagger schema - Event
@@ -171,18 +171,27 @@ export interface IEvent {
   price: number;
 }
 
-export interface IEventDocument extends IEvent, Document {
-}
+export interface IEventDocument extends IEvent, Document {}
 
 export interface IEventModel extends Model<IEventDocument> {
   deleteEvent: (id: Types.ObjectId) => void;
   modifyEvent: (id: Types.ObjectId, event: IEventDocument) => Promise<IEventDocument[]>;
-  findEventPagination: (page: string | null, sort: string | null, eventType: string | null, search: string | null, onOffLine: string | null) => Promise<IEventDocument[]>;
-  findEventCalendar: (year: number, month: number, eventType: string | null, search: string | null) => Promise<IEventDocument[]>;
+  findEventPagination: (
+    page: string | null,
+    sort: string | null,
+    eventType: string | null,
+    search: string | null,
+    onOffLine: string | null
+  ) => Promise<IEventDocument[]>;
+  findEventCalendar: (
+    year: number,
+    month: number,
+    eventType: string | null,
+    search: string | null
+  ) => Promise<IEventDocument[]>;
   countEvent: (eventType: string | null, onOffLine: string | null, search: string | null) => Promise<number>;
   findRecommendEventList: (notInEventId: Types.ObjectId[]) => Promise<IEventDocument[]>;
 }
-
 
 const eventSchema = new Schema<IEventDocument>(
   {
@@ -196,7 +205,7 @@ const eventSchema = new Schema<IEventDocument>(
     imageUrl: { type: String, required: true }, // 이미지 URL
     smallImageUrl: { type: String, required: true }, // 이미지 URL(Small)
     startDate: { type: Date, required: true }, //  시작일
-    endDate: { type: Date, required: true }, //  종료일 
+    endDate: { type: Date, required: true }, //  종료일
     closeDate: { type: Date, required: true }, //  모집 마감일(자동 마감용도)
     author: { type: Types.ObjectId, ref: 'User', required: false }, // 작성자
     isDeleted: { type: Boolean, default: false }, // 삭제 여부
@@ -209,7 +218,7 @@ const eventSchema = new Schema<IEventDocument>(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 eventSchema.statics.modifyEvent = async function (id, event) {
@@ -224,10 +233,7 @@ eventSchema.statics.deleteEvent = async function (id) {
 };
 
 // 조회 query 생성
-const makeFindEventQuery = (
-  eventType: string | null,
-  onOffLine: string | null,
-) => {
+const makeFindEventQuery = (eventType: string | null, onOffLine: string | null) => {
   // Query
   const query: any = {};
 
@@ -249,7 +255,7 @@ eventSchema.statics.findEventPagination = async function (
   sort: string | null,
   eventType: string | null,
   search: string | null,
-  onOffLine: string | null,
+  onOffLine: string | null
 ) {
   let sortQuery = [];
   // Sorting
@@ -281,10 +287,7 @@ eventSchema.statics.findEventPagination = async function (
       },
     });
   }
-  const aggregate = [
-    ...aggregateSearch,
-    { $match: query },
-  ];
+  const aggregate = [...aggregateSearch, { $match: query }];
 
   const events = await this.aggregate(aggregate).sort(sortQuery.join(' ')).skip(pageToSkip).limit(Number(itemsPerPage));
   return events;
@@ -295,12 +298,12 @@ eventSchema.statics.findEventCalendar = async function (
   year: number,
   month: number,
   eventType: string | null,
-  search: string | null,
+  search: string | null
 ) {
   const query = makeFindEventQuery(eventType, null); // 조회 query 생성
   const firstDay = new Date(year, month - 1, 1);
   const lastDay = new Date(year, month, 0);
-  query.startDate = { $gte : firstDay, $lte : lastDay };
+  query.startDate = { $gte: firstDay, $lte: lastDay };
 
   const aggregateSearch = [];
   if (search && typeof search === 'string') {
@@ -316,10 +319,7 @@ eventSchema.statics.findEventCalendar = async function (
       },
     });
   }
-  const aggregate = [
-    ...aggregateSearch,
-    { $match: query },
-  ];
+  const aggregate = [...aggregateSearch, { $match: query }];
 
   const events = await this.aggregate(aggregate).sort('startDate');
   return events;
@@ -349,20 +349,18 @@ eventSchema.statics.countEvent = async function (eventType, onOffLine, search) {
     {
       $project: {
         title: 1,
-        score: { $meta: "searchScore" }
+        score: { $meta: 'searchScore' },
       },
     },
   ];
   aggregate.push({
-    $count: "eventCount"
+    $count: 'eventCount',
   });
 
   const result: any = await this.aggregate(aggregate);
-  if(result && result.length > 0)
-    return result[0].eventCount; 
-  else
-    return 0;
-}  
+  if (result && result.length > 0) return result[0].eventCount;
+  else return 0;
+};
 
 // 추천 이벤트 조회
 // TODO startDate 조건 변경
@@ -372,7 +370,11 @@ eventSchema.statics.findRecommendEventList = async function (notInEventId: Types
   let limit = 10 - notInEventId.length;
   const today = new Date();
   query.startDate = { $gte: today.setDate(today.getDate() - 180) };
-  const events = await this.find(query).select('_id title eventType imageUrl smallImageUrl startDate endDate views').sort('-views').limit(limit).lean();
+  const events = await this.find(query)
+    .select('_id title eventType imageUrl smallImageUrl startDate endDate views')
+    .sort('-views')
+    .limit(limit)
+    .lean();
   return events;
 };
 

@@ -1,9 +1,12 @@
 import { Types } from 'mongoose';
-import { ICommentDocument, IComment, IPostModel } from '../models/Post';
 import { INotificationModel } from '../models/Notification';
+import { ICommentDocument, IPostModel } from '../models/Post';
 
 export class CommentService {
-  constructor(protected postModel: IPostModel, protected notificationModel: INotificationModel) {
+  constructor(
+    protected postModel: IPostModel,
+    protected notificationModel: INotificationModel
+  ) {
     this.postModel = postModel;
     this.notificationModel = notificationModel;
   }
@@ -18,7 +21,7 @@ export class CommentService {
   async registerComment(userID: Types.ObjectId, postId: Types.ObjectId, content: string, nickName: string) {
     const { post, commentId } = await this.postModel.registerComment(postId, content, userID);
     //await this.notificationModel.createCommentNotice(postId, post.author, userID, 'comment', commentId, nickName); // 알림 등록
-    return {post, commentId};
+    return { post, commentId };
   }
 
   // 댓글을 수정한다.

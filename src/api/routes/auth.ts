@@ -1,26 +1,26 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
+import CustomError from '../../CustomError';
+import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Notification as NotificationModel } from '../../models/Notification';
 import { User as UserModel } from '../../models/User';
 import { AuthService, NotificationService } from '../../services/index';
 import { isAccessTokenValid } from '../middlewares/index';
-import { asyncErrorWrapper } from '../../asyncErrorWrapper';
-import CustomError from '../../CustomError';
 
 const route = Router();
 
 export default (app: Router) => {
   /**
- * @swagger
- *  components:
- *    securitySchemes:
- *      bearerAuth:
- *        type: http
- *        scheme: bearer
- *        bearerFormat: JWT
- *    responses:
- *      UnauthorizedError:
- *        description: Access token is missing or invalid
- */
+   * @swagger
+   *  components:
+   *    securitySchemes:
+   *      bearerAuth:
+   *        type: http
+   *        scheme: bearer
+   *        bearerFormat: JWT
+   *    responses:
+   *      UnauthorizedError:
+   *        description: Access token is missing or invalid
+   */
 
   /*
     권한에 관련된 Router를 정의한다.
@@ -57,7 +57,7 @@ export default (app: Router) => {
         accessToken,
         hasUnreadNotice,
       });
-    }),
+    })
   );
 
   // Access Token이 유효한지 체크

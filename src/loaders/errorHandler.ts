@@ -1,11 +1,11 @@
-import createError from 'http-errors';
-import mongoose from 'mongoose';
-import jsonwebtoken from 'jsonwebtoken';
-import express from 'express';
 import * as Sentry from '@sentry/node';
 import { IncomingWebhook } from '@slack/client';
-import config from '../config/index';
+import express from 'express';
+import createError from 'http-errors';
+import jsonwebtoken from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import CustomError from '../CustomError';
+import config from '../config/index';
 
 export default (app: express.Application) => {
   app.use(
@@ -44,7 +44,7 @@ export default (app: express.Application) => {
         }
         return false;
       },
-    }) as express.ErrorRequestHandler,
+    }) as express.ErrorRequestHandler
   );
   // catch 404 and forward to error handler
   app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -55,7 +55,7 @@ export default (app: express.Application) => {
     error: Error,
     req: express.Request,
     res: express.Response,
-    next: express.NextFunction,
+    next: express.NextFunction
   ) {
     if (error instanceof mongoose.Error) return res.status(400).json({ type: 'MongoError', message: error.message });
     next(error);
@@ -65,7 +65,7 @@ export default (app: express.Application) => {
     error: Error,
     req: express.Request,
     res: express.Response,
-    next: express.NextFunction,
+    next: express.NextFunction
   ) {
     if (error instanceof jsonwebtoken.TokenExpiredError)
       return res.status(401).json({ type: 'TokenExpiredError', message: error.message });
@@ -79,7 +79,7 @@ export default (app: express.Application) => {
     error: CustomError,
     req: express.Request,
     res: express.Response,
-    next: express.NextFunction,
+    next: express.NextFunction
   ) {
     // == // if (error instanceof CustomError) {
     if ('type' in error) {

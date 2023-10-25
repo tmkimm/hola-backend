@@ -1,6 +1,6 @@
-import { Router, Request, Response, NextFunction } from 'express';
-import { DashboardService } from '../../services/index';
+import { NextFunction, Request, Response, Router } from 'express';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
+import { DashboardService } from '../../services/index';
 
 const route = Router();
 
@@ -46,7 +46,7 @@ export default (app: Router) => {
       const DashboardServiceInstance = new DashboardService();
       const user = await DashboardServiceInstance.findDailyUser();
       return res.status(200).json(user);
-    }),
+    })
   );
 
   /**
@@ -104,7 +104,7 @@ export default (app: Router) => {
       const DashboardServiceInstance = new DashboardService();
       const user = await DashboardServiceInstance.findUserHistory(startDate, endDate);
       return res.status(200).json(user);
-    }),
+    })
   );
 
   /**
@@ -143,7 +143,7 @@ export default (app: Router) => {
       const DashboardServiceInstance = new DashboardService();
       const post = await DashboardServiceInstance.findDailyPost();
       return res.status(200).json(post);
-    }),
+    })
   );
 
   /**
@@ -205,7 +205,7 @@ export default (app: Router) => {
       const DashboardServiceInstance = new DashboardService();
       const user = await DashboardServiceInstance.findPostHistory(startDate, endDate);
       return res.status(200).json(user);
-    }),
+    })
   );
 
   /**
@@ -262,6 +262,6 @@ export default (app: Router) => {
       const DashboardServiceInstance = new DashboardService();
       const user = await DashboardServiceInstance.findPostFilterRank(startDate, endDate);
       return res.status(200).json(user);
-    }),
+    })
   );
 };

@@ -1,18 +1,18 @@
 import { Router } from 'express';
-import post from './routes/post';
-import auth from './routes/auth';
-import login from './routes/login';
-import logout from './routes/logout';
-import user from './routes/user';
-import feedback from './routes/feedback';
-import commment from './routes/comment';
-import reply from './routes/reply';
-import notifications from './routes/notifications';
 import admin from './routes/admin';
+import advertisement from './routes/advertisement';
+import auth from './routes/auth';
+import campaign from './routes/campaign';
+import commment from './routes/comment';
 import dashboard from './routes/dashboard';
 import event from './routes/event';
-import campaign from './routes/campaign';
-import advertisement from './routes/advertisement';
+import feedback from './routes/feedback';
+import login from './routes/login';
+import logout from './routes/logout';
+import notifications from './routes/notifications';
+import post from './routes/post';
+import reply from './routes/reply';
+import user from './routes/user';
 
 export default () => {
   const app = Router();

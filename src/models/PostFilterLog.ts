@@ -1,4 +1,4 @@
-import { Model, Schema, model, Types } from 'mongoose';
+import { Model, Schema, model } from 'mongoose';
 
 export interface IPostFilterLog {
   viewDate: Date;

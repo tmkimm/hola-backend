@@ -1,17 +1,17 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
 import { Types } from 'mongoose';
-import { NotificationService } from '../../services/index';
-import { isAccessTokenValid } from '../middlewares/index';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Notification as NotificationModel } from '../../models/Notification';
-import { IUser, User as UserModel } from '../../models/User';
+import { IUser } from '../../models/User';
+import { NotificationService } from '../../services/index';
+import { isAccessTokenValid } from '../middlewares/index';
 
 const route = Router();
 
 export default (app: Router) => {
   app.use('/notifications', route);
 
-/**
+  /**
    * @swagger
    * paths:
    *   /notifications:
@@ -41,10 +41,10 @@ export default (app: Router) => {
       const NoticeServiceInstance = new NotificationService(NotificationModel);
       const notifications = await NoticeServiceInstance.findNotifications(userId);
       return res.status(200).json(notifications);
-    }),
+    })
   );
 
-/**
+  /**
    * @swagger
    * paths:
    *   /notifications:
@@ -94,7 +94,7 @@ export default (app: Router) => {
       return res.status(200).json({
         isRead: true,
       });
-    }),
+    })
   );
 
   // 알림 전체 읽음 처리
@@ -109,6 +109,6 @@ export default (app: Router) => {
       return res.status(200).json({
         isRead: true,
       });
-    }),
+    })
   );
 };

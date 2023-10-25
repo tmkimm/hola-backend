@@ -1,5 +1,4 @@
-import { Model, Schema, model, Types, Number } from 'mongoose';
-import { isNumber } from '../utills/isNumber';
+import { Model, Schema, Types, model } from 'mongoose';
 
 // #region Swagger schema - Advertisement
 
@@ -88,8 +87,7 @@ export interface IAdvertisement {
   eventId: Types.ObjectId;
 }
 
-export interface IAdvertisementDocument extends IAdvertisement, Document {
-}
+export interface IAdvertisementDocument extends IAdvertisement, Document {}
 
 export interface IAdvertisementModel extends Model<IAdvertisementDocument> {
   findAdvertisement: (id: Types.ObjectId) => Promise<IAdvertisementDocument>;
@@ -99,13 +97,12 @@ export interface IAdvertisementModel extends Model<IAdvertisementDocument> {
   modifyAdvertisement: (id: Types.ObjectId, advertisement: IAdvertisementDocument) => Promise<IAdvertisementDocument[]>;
 }
 
-
 const advertisementSchema = new Schema<IAdvertisementDocument>(
   {
     campaignId: { type: Types.ObjectId, ref: 'Campaign', required: true }, // 캠페인 Id
     advertisementType: { type: String, required: true }, // 광고유형(banner 메인배너, event 공모전, modalBanner 모달 상세 배너)
     startDate: { type: Date, required: true }, //  시작일
-    endDate: { type: Date, required: false }, //  종료일 
+    endDate: { type: Date, required: false }, //  종료일
     realEndDate: { type: Date, required: false }, //  실제 종료일(종료 처리된 날짜)
     advertisementStatus: { type: String, default: 'before' }, // 상태(before 진행전, active 진행중, close종료)
     link: { type: String, required: true }, // 링크
@@ -118,7 +115,7 @@ const advertisementSchema = new Schema<IAdvertisementDocument>(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // 광고 상세 조회
@@ -126,25 +123,38 @@ advertisementSchema.statics.findAdvertisement = async function (id) {
   return await this.findById(id);
 };
 
-
 // 진행중인 공모전 광고 조회
 advertisementSchema.statics.findActiveADListInEvent = async function () {
-  const adEvent =  await this.aggregate([ 
-    { $match: { advertisementType: 'event', advertisementStatus: 'active'}}
-    , { $sample: { size: 2 } } 
-    ,  {
+  const adEvent = await this.aggregate([
+    { $match: { advertisementType: 'event', advertisementStatus: 'active' } },
+    { $sample: { size: 2 } },
+    {
       $lookup: {
         from: 'events',
         localField: 'eventId',
         foreignField: '_id',
-        pipeline: [{ $project: { _id: 1, title: 1, eventType: 1, imageUrl: 1, smallImageUrl: 1, startDate: 1, endDate: 1, views: 1 } }],
+        pipeline: [
+          {
+            $project: {
+              _id: 1,
+              title: 1,
+              eventType: 1,
+              imageUrl: 1,
+              smallImageUrl: 1,
+              startDate: 1,
+              endDate: 1,
+              views: 1,
+            },
+          },
+        ],
         as: 'event',
       },
     },
     {
-      $project: {event: 1},
-    },]);
-    return adEvent;
+      $project: { event: 1 },
+    },
+  ]);
+  return adEvent;
 };
 
 advertisementSchema.statics.modifyAdvertisement = async function (id, advertisement) {
@@ -158,12 +168,11 @@ advertisementSchema.statics.deleteAdvertisement = async function (id) {
   await this.findByIdAndDelete(id);
 };
 
-  // 캠페인의 광고 리스트 조회
+// 캠페인의 광고 리스트 조회
 advertisementSchema.statics.findAdvertisementInCampaign = async function (campaignId: Types.ObjectId) {
-    const result = await this.find({campaignId}).select(`advertisementType startDate endDate advertisementStatus`);
-    return result;
-}
-
+  const result = await this.find({ campaignId }).select(`advertisementType startDate endDate advertisementStatus`);
+  return result;
+};
 
 const Advertisement = model<IAdvertisementDocument, IAdvertisementModel>('Advertisement', advertisementSchema);
 export { Advertisement };

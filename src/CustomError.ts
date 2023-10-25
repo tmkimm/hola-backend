@@ -1,5 +1,9 @@
 export default class CustomError extends Error {
-  constructor(public type: string = 'GENERIC', public status: number = 400, ...params: any[]) {
+  constructor(
+    public type: string = 'GENERIC',
+    public status: number = 400,
+    ...params: any[]
+  ) {
     super(...params);
 
     if (Error.captureStackTrace) {

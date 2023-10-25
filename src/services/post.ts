@@ -1,13 +1,12 @@
-import sanitizeHtml from 'sanitize-html';
 import { Types } from 'mongoose';
-import { IPost, IPostModel, IPostDocument } from '../models/Post';
-import { INotificationModel } from '../models/Notification';
-import { PostFilterLog } from '../models/PostFilterLog';
-import { ReadPosts } from '../models/ReadPosts';
-import { LikePosts } from '../models/LikePosts';
-import { timeForEndDate} from '../utills/timeForEndDate';
-import { IUserModel } from '../models/User';
+import sanitizeHtml from 'sanitize-html';
 import CustomError from '../CustomError';
+import { LikePosts } from '../models/LikePosts';
+import { INotificationModel } from '../models/Notification';
+import { IPost, IPostDocument, IPostModel } from '../models/Post';
+import { ReadPosts } from '../models/ReadPosts';
+import { IUserModel } from '../models/User';
+import { timeForEndDate } from '../utills/timeForEndDate';
 
 export class PostService {
   constructor(
@@ -72,7 +71,8 @@ export class PostService {
   // isLiked : 사용자의 관심 등록 여부
   // state : 상태 뱃지
   // totalComments : 댓글 수
-  addPostVirtualField(posts: IPostDocument[], userId: Types.ObjectId | null): IPostDocument[] {
+  addPostVirtualField(posts: IPostDocument[], userId: Types.ObjectId | null): IPostDocument[]    
+                  {
     let result = [];
     // 글 상태
     const today: Date = new Date();

@@ -1,7 +1,7 @@
+import { NextFunction, Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
-import { Request, Response, NextFunction } from 'express';
-import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import CustomError from '../../CustomError';
+import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import languageList from '../../languageList';
 
 const checkPost = [

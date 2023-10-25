@@ -1,4 +1,4 @@
-import { Model, Schema, model, Types } from 'mongoose';
+import { Model, Schema, Types, model } from 'mongoose';
 
 export interface IReadPosts {
   viewDate: Date;
@@ -19,7 +19,7 @@ const ReadPostsSchema = new Schema<IReadPostsDocument>(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 ReadPostsSchema.statics.insertIfNotExist = async function (postId, userId) {
@@ -31,7 +31,7 @@ ReadPostsSchema.statics.insertIfNotExist = async function (postId, userId) {
         postId,
       },
     },
-    { upsert: true },
+    { upsert: true }
   );
 };
 

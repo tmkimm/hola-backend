@@ -1,12 +1,12 @@
-import express from 'express';
-import path from 'path';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import swaggerUi from 'swagger-ui-express';
-import swaggerJSDoc from 'swagger-jsdoc';
+import express from 'express';
 import expressBasicAuth from 'express-basic-auth';
-import config from '../config/index';
+import path from 'path';
+import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 import routes from '../api/index';
+import config from '../config/index';
 import schedule from '../schedule/index';
 import swaggerOption from '../swagger/swagger';
 
@@ -47,7 +47,7 @@ export default (app: express.Application) => {
       users: {
         [config.AdminId]: config.AdminPassword,
       },
-    }),
+    })
   );
   // Swagger
   const specs = swaggerJSDoc(swaggerOption);

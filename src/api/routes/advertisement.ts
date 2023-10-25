@@ -1,8 +1,8 @@
-import { AdvertisementService } from '../../services/advertisement';
-import { Router, Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
 import { Types } from 'mongoose';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Advertisement as AdvertisementModel } from '../../models/Advertisement';
+import { AdvertisementService } from '../../services/advertisement';
 
 const route = Router();
 
@@ -14,7 +14,6 @@ export default (app: Router) => {
           description: 광고에 관련된 API
    */
   app.use('/advertisements', route);
-
 
   // #region 광고 상세 보기
   /**
@@ -52,7 +51,7 @@ export default (app: Router) => {
       const AdvertisementServiceInstance = new AdvertisementService(AdvertisementModel);
       const advertisement = await AdvertisementServiceInstance.findAdvertisement(advertisementId);
       return res.status(200).json(advertisement);
-    }),
+    })
   );
 
   // #region POST - 광고 등록
@@ -106,7 +105,7 @@ export default (app: Router) => {
           error,
         });
       }
-    }),
+    })
   );
 
   // #region 광고 수정
@@ -153,10 +152,13 @@ export default (app: Router) => {
       const { id } = req.params;
       const advertisementDTO = req.body;
       const AdvertisementServiceInstance = new AdvertisementService(AdvertisementModel);
-      const advertisement = await AdvertisementServiceInstance.modifyAdvertisement(Types.ObjectId(id), advertisementDTO);
+      const advertisement = await AdvertisementServiceInstance.modifyAdvertisement(
+        Types.ObjectId(id),
+        advertisementDTO
+      );
 
       return res.status(200).json(advertisement);
-    }),
+    })
   );
 
   // #region 광고 삭제
@@ -193,7 +195,6 @@ export default (app: Router) => {
       const AdvertisementServiceInstance = new AdvertisementService(AdvertisementModel);
       await AdvertisementServiceInstance.deleteAdvertisement(Types.ObjectId(id));
       return res.status(204).json();
-    }),
+    })
   );
-
 };

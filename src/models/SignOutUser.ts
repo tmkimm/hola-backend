@@ -1,4 +1,4 @@
-import { Model, Schema, model, Types } from 'mongoose';
+import { Model, Schema, Types, model } from 'mongoose';
 
 export interface ISignOutUser {
   _id: Types.ObjectId;
@@ -33,7 +33,7 @@ const SignOutUserSchema = new Schema<ISignOutUserDocument>(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 const SignOutUser = model<ISignOutUserDocument, ISignOutUserModel>('SignOutUser', SignOutUserSchema);

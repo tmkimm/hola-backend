@@ -1,6 +1,6 @@
-import { Router, Request, Response, NextFunction } from 'express';
-import { FeedbackService } from '../../services/index';
+import { NextFunction, Request, Response, Router } from 'express';
 import { Feedback as FeedbackModel } from '../../models/Feedback';
+import { FeedbackService } from '../../services/index';
 
 const route = Router();
 

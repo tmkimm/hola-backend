@@ -1,8 +1,7 @@
-import { Model, Schema, model, Types, Document, QueryCursor } from 'mongoose';
+import { Document, Model, Schema, Types, model } from 'mongoose';
 import CustomError from '../CustomError';
 import { isNumber } from '../utills/isNumber';
 // eslint-disable-next-line import/no-unresolved
-import { studyOrProjectCode, onlineOrOfflineCode, recruitsCode, expectedPeriodCode } from '../CommonCode';
 // 대댓글
 export interface IReply {
   contnet: string;
@@ -318,7 +317,7 @@ export interface IPostModel extends Model<IPostDocument> {
     type: string | null,
     position: string | null,
     search: string | null,
-    onOffLine: string | null,
+    onOffLine: string | null
   ) => Promise<IPostDocument[]>;
   countPost: (
     language: string | null,
@@ -327,7 +326,7 @@ export interface IPostModel extends Model<IPostDocument> {
     type: string | null,
     position: string | null,
     search: string | null,
-    onOffLine: string | null,
+    onOffLine: string | null
   ) => Promise<number>;
   findPopularPosts: (postId: Types.ObjectId | null, userId: Types.ObjectId | null) => Promise<IPostDocument[]>;
   findPostRecommend: (
@@ -335,18 +334,18 @@ export interface IPostModel extends Model<IPostDocument> {
     language: string[] | null,
     postId: Types.ObjectId | null,
     userId: Types.ObjectId | null,
-    limit: number | null,
+    limit: number | null
   ) => Promise<IPostDocument[]>;
   registerComment: (
     postId: Types.ObjectId,
     content: string,
-    author: Types.ObjectId,
+    author: Types.ObjectId
   ) => Promise<{ post: IPostDocument; commentId: Types.ObjectId }>;
   registerReply: (
     postId: Types.ObjectId,
     commentId: Types.ObjectId,
     content: string,
-    author: Types.ObjectId,
+    author: Types.ObjectId
   ) => Promise<{ post: IPostDocument; replyId: Types.ObjectId }>;
   findComments: (id: Types.ObjectId) => Promise<IPostDocument>;
   deletePost: (id: Types.ObjectId) => void;
@@ -358,7 +357,7 @@ export interface IPostModel extends Model<IPostDocument> {
   addLike: (postId: Types.ObjectId, userId: Types.ObjectId) => Promise<{ post: IPostDocument; isLikeExist: boolean }>;
   deleteLike: (
     postId: Types.ObjectId,
-    userId: Types.ObjectId,
+    userId: Types.ObjectId
   ) => Promise<{ post: IPostDocument; isLikeExist: boolean }>;
   increaseView: (postId: Types.ObjectId) => void;
   findAuthorByCommentId: (commentId: Types.ObjectId) => Promise<Types.ObjectId | null>;
@@ -378,7 +377,7 @@ const replySchema = new Schema<IReplyDocument>(
   {
     versionKey: false,
     timestamps: true, // createdAt, updatedAt 컬럼 사용
-  },
+  }
 );
 
 // 댓글 스키마
@@ -391,7 +390,7 @@ const commentSchema = new Schema<ICommentDocument>(
   {
     versionKey: false,
     timestamps: true, // createdAt, updatedAt 컬럼 사용
-  },
+  }
 );
 
 const postSchema = new Schema<IPostDocument>(
@@ -424,7 +423,7 @@ const postSchema = new Schema<IPostDocument>(
     timestamps: true,
     toObject: { virtuals: true },
     toJSON: { virtuals: true },
-  },
+  }
 );
 
 // 조회 query 생성
@@ -435,7 +434,7 @@ const makeFindPostQuery = (
   type: string | null,
   position: string | null,
   search: string | null,
-  onOffLine: string | null,
+  onOffLine: string | null
 ) => {
   // Query
   const query: any = {};
@@ -487,9 +486,9 @@ postSchema.statics.findTopPost = async function (limit, sort) {
   const today: Date = new Date();
   const daysAgo: Date = new Date();
   daysAgo.setDate(today.getDate() - 7); // 7일 이내
-  
+
   // Query
-  const result = await this.find({ createdAt: { $gte: daysAgo }, startDate : { $gte: today} })
+  const result = await this.find({ createdAt: { $gte: daysAgo }, startDate: { $gte: today } })
     .where('isDeleted')
     .equals(false)
     .where('isClosed')
@@ -497,7 +496,7 @@ postSchema.statics.findTopPost = async function (limit, sort) {
     .sort(sortQuery.join(' '))
     .limit(Number(limitQuery))
     .select(
-      `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`,
+      `title views comments likes language isClosed totalLikes startDate endDate type onlineOrOffline contactType recruits expectedPeriod author positions createdAt`
     )
     .populate('author', 'nickName image');
   return result;
@@ -513,7 +512,7 @@ postSchema.statics.findPostPagination = async function (
   type,
   position,
   search,
-  onOffLine,
+  onOffLine
 ) {
   let sortQuery = [];
   // Sorting
@@ -576,18 +575,18 @@ postSchema.statics.findPostPagination = async function (
         author: 1,
         positions: 1,
         createdAt: 1,
-        score: { $meta: "searchScore" }
+        score: { $meta: 'searchScore' },
       },
     },
   ];
 
   if (search && typeof search === 'string') {
     aggregate.push({
-      $match : {
+      $match: {
         score: {
-          $gte: 0.5
-        }
-      }
+          $gte: 0.5,
+        },
+      },
     });
   }
   const posts = await this.aggregate(aggregate).sort(sortQuery.join(' ')).skip(pageToSkip).limit(Number(itemsPerPage));
@@ -617,29 +616,27 @@ postSchema.statics.countPost = async function (language, period, isClosed, type,
     {
       $project: {
         title: 1,
-        score: { $meta: "searchScore" }
+        score: { $meta: 'searchScore' },
       },
     },
   ];
 
   if (search && typeof search === 'string') {
     aggregate.push({
-      $match : {
+      $match: {
         score: {
-          $gte: 0.5
-        }
-      }
+          $gte: 0.5,
+        },
+      },
     });
   }
   aggregate.push({
-    $count: "postCount"
+    $count: 'postCount',
   });
 
   const result: any = await this.aggregate(aggregate);
-  if(result && result.length > 0)
-    return result[0].postCount; 
-  else
-    return 0;
+  if (result && result.length > 0) return result[0].postCount;
+  else return 0;
 };
 
 // 인기글 조회
@@ -652,7 +649,7 @@ postSchema.statics.findPopularPosts = async function (postId, userId) {
   query.createdAt = { $gte: today.setDate(today.getDate() - 14) };
 
   // 현재 읽고 있는 글은 제외하고 조회
-  query._id = { $ne: postId }; 
+  query._id = { $ne: postId };
 
   // 사용자가 작성한 글 제외하고 조회
   if (userId) query.author = { $ne: userId };
@@ -724,7 +721,7 @@ postSchema.statics.registerComment = async function (postId, content, author) {
   const post = await this.findOneAndUpdate(
     { _id: postId },
     { $push: { comments: { _id: commentId, content, author } } },
-    { new: true, upsert: true },
+    { new: true, upsert: true }
   );
   return { post, commentId };
 };
@@ -734,7 +731,7 @@ postSchema.statics.registerReply = async function (postId, commentId, content, a
   const post = await this.findOneAndUpdate(
     { _id: postId, comments: { $elemMatch: { _id: commentId } } },
     { $push: { 'comments.$.replies': { _id: replyId, content, author } } },
-    { new: true, upsert: true },
+    { new: true, upsert: true }
   );
   return { post, replyId };
 };
@@ -763,7 +760,7 @@ postSchema.statics.modifyComment = async function (comment) {
   const commentRecord = await this.findOneAndUpdate(
     { comments: { $elemMatch: { _id } } },
     { $set: { 'comments.$.content': content } },
-    { new: true },
+    { new: true }
   );
   return commentRecord;
 };
@@ -781,7 +778,7 @@ postSchema.statics.modifyReply = async function (comment) {
     {
       arrayFilters: [{ 'i._id': _id }],
       new: true,
-    },
+    }
   );
   return commentRecord;
 };
@@ -789,7 +786,7 @@ postSchema.statics.modifyReply = async function (comment) {
 postSchema.statics.deleteComment = async function (id) {
   const commentRecord = await this.findOneAndUpdate(
     { comments: { $elemMatch: { _id: id } } },
-    { $pull: { comments: { _id: id } } },
+    { $pull: { comments: { _id: id } } }
   );
   return commentRecord;
 };
@@ -797,7 +794,7 @@ postSchema.statics.deleteComment = async function (id) {
 postSchema.statics.deleteReply = async function (id) {
   const commentRecord = await this.findOneAndUpdate(
     { 'comments.replies': { $elemMatch: { _id: id } } },
-    { $pull: { 'comments.$.replies': { _id: id } } },
+    { $pull: { 'comments.$.replies': { _id: id } } }
   );
   return commentRecord;
 };
@@ -825,7 +822,7 @@ postSchema.statics.addLike = async function (postId, userId) {
       {
         new: true,
         upsert: true,
-      },
+      }
     );
   } else {
     result = post[post.length - 1];
@@ -848,7 +845,7 @@ postSchema.statics.deleteLike = async function (postId, userId) {
       },
       {
         new: true,
-      },
+      }
     );
   }
   return { post, isLikeExist };
@@ -916,7 +913,7 @@ postSchema.statics.autoClosing = async function () {
   const today = new Date();
   await this.updateMany(
     { $and: [{ isClosed: false }, { endDate: { $ne: null } }, { endDate: { $lte: today } }] },
-    { isClosed: true },
+    { isClosed: true }
   );
 };
 

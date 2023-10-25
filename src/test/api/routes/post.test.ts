@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
-import request from 'supertest';
-import { IPostDocument } from '../../../models/Post';
 import 'regenerator-runtime/runtime';
+import request from 'supertest';
 import server from '../../../app';
+import { IPostDocument } from '../../../models/Post';
 import mockData from '../../mockData';
 
 let accessToken: string;

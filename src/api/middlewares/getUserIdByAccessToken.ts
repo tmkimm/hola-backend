@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
-import { User } from '../../models/User';
-import { asyncErrorWrapper } from '../../asyncErrorWrapper';
+import { NextFunction, Request, Response } from 'express';
 import CustomError from '../../CustomError';
+import { asyncErrorWrapper } from '../../asyncErrorWrapper';
+import { User } from '../../models/User';
 import { isValidAccessToken, verifyJWT } from '../../utills/jwt';
 
 const hasTokenByAuthHeaders = (authorization: string | undefined): boolean => {

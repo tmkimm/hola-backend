@@ -1,9 +1,9 @@
 import axios from 'axios';
+import { NextFunction, Request, Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
-import { Request, Response, NextFunction } from 'express';
-import config from '../../config/index';
-import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import CustomError from '../../CustomError';
+import { asyncErrorWrapper } from '../../asyncErrorWrapper';
+import config from '../../config/index';
 
 const client = new OAuth2Client(config.googleClientID);
 
@@ -37,7 +37,7 @@ const getUserInfoByOauth = async (loginType: string, code: string) => {
           headers: {
             accept: 'application/json',
           },
-        },
+        }
       );
 
       // 사용자 정보 가져오기
@@ -59,7 +59,7 @@ const getUserInfoByOauth = async (loginType: string, code: string) => {
           headers: {
             Authorization: `Bearer ${code}`,
           },
-        },
+        }
       );
       idToken = kakaoResponse.data.id;
       name = kakaoResponse.data.kakao_account.profile.nickname;

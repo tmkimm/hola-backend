@@ -1,7 +1,7 @@
-import { Model, Schema, model, Types } from 'mongoose';
+import { Model, Schema, Types, model } from 'mongoose';
 import { signJWT } from '../utills/jwt';
-import { Post as PostModel } from './Post';
 import { Notification as NotificationModel } from './Notification';
+import { Post as PostModel } from './Post';
 
 /**
  * @swagger
@@ -169,7 +169,7 @@ const userSchema = new Schema<IUserDocument>(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 userSchema.post('findOneAndDelete', async function (user: IUserDocument) {
@@ -178,13 +178,13 @@ userSchema.post('findOneAndDelete', async function (user: IUserDocument) {
   // 사용자가 작성한 댓글 제거
   await PostModel.findOneAndUpdate(
     { comments: { $elemMatch: { author: user._id } } },
-    { $pull: { comments: { author: user._id } } },
+    { $pull: { comments: { author: user._id } } }
   );
 
   // 사용자가 작성한 대댓글 제거
   await PostModel.findOneAndUpdate(
     { 'comments.replies': { $elemMatch: { author: user._id } } },
-    { $pull: { 'comments.$.replies': { author: user._id } } },
+    { $pull: { 'comments.$.replies': { author: user._id } } }
   );
 
   // 회원 탈퇴 시 관련 알림 제거
@@ -236,7 +236,7 @@ userSchema.statics.addReadList = async function (postId, userId) {
             _id: postId,
           },
         },
-      },
+      }
     );
   }
 };
