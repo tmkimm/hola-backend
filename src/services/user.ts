@@ -168,7 +168,7 @@ export class UserService {
     const params = {
       Bucket: config.S3BucketName,
       Key: fileName,
-      Expires: 60 * 60 * 3,
+      Expires: 60 * 10, // seconds
     };
 
     const signedUrlPut = await s3.getSignedUrlPromise('putObject', params);

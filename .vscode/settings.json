@@ -10,5 +10,6 @@
     // For ESLint
     "source.fixAll.eslint": true
   },
-  "notebook.formatOnSave.enabled": true
+  "notebook.formatOnSave.enabled": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }

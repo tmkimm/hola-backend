@@ -283,7 +283,7 @@ export default (app: Router) => {
    *        content:
    *          application/json:
    *            schema:
-   *              $ref: '#/components/schemas/Event'
+   *              $ref: '#/components/schemas/PostEvent'
    *      responses:
    *        201:
    *          description: successful operation

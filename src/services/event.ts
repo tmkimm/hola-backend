@@ -102,6 +102,8 @@ export class EventService {
   async createEvent(event: IEventDocument) {
     // TODO 사용자 정보 기입
     //event.author = userID;
+    let image = event.imageUrl;
+    event.smallImageUrl = image.replace('event-original', 'event-thumbnail'); // 이미지 등록 시 Lambda에서 thumbnail 이미지 생성
     const eventRecord = await this.eventModel.create(event);
     return eventRecord;
   }

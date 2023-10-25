@@ -44,11 +44,11 @@ import { isNumber } from '../utills/isNumber';
  *      imageUrl:
  *        type: string
  *        description: '이미지 URL'
- *        example: 'https://hola-event-image.s3.ap-northeast-2.amazonaws.com/Tony%20Lee_2023-02-22_15-31-09.png'
+ *        example: 'https://hola-post-image.s3.ap-northeast-2.amazonaws.com/event-original/20221230_164934.jpg'
  *      smallImageUrl:
  *        type: string
  *        description: '이미지 URL(모바일용)'
- *        example: 'https://hola-event-image.s3.ap-northeast-2.amazonaws.com/Tony%20Lee_2023-02-22_15-31-09.png'
+ *        example: 'https://hola-post-image.s3.ap-northeast-2.amazonaws.com/event-thumbnail/20221230_164934.jpg'
  *      startDate:
  *        type: string
  *        description: 시작일
@@ -112,11 +112,11 @@ import { isNumber } from '../utills/isNumber';
  *      imageUrl:
  *        type: string
  *        description: '이미지 URL'
- *        example: 'https://hola-event-image.s3.ap-northeast-2.amazonaws.com/Tony%20Lee_2023-02-22_15-31-09.png'
+ *        example: 'https://hola-post-image.s3.ap-northeast-2.amazonaws.com/event-original/20221230_164934.jpg'
  *      smallImageUrl:
  *        type: string
  *        description: '이미지 URL(모바일용)'
- *        example: 'https://hola-event-image.s3.ap-northeast-2.amazonaws.com/Tony%20Lee_2023-02-22_15-31-09.png'
+ *        example: 'https://hola-post-image.s3.ap-northeast-2.amazonaws.com/event-thumbnail/20221230_164934.jpg'
  *      startDate:
  *        type: string
  *        description: 시작일
@@ -148,6 +148,61 @@ import { isNumber } from '../utills/isNumber';
  */
 // #endregion
 
+/**
+ * @swagger
+ *  components:
+ *  schemas:
+ *   PostEvent:
+ *     properties:
+ *      title:
+ *        type: string
+ *        description: '제목'
+ *        example: '인프콘 2023'
+ *      content:
+ *        type: string
+ *        description: '내용'
+ *        example: '<h1>인프콘 2023 개최!</h1>'
+ *      eventType:
+ *        type: string
+ *        description: '공모전 구분(conference, hackathon, contest, bootcamp, others)'
+ *        example: 'conference'
+ *      onlineOrOffline:
+ *        type: string
+ *        description: 온오프라인 구분(on, off, onOff)
+ *        example: 'on'
+ *      place:
+ *        type: string
+ *        description: 장소
+ *        example: '삼성동 COEX 그랜드홀룸 2F'
+ *      organization:
+ *        type: string
+ *        description: 주최자명
+ *        example: '인프런'
+ *      link:
+ *        type: string
+ *        description: 원문 링크
+ *        example: 'https://www.inflearn.com/conf/infcon-2023?gad=1&gclid=Cj0KCQjwx5qoBhDyARIsAPbMagAH6o1ODZN3niCQfLRl4NzHuxr0iTgE5RABaJ2yIWZG2m2w5lx7dxIaAnYPEALw_wcB'
+ *      imageUrl:
+ *        type: string
+ *        description: '이미지 URL'
+ *        example: 'https://hola-post-image.s3.ap-northeast-2.amazonaws.com/event-thumbnail/20221230_164934.jpg'
+ *      startDate:
+ *        type: string
+ *        description: 시작일
+ *        format: date-time
+ *        example: "2023-08-15T08:30:00Z"
+ *      endDate:
+ *        type: string
+ *        description: 종료일
+ *        format: date-time
+ *        example: "2023-08-15T08:30:00Z"
+ *      closeDate:
+ *        type: string
+ *        description: 모집 마감일
+ *        format: date-time
+ *        example: "2023-08-01T08:30:00Z"
+ */
+// #endregion
 export interface IEvent {
   _id: Types.ObjectId;
   title: string;
