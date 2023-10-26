@@ -269,6 +269,53 @@ export default (app: Router) => {
     })
   );
 
+  // #region 공모전 상세에서 관련 공모전 추천
+  /**
+   * @swagger
+   * paths:
+   *   /events/{id}/recommend:
+   *    get:
+   *      tags:
+   *        - events
+   *      summary: 공모전 상세에서 관련 공모전 추천
+   *      description: '현재 읽고 있는 공모전 유형과 같은 글을 추천한다.'
+   *      parameters:
+   *        - name: id
+   *          in: path
+   *          description: 공모전 Id
+   *          required: true
+   *          example: '635a91e837ad67001412321a'
+   *          schema:
+   *            type: string
+   *        - name: eventType
+   *          in: query
+   *          description: 공모전 구분(conference, hackathon, contest, bootcamp, others)
+   *          required: true
+   *          schema:
+   *            type: string
+   *          example: 'conference'
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                $ref: '#/components/schemas/Event'
+   *        404:
+   *          description: Event not found
+   */
+  // #endregion
+  route.get(
+    '/:id/recommend',
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const eventId = req.params.id;
+      const { eventType } = req.query;
+      const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
+      const event = await EventServiceInstance.findRecommendEventListInDetail(eventId, eventType);
+      return res.status(200).json(event);
+    })
+  );
+
   // #region POST - 공모전 등록
   /**
    * @swagger

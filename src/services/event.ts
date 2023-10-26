@@ -98,6 +98,12 @@ export class EventService {
     return result;
   }
 
+  // 글 상세에서 추천 이벤트 조회
+  async findRecommendEventListInDetail(eventId: Types.ObjectId, eventType: string | null) {
+    const event = await this.eventModel.findRandomEventByEventType(eventId, eventType);
+    return event;
+  }
+
   // 공모전 등록
   async createEvent(event: IEventDocument) {
     // TODO 사용자 정보 기입

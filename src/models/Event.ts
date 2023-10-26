@@ -246,6 +246,7 @@ export interface IEventModel extends Model<IEventDocument> {
   ) => Promise<IEventDocument[]>;
   countEvent: (eventType: string | null, onOffLine: string | null, search: string | null) => Promise<number>;
   findRecommendEventList: (notInEventId: Types.ObjectId[]) => Promise<IEventDocument[]>;
+  findRandomEventByEventType: (eventId: Types.ObjectId, eventType: string | null) => Promise<IEventDocument[]>;
 }
 
 const eventSchema = new Schema<IEventDocument>(
@@ -431,6 +432,30 @@ eventSchema.statics.findRecommendEventList = async function (notInEventId: Types
     .limit(limit)
     .lean();
   return events;
+};
+
+// 랜덤 이벤트 조회(글 상세에서 추천)
+eventSchema.statics.findRandomEventByEventType = async function (eventId: Types.ObjectId, eventType: string | null) {
+  const query = makeFindEventQuery(eventType, null); // 조회 query 생성
+  query._id = { $ne: eventId }; // 현재 읽고 있는 글 제외
+
+  const event = await this.aggregate([
+    { $match: query },
+    { $sample: { size: 6 } },
+    {
+      $project: {
+        _id: 1,
+        title: 1,
+        eventType: 1,
+        imageUrl: 1,
+        smallImageUrl: 1,
+        startDate: 1,
+        endDate: 1,
+        views: 1,
+      },
+    },
+  ]);
+  return event;
 };
 
 const Event = model<IEventDocument, IEventModel>('Event', eventSchema);
