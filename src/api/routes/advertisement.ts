@@ -2,7 +2,10 @@ import { NextFunction, Request, Response, Router } from 'express';
 import { Types } from 'mongoose';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Advertisement as AdvertisementModel } from '../../models/Advertisement';
+import { AdvertisementLog as AdvertisementLogModel } from '../../models/AdvertisementLog';
 import { AdvertisementService } from '../../services/advertisement';
+import CustomError from '../../CustomError';
+import { AdvertisementLogService } from '../../services/advertisementLog';
 
 const route = Router();
 
@@ -14,6 +17,47 @@ export default (app: Router) => {
           description: 광고에 관련된 API
    */
   app.use('/advertisements', route);
+
+  // #region POST - 광고 등록
+  /**
+   * @swagger
+   * paths:
+   *   /advertisements/event-log:
+   *    post:
+   *      tags:
+   *        - advertisements
+   *      summary: 광고 이벤트 추적 로깅
+   *      description: '광고가 노출되었을때 이벤트를 추적한다.'
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                advertisementId:
+   *                  type: string
+   *                  description: Advertisement ID
+   *                  example: 6513fd110c19093e9896c9a2
+   *                logType:
+   *                  type: string
+   *                  description: 로그유형(impression 노출, reach 도달)
+   *                  example: impression
+   *      responses:
+   *        204:
+   *          description: successful operation
+   */
+  // #endregion
+  route.post(
+    '/event-log',
+    asyncErrorWrapper(async function (req: Request, res: Response, next: NextFunction) {
+      const { advertisementId, logType } = req.body;
+      const AdvertisementLogServiceInstance = new AdvertisementLogService(AdvertisementLogModel);
+      if (!advertisementId) throw new CustomError('NotFoundError', 404, '"advertisementId" not found');
+
+      await AdvertisementLogServiceInstance.createEventLog(Types.ObjectId(advertisementId), logType);
+      return res.status(204).json();
+    })
+  );
 
   // #region 광고 상세 보기
   /**

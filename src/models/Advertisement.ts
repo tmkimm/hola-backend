@@ -84,6 +84,7 @@ export interface IAdvertisement {
   mainCopy: string;
   subCopy: string;
   bannerSequence: number;
+  views: number;
   eventId: Types.ObjectId;
 }
 
@@ -111,6 +112,7 @@ const advertisementSchema = new Schema<IAdvertisementDocument>(
     mainCopy: { type: String, required: false }, // 메인 카피 (배너광고)
     subCopy: { type: String, required: false }, // 서브 카피(배너광고)
     bannerSequence: { type: Number, default: 999 }, // 배너 순번(배너광고)
+    views: { type: Number, default: 0 }, // 조회수
     eventId: { type: Types.ObjectId, ref: 'Event', required: false }, // 이벤트 Id(공모전 광고)
   },
   {
