@@ -22,11 +22,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var http_errors_1 = __importDefault(require("http-errors"));
-var mongoose_1 = __importDefault(require("mongoose"));
-var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var Sentry = __importStar(require("@sentry/node"));
 var client_1 = require("@slack/client");
+var http_errors_1 = __importDefault(require("http-errors"));
+var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+var mongoose_1 = __importDefault(require("mongoose"));
 var index_1 = __importDefault(require("../config/index"));
 exports.default = (function (app) {
     app.use(Sentry.Handlers.errorHandler({

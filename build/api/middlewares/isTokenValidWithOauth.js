@@ -42,9 +42,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isTokenValidWithOauth = void 0;
 var axios_1 = __importDefault(require("axios"));
 var google_auth_library_1 = require("google-auth-library");
-var index_1 = __importDefault(require("../../config/index"));
-var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var CustomError_1 = __importDefault(require("../../CustomError"));
+var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
+var index_1 = __importDefault(require("../../config/index"));
 var client = new google_auth_library_1.OAuth2Client(index_1.default.googleClientID);
 // 클라이언트에게 전달받은 token의 유효성을 체크하고 사용자 정보를 리턴한다.
 var getUserInfoByOauth = function (loginType, code) { return __awaiter(void 0, void 0, void 0, function () {

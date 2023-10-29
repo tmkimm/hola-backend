@@ -5,8 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isValidAccessToken = exports.verifyJWT = exports.signJWT = void 0;
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-var isStringEmpty_1 = require("./isStringEmpty");
 var index_1 = __importDefault(require("../config/index"));
+var isStringEmpty_1 = require("./isStringEmpty");
 function signJWT(payload, expiresIn) {
     return new Promise(function (resolve, reject) {
         jsonwebtoken_1.default.sign(payload, index_1.default.jwtSecretKey, {

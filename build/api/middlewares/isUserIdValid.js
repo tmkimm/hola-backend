@@ -41,9 +41,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isUserIdValid = void 0;
 var mongoose_1 = __importDefault(require("mongoose"));
-var User_1 = require("../../models/User");
-var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var CustomError_1 = __importDefault(require("../../CustomError"));
+var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
+var User_1 = require("../../models/User");
 // 사용자 id가 올바른지 확인한다.
 var isUserIdValid = (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var userId, ObjectId, user;

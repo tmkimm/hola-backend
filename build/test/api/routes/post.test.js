@@ -40,8 +40,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose_1 = __importDefault(require("mongoose"));
-var supertest_1 = __importDefault(require("supertest"));
 require("regenerator-runtime/runtime");
+var supertest_1 = __importDefault(require("supertest"));
 var app_1 = __importDefault(require("../../../app"));
 var mockData_1 = __importDefault(require("../../mockData"));
 var accessToken;

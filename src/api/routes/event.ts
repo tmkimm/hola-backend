@@ -4,6 +4,7 @@ import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Advertisement as AdvertisementModel } from '../../models/Advertisement';
 import { Event as EventModel } from '../../models/Event';
 import { EventService } from './../../services/event';
+import { checkEvent, isEventValid } from '../middlewares/isEventValid';
 
 const route = Router();
 
@@ -348,6 +349,8 @@ export default (app: Router) => {
   // #endregion
   route.post(
     '/',
+    checkEvent,
+    isEventValid,
     asyncErrorWrapper(async function (req: Request, res: Response, next: NextFunction) {
       try {
         const eventDTO = req.body;
@@ -364,7 +367,7 @@ export default (app: Router) => {
               location: 'body',
               param: 'name',
               error: 'TypeError',
-              message: 'must be String',
+              message: 'Invalid request',
             },
           ],
           error,

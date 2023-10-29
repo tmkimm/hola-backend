@@ -41,10 +41,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 var aws_sdk_1 = __importDefault(require("aws-sdk"));
-var ReadPosts_1 = require("../models/ReadPosts");
-var LikePosts_1 = require("../models/LikePosts");
-var index_1 = __importDefault(require("../config/index"));
 var CustomError_1 = __importDefault(require("../CustomError"));
+var index_1 = __importDefault(require("../config/index"));
+var LikePosts_1 = require("../models/LikePosts");
+var ReadPosts_1 = require("../models/ReadPosts");
 var SignOutUser_1 = require("../models/SignOutUser");
 var UserService = /** @class */ (function () {
     function UserService(postModel, userModel, notificationModel) {
@@ -153,7 +153,9 @@ var UserService = /** @class */ (function () {
                                     from: 'posts',
                                     localField: 'postId',
                                     foreignField: '_id',
-                                    pipeline: [{ $project: {
+                                    pipeline: [
+                                        {
+                                            $project: {
                                                 title: 1,
                                                 views: 1,
                                                 comments: 1,
@@ -171,12 +173,14 @@ var UserService = /** @class */ (function () {
                                                 author: 1,
                                                 positions: 1,
                                                 createdAt: 1,
-                                            } }],
+                                            },
+                                        },
+                                    ],
                                     as: 'postId',
-                                }
+                                },
                             },
                             {
-                                $unwind: '$postId'
+                                $unwind: '$postId',
                             },
                             {
                                 $lookup: {
@@ -188,7 +192,7 @@ var UserService = /** @class */ (function () {
                                 },
                             },
                         ]).sort({
-                            'postId.createdAt': -1
+                            'postId.createdAt': -1,
                         })];
                     case 1:
                         likePosts = _a.sent();
@@ -265,7 +269,7 @@ var UserService = /** @class */ (function () {
                         params = {
                             Bucket: index_1.default.S3BucketName,
                             Key: fileName,
-                            Expires: 60 * 60 * 3,
+                            Expires: 60 * 10, // seconds
                         };
                         return [4 /*yield*/, s3.getSignedUrlPromise('putObject', params)];
                     case 1:

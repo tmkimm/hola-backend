@@ -39,15 +39,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var mongoose_1 = require("mongoose");
 var express_1 = require("express");
-var isPostIdValid_1 = require("../middlewares/isPostIdValid");
-var index_1 = require("../middlewares/index");
-var index_2 = require("../../services/index");
-var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
-var Post_1 = require("../../models/Post");
-var Notification_1 = require("../../models/Notification");
+var mongoose_1 = require("mongoose");
 var CustomError_1 = __importDefault(require("../../CustomError"));
+var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
+var Notification_1 = require("../../models/Notification");
+var Post_1 = require("../../models/Post");
+var index_1 = require("../../services/index");
+var index_2 = require("../middlewares/index");
+var isPostIdValid_1 = require("../middlewares/isPostIdValid");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**
@@ -99,7 +99,7 @@ exports.default = (function (app) {
                     if (!id || !mongoose_1.Types.ObjectId.isValid(id)) {
                         throw new CustomError_1.default('InvalidApiError', 400, 'Invalid Api Parameter');
                     }
-                    CommentServiceInstance = new index_2.CommentService(Post_1.Post, Notification_1.Notification);
+                    CommentServiceInstance = new index_1.CommentService(Post_1.Post, Notification_1.Notification);
                     return [4 /*yield*/, CommentServiceInstance.findComments(mongoose_1.Types.ObjectId(id))];
                 case 1:
                     comments = _a.sent();
@@ -151,14 +151,14 @@ exports.default = (function (app) {
      *        404:
      *          description: Post not found
      */
-    route.post('/', index_1.isAccessTokenValid, isPostIdValid_1.isPostIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.post('/', index_2.isAccessTokenValid, isPostIdValid_1.isPostIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, postId, content, _b, userId, nickName, CommentServiceInstance, _c, post, commentId;
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0:
                     _a = req.body, postId = _a.postId, content = _a.content;
                     _b = req.user, userId = _b._id, nickName = _b.nickName;
-                    CommentServiceInstance = new index_2.CommentService(Post_1.Post, Notification_1.Notification);
+                    CommentServiceInstance = new index_1.CommentService(Post_1.Post, Notification_1.Notification);
                     return [4 /*yield*/, CommentServiceInstance.registerComment(userId, postId, content, nickName)];
                 case 1:
                     _c = _d.sent(), post = _c.post, commentId = _c.commentId;
@@ -215,7 +215,7 @@ exports.default = (function (app) {
      *        401:
      *          $ref: '#/components/responses/UnauthorizedError'
      */
-    route.patch('/:id', index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.patch('/:id', index_2.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var commentDTO, _a, tokenUserId, tokenType, nickName, CommentServiceInstance, comment;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -223,7 +223,7 @@ exports.default = (function (app) {
                     commentDTO = req.body;
                     commentDTO._id = req.params.id;
                     _a = req.user, tokenUserId = _a._id, tokenType = _a.tokenType, nickName = _a.nickName;
-                    CommentServiceInstance = new index_2.CommentService(Post_1.Post, Notification_1.Notification);
+                    CommentServiceInstance = new index_1.CommentService(Post_1.Post, Notification_1.Notification);
                     return [4 /*yield*/, CommentServiceInstance.modifyComment(commentDTO, tokenUserId, tokenType)];
                 case 1:
                     comment = _b.sent();
@@ -259,14 +259,14 @@ exports.default = (function (app) {
      *        404:
      *          description: Post not found
      */
-    route.delete('/:id', index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.delete('/:id', index_2.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var commentId, _a, userId, tokenType, CommentServiceInstance;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     commentId = req.params.id;
                     _a = req.user, userId = _a._id, tokenType = _a.tokenType;
-                    CommentServiceInstance = new index_2.CommentService(Post_1.Post, Notification_1.Notification);
+                    CommentServiceInstance = new index_1.CommentService(Post_1.Post, Notification_1.Notification);
                     return [4 /*yield*/, CommentServiceInstance.deleteComment(mongoose_1.Types.ObjectId(commentId), userId, tokenType)];
                 case 1:
                     _b.sent();

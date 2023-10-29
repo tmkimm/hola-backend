@@ -104,7 +104,17 @@ notificationSchema.statics.createNotification = function (noticeType, targetUser
                 case 0:
                     domain = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://holaworld.io';
                     href = domain + urn;
-                    return [4 /*yield*/, this.create({ targetUserId: targetUserId, createUserId: createUserId, href: href, title: title, noticeType: noticeType, createObjectId: createObjectId, buttonLabel: buttonLabel, parentObjectId: parentObjectId, icon: icon })];
+                    return [4 /*yield*/, this.create({
+                            targetUserId: targetUserId,
+                            createUserId: createUserId,
+                            href: href,
+                            title: title,
+                            noticeType: noticeType,
+                            createObjectId: createObjectId,
+                            buttonLabel: buttonLabel,
+                            parentObjectId: parentObjectId,
+                            icon: icon,
+                        })];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];

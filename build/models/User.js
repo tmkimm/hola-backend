@@ -39,8 +39,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 var mongoose_1 = require("mongoose");
 var jwt_1 = require("../utills/jwt");
-var Post_1 = require("./Post");
 var Notification_1 = require("./Notification");
+var Post_1 = require("./Post");
 var UrlSchema = new mongoose_1.Schema({ urlType: String, url: String });
 var userSchema = new mongoose_1.Schema({
     idToken: { type: String, required: true },

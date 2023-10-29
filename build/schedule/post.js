@@ -41,10 +41,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.autoClosing = void 0;
 var node_schedule_1 = __importDefault(require("node-schedule"));
+var Notification_1 = require("../models/Notification");
+var Post_1 = require("../models/Post");
 var User_1 = require("../models/User");
 var index_1 = require("../services/index");
-var Post_1 = require("../models/Post");
-var Notification_1 = require("../models/Notification");
 /*
   글에 관련된 Schedule을 정의한다.
 */

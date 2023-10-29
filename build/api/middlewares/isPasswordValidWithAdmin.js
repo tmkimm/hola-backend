@@ -40,9 +40,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isPasswordValidWithAdmin = void 0;
-var index_1 = __importDefault(require("../../config/index"));
-var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var CustomError_1 = __importDefault(require("../../CustomError"));
+var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
+var index_1 = __importDefault(require("../../config/index"));
 // Admin Login
 var isPasswordValidWithAdmin = (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var _a, id, password, loginType;

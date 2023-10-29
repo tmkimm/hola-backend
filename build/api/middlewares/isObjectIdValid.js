@@ -41,8 +41,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isObjectIdValid = void 0;
 var mongoose_1 = require("mongoose");
-var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var CustomError_1 = __importDefault(require("../../CustomError"));
+var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 // 글 id가 존재하는지 확인한다.
 exports.isObjectIdValid = (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var objectId;

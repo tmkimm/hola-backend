@@ -1,0 +1,1 @@
+{"version":3,"file":"eventList.js","sourceRoot":"/","sources":["eventList.ts"],"names":[],"mappings":";;AAAA,IAAM,SAAS,GAAa,CAAC,YAAY,EAAE,WAAW,EAAE,SAAS,EAAE,UAAU,EAAE,QAAQ,CAAC,CAAC;AAEzF,kBAAe,SAAS,CAAC","sourcesContent":["const eventList: string[] = ['conference', 'hackathon', 'contest', 'bootcamp', 'others'];\n\nexport default eventList;\n"]}

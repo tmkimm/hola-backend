@@ -41,8 +41,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isPostValid = exports.checkPost = void 0;
 var express_validator_1 = require("express-validator");
-var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var CustomError_1 = __importDefault(require("../../CustomError"));
+var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var languageList_1 = __importDefault(require("../../languageList"));
 var checkPost = [
     (0, express_validator_1.body)('title').isString().withMessage('Invaild datatype(String)').optional({ nullable: true }),

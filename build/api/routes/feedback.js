@@ -37,8 +37,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var index_1 = require("../../services/index");
 var Feedback_1 = require("../../models/Feedback");
+var index_1 = require("../../services/index");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /*

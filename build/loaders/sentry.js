@@ -22,9 +22,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var integrations_1 = require("@sentry/integrations");
 var Sentry = __importStar(require("@sentry/node"));
 var Tracing = __importStar(require("@sentry/tracing"));
-var integrations_1 = require("@sentry/integrations");
 var index_1 = __importDefault(require("../config/index"));
 exports.default = (function (app) {
     Sentry.init({

@@ -40,26 +40,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
+var CustomError_1 = __importDefault(require("../../CustomError"));
+var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var Notification_1 = require("../../models/Notification");
 var User_1 = require("../../models/User");
 var index_1 = require("../../services/index");
 var index_2 = require("../middlewares/index");
-var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
-var CustomError_1 = __importDefault(require("../../CustomError"));
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**
-   * @swagger
-   *  components:
-   *    securitySchemes:
-   *      bearerAuth:
-   *        type: http
-   *        scheme: bearer
-   *        bearerFormat: JWT
-   *    responses:
-   *      UnauthorizedError:
-   *        description: Access token is missing or invalid
-   */
+     * @swagger
+     *  components:
+     *    securitySchemes:
+     *      bearerAuth:
+     *        type: http
+     *        scheme: bearer
+     *        bearerFormat: JWT
+     *    responses:
+     *      UnauthorizedError:
+     *        description: Access token is missing or invalid
+     */
     /*
       권한에 관련된 Router를 정의한다.
       # GET /auth : Refresh Token을 이용해 Access Token 발급

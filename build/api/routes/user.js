@@ -38,14 +38,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mongoose_1 = require("mongoose");
-var Post_1 = require("../../models/Post");
-var post_1 = require("../../services/post");
-var isStringEmpty_1 = require("../../utills/isStringEmpty");
-var User_1 = require("../../models/User");
-var index_1 = require("../../services/index");
-var index_2 = require("../middlewares/index");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var Notification_1 = require("../../models/Notification");
+var Post_1 = require("../../models/Post");
+var User_1 = require("../../models/User");
+var index_1 = require("../../services/index");
+var post_1 = require("../../services/post");
+var isStringEmpty_1 = require("../../utills/isStringEmpty");
+var index_2 = require("../middlewares/index");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**

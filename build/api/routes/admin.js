@@ -37,9 +37,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var index_1 = require("../../services/index");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var User_1 = require("../../models/User");
+var index_1 = require("../../services/index");
 var isPasswordValidWithAdmin_1 = require("../middlewares/isPasswordValidWithAdmin");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {

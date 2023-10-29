@@ -39,10 +39,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var supertest_1 = __importDefault(require("supertest"));
-require("regenerator-runtime/runtime");
-var mongoose_1 = __importDefault(require("mongoose"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+var mongoose_1 = __importDefault(require("mongoose"));
+require("regenerator-runtime/runtime");
+var supertest_1 = __importDefault(require("supertest"));
 var app_1 = __importDefault(require("../../../app"));
 var index_1 = __importDefault(require("../../../config/index"));
 var mockData_1 = __importDefault(require("../../mockData"));

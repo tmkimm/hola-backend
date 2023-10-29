@@ -38,34 +38,34 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mongoose_1 = require("mongoose");
-var index_1 = require("../../services/index");
-var index_2 = require("../middlewares/index");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var Notification_1 = require("../../models/Notification");
+var index_1 = require("../../services/index");
+var index_2 = require("../middlewares/index");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     app.use('/notifications', route);
     /**
-       * @swagger
-       * paths:
-       *   /notifications:
-       *    get:
-       *      tags:
-       *        - notifications
-       *      summary: 내 알림 조회
-       *      description: '내 알림을 조회한다.'
-       *      responses:
-       *        200:
-       *          description: successful operation
-       *          content:
-       *            application/json:
-       *              schema:
-       *                type: array
-       *                items:
-       *                  $ref: '#/components/schemas/Notification'
-       *        401:
-       *          $ref: '#/components/responses/UnauthorizedError'
-       */
+     * @swagger
+     * paths:
+     *   /notifications:
+     *    get:
+     *      tags:
+     *        - notifications
+     *      summary: 내 알림 조회
+     *      description: '내 알림을 조회한다.'
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: array
+     *                items:
+     *                  $ref: '#/components/schemas/Notification'
+     *        401:
+     *          $ref: '#/components/responses/UnauthorizedError'
+     */
     route.get('/', index_2.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var userId, NoticeServiceInstance, notifications;
         return __generator(this, function (_a) {
@@ -81,43 +81,43 @@ exports.default = (function (app) {
         });
     }); }));
     /**
-       * @swagger
-       * paths:
-       *   /notifications:
-       *    patch:
-       *      tags:
-       *        - notifications
-       *      summary: 알림 읽음 처리
-       *      description: '알림을 읽음 처리한다.'
-       *      parameters:
-       *        - name: accessToken
-       *          in: header
-       *          description: access token
-       *          required: true
-       *          schema:
-       *            type: string
-       *        - name: id
-       *          in: path
-       *          description: 알림 Id
-       *          required: true
-       *          example: '635a91e837ad67001412321a'
-       *          schema:
-       *            type: string
-       *      responses:
-       *        200:
-       *          description: successful operation
-       *          content:
-       *            application/json:
-       *              schema:
-       *                type: object
-       *                properties:
-       *                  isRead:
-       *                    type: boolean
-       *                    description : 읽음 여부
-       *                    example: true
-       *        401:
-       *          $ref: '#/components/responses/UnauthorizedError'
-       */
+     * @swagger
+     * paths:
+     *   /notifications:
+     *    patch:
+     *      tags:
+     *        - notifications
+     *      summary: 알림 읽음 처리
+     *      description: '알림을 읽음 처리한다.'
+     *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: true
+     *          schema:
+     *            type: string
+     *        - name: id
+     *          in: path
+     *          description: 알림 Id
+     *          required: true
+     *          example: '635a91e837ad67001412321a'
+     *          schema:
+     *            type: string
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: object
+     *                properties:
+     *                  isRead:
+     *                    type: boolean
+     *                    description : 읽음 여부
+     *                    example: true
+     *        401:
+     *          $ref: '#/components/responses/UnauthorizedError'
+     */
     // 알림 읽음 처리
     route.patch('/:id/read', index_2.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, NotificationServcieInstance, notice;

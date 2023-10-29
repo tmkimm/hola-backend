@@ -236,7 +236,7 @@ postSchema.statics.findPostPagination = function (page, sort, language, period, 
                                 author: 1,
                                 positions: 1,
                                 createdAt: 1,
-                                score: { $meta: "searchScore" }
+                                score: { $meta: 'searchScore' },
                             },
                         },
                     ], false);
@@ -244,9 +244,9 @@ postSchema.statics.findPostPagination = function (page, sort, language, period, 
                         aggregate.push({
                             $match: {
                                 score: {
-                                    $gte: 0.5
-                                }
-                            }
+                                    $gte: 0.5,
+                                },
+                            },
                         });
                     }
                     return [4 /*yield*/, this.aggregate(aggregate).sort(sortQuery.join(' ')).skip(pageToSkip).limit(Number(itemsPerPage))];
@@ -284,7 +284,7 @@ postSchema.statics.countPost = function (language, period, isClosed, type, posit
                         {
                             $project: {
                                 title: 1,
-                                score: { $meta: "searchScore" }
+                                score: { $meta: 'searchScore' },
                             },
                         },
                     ], false);
@@ -292,13 +292,13 @@ postSchema.statics.countPost = function (language, period, isClosed, type, posit
                         aggregate.push({
                             $match: {
                                 score: {
-                                    $gte: 0.5
-                                }
-                            }
+                                    $gte: 0.5,
+                                },
+                            },
                         });
                     }
                     aggregate.push({
-                        $count: "postCount"
+                        $count: 'postCount',
                     });
                     return [4 /*yield*/, this.aggregate(aggregate)];
                 case 1:

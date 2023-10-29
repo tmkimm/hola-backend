@@ -38,12 +38,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mongoose_1 = require("mongoose");
-var User_1 = require("../../models/User");
-var index_1 = require("../middlewares/index");
-var index_2 = require("../../services/index");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
-var Post_1 = require("../../models/Post");
 var Notification_1 = require("../../models/Notification");
+var Post_1 = require("../../models/Post");
+var User_1 = require("../../models/User");
+var index_1 = require("../../services/index");
+var index_2 = require("../middlewares/index");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**
@@ -80,7 +80,7 @@ exports.default = (function (app) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
+                    PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
                     return [4 /*yield*/, PostServiceInstance.findTopPost()];
                 case 1:
                     posts = _a.sent();
@@ -182,14 +182,14 @@ exports.default = (function (app) {
      *                      $ref: '#/components/schemas/PostMain'
      */
     // #endregion
-    route.get('/pagination', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/pagination', index_2.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, page, sort, language, period, isClosed, type, position, search, onOffLine, userId, PostServiceInstance, posts;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = req.query, page = _a.page, sort = _a.sort, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search, onOffLine = _a.onOffLine;
                     userId = req.user._id;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
+                    PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
                     return [4 /*yield*/, PostServiceInstance.findPostPagination(page, sort, language, period, isClosed, type, position, search, userId, onOffLine)];
                 case 1:
                     posts = _b.sent();
@@ -275,7 +275,7 @@ exports.default = (function (app) {
             switch (_b.label) {
                 case 0:
                     _a = req.query, language = _a.language, period = _a.period, isClosed = _a.isClosed, type = _a.type, position = _a.position, search = _a.search, onOffLine = _a.onOffLine;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
+                    PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
                     return [4 /*yield*/, PostServiceInstance.findLastPage(language, period, isClosed, type, position, search, onOffLine)];
                 case 1:
                     lastPage = _b.sent();
@@ -322,14 +322,14 @@ exports.default = (function (app) {
      *          description: Post not found
      */
     // #endregion
-    route.get('/:id/recommend', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/:id/recommend', index_2.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var postId, userId, PostServiceInstance, post;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     postId = req.params.id;
                     userId = req.user._id;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
+                    PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
                     return [4 /*yield*/, PostServiceInstance.recommendToUserFromPost(mongoose_1.Types.ObjectId(postId), userId)];
                 case 1:
                     post = _a.sent();
@@ -375,14 +375,14 @@ exports.default = (function (app) {
      *          description: Post not found
      */
     // #endregion
-    route.get('/:id', index_1.isObjectIdValid, index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/:id', index_2.isObjectIdValid, index_2.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var postId, userId, PostServiceInstance, post;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     postId = req.params.id;
                     userId = req.user._id;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
+                    PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
                     return [4 /*yield*/, PostServiceInstance.findPostDetail(mongoose_1.Types.ObjectId(postId), userId)];
                 case 1:
                     post = _a.sent();
@@ -427,7 +427,7 @@ exports.default = (function (app) {
      *          $ref: '#/components/responses/UnauthorizedError'
      */
     // #endregion
-    route.post('/', index_1.checkPost, index_1.isPostValid, index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) {
+    route.post('/', index_2.checkPost, index_2.isPostValid, index_2.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var postDTO, userId, PostServiceInstance, post, error_1;
             return __generator(this, function (_a) {
@@ -436,7 +436,7 @@ exports.default = (function (app) {
                         _a.trys.push([0, 2, , 3]);
                         postDTO = req.body;
                         userId = req.user._id;
-                        PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
+                        PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
                         return [4 /*yield*/, PostServiceInstance.registerPost(userId, postDTO)];
                     case 1:
                         post = _a.sent();
@@ -503,7 +503,7 @@ exports.default = (function (app) {
      *          $ref: '#/components/responses/UnauthorizedError'
      */
     // #endregion
-    route.patch('/:id', index_1.isAccessTokenValid, index_1.checkPost, index_1.isPostValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.patch('/:id', index_2.isAccessTokenValid, index_2.checkPost, index_2.isPostValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, _a, tokenUserId, tokenType, postDTO, PostServiceInstance, post;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -511,7 +511,7 @@ exports.default = (function (app) {
                     id = req.params.id;
                     _a = req.user, tokenUserId = _a._id, tokenType = _a.tokenType;
                     postDTO = req.body;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
+                    PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
                     return [4 /*yield*/, PostServiceInstance.modifyPost(mongoose_1.Types.ObjectId(id), tokenUserId, tokenType, postDTO)];
                 case 1:
                     post = _b.sent();
@@ -546,14 +546,14 @@ exports.default = (function (app) {
      *          description: Post not found
      */
     // #endregion
-    route.delete('/:id', index_1.isPostIdValid, index_1.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.delete('/:id', index_2.isPostIdValid, index_2.isAccessTokenValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, _a, tokenUserId, tokenType, PostServiceInstance;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     id = req.params.id;
                     _a = req.user, tokenUserId = _a._id, tokenType = _a.tokenType;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
+                    PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
                     return [4 /*yield*/, PostServiceInstance.deletePost(mongoose_1.Types.ObjectId(id), tokenUserId, tokenType)];
                 case 1:
                     _b.sent();
@@ -613,14 +613,14 @@ exports.default = (function (app) {
      *          $ref: '#/components/responses/UnauthorizedError'
      */
     // #endregion
-    route.post('/likes', index_1.isAccessTokenValid, index_1.isPostIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.post('/likes', index_2.isAccessTokenValid, index_2.isPostIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var postId, userId, PostServiceInstance, post;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     postId = req.body.postId;
                     userId = req.user._id;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
+                    PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
                     return [4 /*yield*/, PostServiceInstance.addLike(mongoose_1.Types.ObjectId(postId), userId)];
                 case 1:
                     post = _a.sent();
@@ -659,14 +659,14 @@ exports.default = (function (app) {
      *        404:
      *          description: Post not found
      */
-    route.delete('/likes/:id', index_1.isAccessTokenValid, index_1.isPostIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.delete('/likes/:id', index_2.isAccessTokenValid, index_2.isPostIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var postId, userId, PostServiceInstance, post;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     postId = req.params.id;
                     userId = req.user._id;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
+                    PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
                     return [4 /*yield*/, PostServiceInstance.deleteLike(mongoose_1.Types.ObjectId(postId), userId)];
                 case 1:
                     post = _a.sent();
@@ -711,14 +711,14 @@ exports.default = (function (app) {
      *        401:
      *          $ref: '#/components/responses/UnauthorizedError'
      */
-    route.get('/:id/isLiked', index_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/:id/isLiked', index_2.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var postId, userId, PostServiceInstance, isLiked;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     postId = req.params.id;
                     userId = req.user._id;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
+                    PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
                     return [4 /*yield*/, PostServiceInstance.findUserLiked(mongoose_1.Types.ObjectId(postId), userId)];
                 case 1:
                     isLiked = _a.sent();
@@ -765,7 +765,7 @@ exports.default = (function (app) {
             switch (_a.label) {
                 case 0:
                     postId = req.params.id;
-                    PostServiceInstance = new index_2.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
+                    PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
                     return [4 /*yield*/, PostServiceInstance.findLikeUsers(mongoose_1.Types.ObjectId(postId))];
                 case 1:
                     likeUsers = _a.sent();

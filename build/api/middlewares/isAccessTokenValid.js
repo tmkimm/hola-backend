@@ -40,10 +40,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isAccessTokenValid = void 0;
-var User_1 = require("../../models/User");
-var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
-var jwt_1 = require("../../utills/jwt");
 var CustomError_1 = __importDefault(require("../../CustomError"));
+var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
+var User_1 = require("../../models/User");
+var jwt_1 = require("../../utills/jwt");
 // Access Token이 유효한지 확인한다.
 var isAccessTokenValid = (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) {
     return __awaiter(this, void 0, void 0, function () {

@@ -37,20 +37,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var index_1 = require("../../services/index");
-var index_2 = require("../middlewares/index");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
+var Notification_1 = require("../../models/Notification");
 var Post_1 = require("../../models/Post");
 var User_1 = require("../../models/User");
-var Notification_1 = require("../../models/Notification");
+var index_1 = require("../../services/index");
+var index_2 = require("../middlewares/index");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**
-   * @swagger
-   * tags:
-        - name: login
-          description: 로그인에 관련된 API
-   */
+     * @swagger
+     * tags:
+          - name: login
+            description: 로그인에 관련된 API
+     */
     app.use('/login', route);
     /**
      * @swagger

@@ -37,8 +37,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.nickNameDuplicationCheck = void 0;
-var User_1 = require("../../models/User");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
+var User_1 = require("../../models/User");
 // 회원 정보 수정 시 닉네임이 중복되었는지 체크한다.
 var nickNameDuplicationCheck = (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var nickName, user;

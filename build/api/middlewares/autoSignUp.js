@@ -40,9 +40,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.autoSignUp = void 0;
-var User_1 = require("../../models/User");
-var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var CustomError_1 = __importDefault(require("../../CustomError"));
+var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
+var User_1 = require("../../models/User");
 // 로그인 시 회원가입 여부를 판단한다.
 // loginSuccess
 // true: 로그인 완료

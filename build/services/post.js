@@ -41,10 +41,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostService = void 0;
 var sanitize_html_1 = __importDefault(require("sanitize-html"));
-var ReadPosts_1 = require("../models/ReadPosts");
-var LikePosts_1 = require("../models/LikePosts");
-var timeForEndDate_1 = require("../utills/timeForEndDate");
 var CustomError_1 = __importDefault(require("../CustomError"));
+var LikePosts_1 = require("../models/LikePosts");
+var ReadPosts_1 = require("../models/ReadPosts");
+var timeForEndDate_1 = require("../utills/timeForEndDate");
 var PostService = /** @class */ (function () {
     function PostService(postModel, userModel, notificationModel) {
         this.postModel = postModel;
