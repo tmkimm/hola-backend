@@ -4,6 +4,8 @@ import { IAdvertisementModel } from '../models/Advertisement';
 import { IEventDocument, IEventModel } from '../models/Event';
 import { timeForEndDate } from '../utills/timeForEndDate';
 import { isNumber } from './../utills/isNumber';
+import AWS from 'aws-sdk';
+import config from '../config';
 
 export class EventService {
   constructor(
@@ -129,5 +131,27 @@ export class EventService {
     // if (id.toString() !== tokenEventId.toString())
     //   throw new CustomError('NotAuthenticatedError', 401, 'Event does not match');
     await this.eventModel.deleteEvent(id);
+  }
+
+  // S3 Pre-Sign Url을 발급한다.
+  async getPreSignUrl(fileName: string) {
+    if (!fileName) {
+      throw new CustomError('NotFoundError', 404, '"fileName" does not exist');
+    }
+
+    const s3 = new AWS.S3({
+      accessKeyId: config.S3AccessKeyId,
+      secretAccessKey: config.S3SecretAccessKey,
+      region: config.S3BucketRegion,
+    });
+
+    const params = {
+      Bucket: config.S3BucketName,
+      Key: `event-original/${fileName}`,
+      Expires: 60 * 10, // seconds
+    };
+
+    const signedUrlPut = await s3.getSignedUrlPromise('putObject', params);
+    return signedUrlPut;
   }
 }

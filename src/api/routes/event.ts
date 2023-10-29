@@ -231,6 +231,50 @@ export default (app: Router) => {
     })
   );
 
+  // #region 공모전 이미지 S3 Pre-Signed URL 발급
+  /**
+   * @swagger
+   * paths:
+   *   /events/pre-sign-url:
+   *    get:
+   *      tags:
+   *        - events
+   *      summary: 공모전 이미지 S3 Pre-Signed URL 발급
+   *      description: 공모전 이미지 S3 Pre-Signed URL 발급
+   *      parameters:
+   *        - name: fileName
+   *          in: query
+   *          description: 파일명
+   *          required: true
+   *          example: '2839_284_42.jpg'
+   *          schema:
+   *            type: string
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: object
+   *                properties:
+   *                  preSignUrl:
+   *                    type: string
+   *                    description: Pre-signed url
+   */
+  // #endregion
+  route.get(
+    '/pre-sign-url',
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const { fileName } = req.query;
+      const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
+      const signedUrlPut = await EventServiceInstance.getPreSignUrl(fileName);
+
+      return res.status(200).json({
+        preSignUrl: signedUrlPut,
+      });
+    })
+  );
+
   // #region 공모전 상세 보기
   /**
    * @swagger
