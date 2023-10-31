@@ -2,6 +2,7 @@ import { NextFunction, Request, Response, Router } from 'express';
 import { Types } from 'mongoose';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Advertisement as AdvertisementModel } from '../../models/Advertisement';
+import { AdvertisementLog as AdvertisementLogModel } from '../../models/AdvertisementLog';
 import { Campaign as CampaignModel } from '../../models/Campaign';
 import { CampaignService } from '../../services/campaign';
 
@@ -49,7 +50,7 @@ export default (app: Router) => {
     '/',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { page } = req.query;
-      const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel);
+      const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel, AdvertisementLogModel);
       const campaigns = await CampaignServiceInstance.findCampaignList(page);
       return res.status(200).json(campaigns);
     })
@@ -88,7 +89,7 @@ export default (app: Router) => {
     '/:id',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const campaignId = req.params.id;
-      const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel);
+      const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel, AdvertisementLogModel);
       const campaign = await CampaignServiceInstance.findCampaign(campaignId);
       return res.status(200).json(campaign);
     })
@@ -125,8 +126,45 @@ export default (app: Router) => {
     '/:id/advertisement',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const campaignId = req.params.id;
-      const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel);
+      const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel, AdvertisementLogModel);
       const campaign = await CampaignServiceInstance.findAdvertisementInCampaign(campaignId);
+      return res.status(200).json(campaign);
+    })
+  );
+
+  // #region 광고 성과 집계
+  /**
+   * @swagger
+   * paths:
+   *   /campaigns/{id}/result:
+   *    get:
+   *      tags:
+   *        - campaigns
+   *      summary: 캠페인의 광고 성과 집계
+   *      description: '광고 성과를 조회한다.'
+   *      parameters:
+   *        - name: id
+   *          in: path
+   *          description: 캠페인 Id
+   *          required: true
+   *          example: '635a91e837ad67001412321a'
+   *          schema:
+   *            type: string
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                $ref: '#/components/schemas/AdvertisementResult'
+   */
+  // #endregion
+  route.get(
+    '/:id/result',
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const campaignId = req.params.id;
+      const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel, AdvertisementLogModel);
+      const campaign = await CampaignServiceInstance.findCampaignResult(campaignId);
       return res.status(200).json(campaign);
     })
   );
@@ -166,7 +204,7 @@ export default (app: Router) => {
     asyncErrorWrapper(async function (req: Request, res: Response, next: NextFunction) {
       try {
         const campaignDTO = req.body;
-        const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel);
+        const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel, AdvertisementLogModel);
         const campaign = await CampaignServiceInstance.createCampaign(campaignDTO);
         return res.status(201).json(campaign);
       } catch (error) {
@@ -228,7 +266,7 @@ export default (app: Router) => {
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
       const campaignDTO = req.body;
-      const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel);
+      const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel, AdvertisementLogModel);
       const campaign = await CampaignServiceInstance.modifyCampaign(Types.ObjectId(id), campaignDTO);
 
       return res.status(200).json(campaign);
@@ -266,7 +304,7 @@ export default (app: Router) => {
     '/:id',
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
-      const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel);
+      const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel, AdvertisementLogModel);
       await CampaignServiceInstance.deleteCampaign(Types.ObjectId(id));
       return res.status(204).json();
     })

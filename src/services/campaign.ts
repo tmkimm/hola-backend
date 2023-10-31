@@ -2,11 +2,13 @@ import { Types } from 'mongoose';
 import CustomError from '../CustomError';
 import { IAdvertisementModel } from '../models/Advertisement';
 import { ICampaignDocument, ICampaignModel } from '../models/Campaign';
+import { IAdvertisementLogModel } from '../models/AdvertisementLog';
 
 export class CampaignService {
   constructor(
     protected campaignModel: ICampaignModel,
-    protected advertisementModel: IAdvertisementModel
+    protected advertisementModel: IAdvertisementModel,
+    protected advertisementLogModel: IAdvertisementLogModel
   ) {}
 
   // 캠페인 리스트 조회
@@ -42,5 +44,24 @@ export class CampaignService {
   // 캠페인의 광고 리스트 조회
   async findAdvertisementInCampaign(campaignId: Types.ObjectId) {
     return await this.advertisementModel.findAdvertisementInCampaign(campaignId);
+  }
+
+  // 광고 결과 집계
+  async findCampaignResult(campaignId: Types.ObjectId) {
+    const adList = await this.advertisementModel.findAdvertisementInCampaign(campaignId);
+    const adIdList = adList.map((ad: any) => {
+      return Types.ObjectId(ad._id);
+    });
+    const aggregate = await this.advertisementLogModel.findADResult(adIdList);
+    const result = aggregate.map((ad: any) => {
+      return {
+        _id: ad._id.advertisementId,
+        logType: ad._id.logType,
+        count: ad.count,
+        advertisementType: ad.advertisements.advertisementType,
+      };
+    });
+
+    return result;
   }
 }
