@@ -6,6 +6,7 @@ import { AdvertisementLog as AdvertisementLogModel } from '../../models/Advertis
 import { AdvertisementService } from '../../services/advertisement';
 import CustomError from '../../CustomError';
 import { AdvertisementLogService } from '../../services/advertisementLog';
+import { isAccessTokenValidWithAdmin } from '../middlewares/isAccessTokenValidWithAdmin';
 
 const route = Router();
 
@@ -70,6 +71,12 @@ export default (app: Router) => {
    *      summary: 광고 상세 보기
    *      description: '광고 상세 정보를 조회한다.'
    *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *        - name: id
    *          in: path
    *          description: 광고 Id
@@ -90,6 +97,7 @@ export default (app: Router) => {
   // #endregion
   route.get(
     '/:id',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const advertisementId = req.params.id;
       const AdvertisementServiceInstance = new AdvertisementService(AdvertisementModel);
@@ -108,6 +116,13 @@ export default (app: Router) => {
    *        - advertisements
    *      summary: 광고 등록
    *      description: '신규 광고를 등록한다.'
+   *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *      requestBody:
    *        content:
    *          application/json:
@@ -130,6 +145,7 @@ export default (app: Router) => {
   // #endregion
   route.post(
     '/',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async function (req: Request, res: Response, next: NextFunction) {
       try {
         const advertisementDTO = req.body;
@@ -163,6 +179,12 @@ export default (app: Router) => {
    *      summary: 광고 수정
    *      description: 광고를 수정한다.
    *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *        - name: id
    *          in: path
    *          description: 광고 Id
@@ -192,6 +214,7 @@ export default (app: Router) => {
   // #endregion
   route.patch(
     '/:id',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
       const advertisementDTO = req.body;
@@ -216,6 +239,12 @@ export default (app: Router) => {
    *      summary: 광고 삭제
    *      description: 광고를 삭제한다.
    *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *        - name: id
    *          in: path
    *          description: 광고 Id
@@ -234,6 +263,7 @@ export default (app: Router) => {
   // #endregion
   route.delete(
     '/:id',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
       const AdvertisementServiceInstance = new AdvertisementService(AdvertisementModel);

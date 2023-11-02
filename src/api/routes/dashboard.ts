@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { DashboardService } from '../../services/index';
+import { isAccessTokenValidWithAdmin } from '../middlewares/isAccessTokenValidWithAdmin';
 
 const route = Router();
 
@@ -22,6 +23,13 @@ export default (app: Router) => {
    *        - dashboard
    *      summary: 사용자 데일리 액션
    *      description: 총 회원 수, 오늘 가입자, 오늘 탈퇴자 조회
+   *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *      responses:
    *        200:
    *          description: successful operation
@@ -42,6 +50,7 @@ export default (app: Router) => {
    */
   route.get(
     '/users/daily',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const DashboardServiceInstance = new DashboardService();
       const user = await DashboardServiceInstance.findDailyUser();
@@ -59,6 +68,12 @@ export default (app: Router) => {
    *      summary: 일자별 회원 가입 현황
    *      description: 조회 기간에 해당되는 가입자 정보 집계
    *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *        - name: startDate
    *          in: query
    *          description: 조회 시작일
@@ -99,6 +114,7 @@ export default (app: Router) => {
    */
   route.get(
     '/users/history',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { startDate, endDate } = req.query;
       const DashboardServiceInstance = new DashboardService();
@@ -116,6 +132,13 @@ export default (app: Router) => {
    *        - dashboard
    *      summary: 게시글 데일리 액션
    *      description: 총오늘 전체 글 조회 수, 등록된 글, 글 마감 수, 글 삭제 수 조회
+   *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *      responses:
    *        200:
    *          description: successful operation
@@ -139,6 +162,7 @@ export default (app: Router) => {
    */
   route.get(
     '/posts/daily',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const DashboardServiceInstance = new DashboardService();
       const post = await DashboardServiceInstance.findDailyPost();
@@ -156,6 +180,12 @@ export default (app: Router) => {
    *      summary: 일자별 게시글 현황
    *      description: 조회 기간에 해당되는 게시글 정보 집계(일자, 등록된 글, 마감된 글, 삭제된 글)
    *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *        - name: startDate
    *          in: query
    *          description: 조회 시작일
@@ -200,6 +230,7 @@ export default (app: Router) => {
    */
   route.get(
     '/posts/history',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { startDate, endDate } = req.query;
       const DashboardServiceInstance = new DashboardService();
@@ -218,6 +249,12 @@ export default (app: Router) => {
    *      summary: 가장 많이 조회해 본 언어 필터
    *      description: 조회 기간에 해당되는 언어 필터링 순위
    *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *        - name: startDate
    *          in: query
    *          description: 조회 시작일
@@ -257,6 +294,7 @@ export default (app: Router) => {
   // 가장 많이 조회해 본 언어 필터
   route.get(
     '/posts/filter-rank',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { startDate, endDate } = req.query;
       const DashboardServiceInstance = new DashboardService();

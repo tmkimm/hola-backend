@@ -5,6 +5,7 @@ import { Advertisement as AdvertisementModel } from '../../models/Advertisement'
 import { AdvertisementLog as AdvertisementLogModel } from '../../models/AdvertisementLog';
 import { Campaign as CampaignModel } from '../../models/Campaign';
 import { CampaignService } from '../../services/campaign';
+import { isAccessTokenValidWithAdmin } from '../middlewares/isAccessTokenValidWithAdmin';
 
 const route = Router();
 
@@ -28,6 +29,12 @@ export default (app: Router) => {
    *      summary: 캠페인 리스트 조회(Pagination)
    *      description: 캠페인 리스트를 조회한다.
    *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *        - name: page
    *          in: query
    *          description: 현재 페이지(기본 1)
@@ -48,6 +55,7 @@ export default (app: Router) => {
   // #endregion
   route.get(
     '/',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { page } = req.query;
       const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel, AdvertisementLogModel);
@@ -67,6 +75,12 @@ export default (app: Router) => {
    *      summary: 캠페인 상세 보기
    *      description: '캠페인 상세 정보를 조회한다.'
    *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *        - name: id
    *          in: path
    *          description: 캠페인 Id
@@ -87,6 +101,7 @@ export default (app: Router) => {
   // #endregion
   route.get(
     '/:id',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const campaignId = req.params.id;
       const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel, AdvertisementLogModel);
@@ -106,6 +121,12 @@ export default (app: Router) => {
    *      summary: 캠페인의 광고 리스트 보기
    *      description: '캠페인의 등록된 광고 리스트를 조회한다.'
    *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *        - name: id
    *          in: path
    *          description: 캠페인 Id
@@ -124,6 +145,7 @@ export default (app: Router) => {
   // #endregion
   route.get(
     '/:id/advertisement',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const campaignId = req.params.id;
       const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel, AdvertisementLogModel);
@@ -143,6 +165,12 @@ export default (app: Router) => {
    *      summary: 캠페인의 광고 성과 집계
    *      description: '광고 성과를 조회한다.'
    *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *        - name: id
    *          in: path
    *          description: 캠페인 Id
@@ -161,6 +189,7 @@ export default (app: Router) => {
   // #endregion
   route.get(
     '/:id/result',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const campaignId = req.params.id;
       const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel, AdvertisementLogModel);
@@ -179,6 +208,13 @@ export default (app: Router) => {
    *        - campaigns
    *      summary: 캠페인 등록
    *      description: '신규 캠페인를 등록한다.'
+   *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *      requestBody:
    *        content:
    *          application/json:
@@ -201,6 +237,7 @@ export default (app: Router) => {
   // #endregion
   route.post(
     '/',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async function (req: Request, res: Response, next: NextFunction) {
       try {
         const campaignDTO = req.body;
@@ -234,6 +271,12 @@ export default (app: Router) => {
    *      summary: 캠페인 수정
    *      description: 캠페인를 수정한다.
    *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *        - name: id
    *          in: path
    *          description: 캠페인 Id
@@ -263,6 +306,7 @@ export default (app: Router) => {
   // #endregion
   route.patch(
     '/:id',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
       const campaignDTO = req.body;
@@ -284,6 +328,12 @@ export default (app: Router) => {
    *      summary: 캠페인 삭제
    *      description: 캠페인를 삭제한다.
    *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *        - name: id
    *          in: path
    *          description: 캠페인 Id
@@ -302,6 +352,7 @@ export default (app: Router) => {
   // #endregion
   route.delete(
     '/:id',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
       const CampaignServiceInstance = new CampaignService(CampaignModel, AdvertisementModel, AdvertisementLogModel);

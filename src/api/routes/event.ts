@@ -5,6 +5,7 @@ import { Advertisement as AdvertisementModel } from '../../models/Advertisement'
 import { Event as EventModel } from '../../models/Event';
 import { EventService } from './../../services/event';
 import { checkEvent, isEventValid } from '../middlewares/isEventValid';
+import { isAccessTokenValidWithAdmin } from '../middlewares/isAccessTokenValidWithAdmin';
 
 const route = Router();
 
@@ -371,6 +372,13 @@ export default (app: Router) => {
    *        - events
    *      summary: 공모전 등록
    *      description: '신규 공모전를 등록한다.'
+   *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *      requestBody:
    *        content:
    *          application/json:
@@ -393,6 +401,7 @@ export default (app: Router) => {
   // #endregion
   route.post(
     '/',
+    isAccessTokenValidWithAdmin,
     checkEvent,
     isEventValid,
     asyncErrorWrapper(async function (req: Request, res: Response, next: NextFunction) {
@@ -431,6 +440,12 @@ export default (app: Router) => {
    *      summary: 공모전 수정
    *      description: 공모전를 수정한다.
    *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *        - name: id
    *          in: path
    *          description: 공모전 Id
@@ -460,6 +475,7 @@ export default (app: Router) => {
   // #endregion
   route.patch(
     '/:id',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
       //const { _id: tokenUserId, tokenType } = req.user as IUser;
@@ -483,6 +499,12 @@ export default (app: Router) => {
    *      summary: 공모전 삭제
    *      description: 공모전를 삭제한다.
    *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: false
+   *          schema:
+   *            type: string
    *        - name: id
    *          in: path
    *          description: 공모전 Id
@@ -501,6 +523,7 @@ export default (app: Router) => {
   // #endregion
   route.delete(
     '/:id',
+    isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
       //const { _id: tokenUserId, tokenType } = req.user as IUser;
