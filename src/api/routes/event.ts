@@ -6,6 +6,9 @@ import { Event as EventModel } from '../../models/Event';
 import { EventService } from './../../services/event';
 import { checkEvent, isEventValid } from '../middlewares/isEventValid';
 import { isAccessTokenValidWithAdmin } from '../middlewares/isAccessTokenValidWithAdmin';
+import { isAccessTokenValid } from '../middlewares/isAccessTokenValid';
+import { isEventIdValid } from '../middlewares/isEventIdValid';
+import { IUser } from '../../models/User';
 
 const route = Router();
 
@@ -531,6 +534,117 @@ export default (app: Router) => {
       const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
       await EventServiceInstance.deleteEvent(Types.ObjectId(id));
       return res.status(204).json();
+    })
+  );
+
+  /**
+   * @swagger
+   * tags:
+        - name: likes
+          description: 공모전 관심 등록
+   */
+  // #region 좋아요 등록
+  /**
+   * @swagger
+   * paths:
+   *   /events/likes:
+   *    post:
+   *      tags:
+   *        - likes
+   *      summary: 좋아요 등록
+   *      description: 좋아요 등록
+   *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: true
+   *          schema:
+   *            type: string
+   *      requestBody:
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                eventId:
+   *                  type: string
+   *                  description : '글 ID'
+   *                  example: '61063af4ed4b420bbcfa0b4c'
+   *      responses:
+   *        201:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: object
+   *                properties:
+   *                  likeUsers:
+   *                    type: array
+   *                    description: 사용자 리스트
+   *                    items:
+   *                      type: string
+   *        400:
+   *          description: Invaild post data
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   */
+  // #endregion
+  route.post(
+    '/likes',
+    isAccessTokenValid,
+    isEventIdValid,
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const { eventId } = req.body;
+      const { _id: userId } = req.user as IUser;
+      const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
+      const event = await EventServiceInstance.addLike(Types.ObjectId(eventId), userId);
+
+      return res.status(201).json({ likeUsers: event.likes });
+    })
+  );
+
+  /**
+   * @swagger
+   * paths:
+   *   /events/likes/{id}:
+   *    delete:
+   *      tags:
+   *        - likes
+   *      summary: 공모전 좋아요 삭제
+   *      description: 좋아요 삭제
+   *      parameters:
+   *        - name: accessToken
+   *          in: header
+   *          description: access token
+   *          required: true
+   *          schema:
+   *            type: string
+   *        - name: id
+   *          in: path
+   *          description: 글 Id
+   *          required: true
+   *          example: '60213d1c3126991a7cd1d287'
+   *          schema:
+   *            type: string
+   *      responses:
+   *        204:
+   *          description: successful operation
+   *        401:
+   *          $ref: '#/components/responses/UnauthorizedError'
+   *        404:
+   *          description: Event not found
+   */
+  route.delete(
+    '/likes/:id',
+    isAccessTokenValid,
+    isEventIdValid,
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const eventId = req.params.id; // 사용자 id
+      const { _id: userId } = req.user as IUser;
+
+      const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
+      const event = await EventServiceInstance.deleteLike(Types.ObjectId(eventId), userId);
+      return res.status(201).json({ likeUsers: event.likes });
     })
   );
 };

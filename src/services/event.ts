@@ -6,6 +6,7 @@ import { timeForEndDate } from '../utills/timeForEndDate';
 import { isNumber } from './../utills/isNumber';
 import AWS from 'aws-sdk';
 import config from '../config';
+import { LikeEvents } from '../models/LikeEvents';
 
 export class EventService {
   constructor(
@@ -153,5 +154,23 @@ export class EventService {
 
     const signedUrlPut = await s3.getSignedUrlPromise('putObject', params);
     return signedUrlPut;
+  }
+
+  // 관심 등록 추가
+  async addLike(postId: Types.ObjectId, userId: Types.ObjectId) {
+    const { event, isLikeExist } = await this.eventModel.addLike(postId, userId);
+    if (!isLikeExist) {
+      await LikeEvents.add(postId, userId);
+    }
+    return event;
+  }
+
+  // 관심 등록 취소(삭제)
+  async deleteLike(postId: Types.ObjectId, userId: Types.ObjectId) {
+    const { event, isLikeExist } = await this.eventModel.deleteLike(postId, userId);
+    if (isLikeExist) {
+      await LikeEvents.delete(postId, userId);
+    }
+    return event;
   }
 }

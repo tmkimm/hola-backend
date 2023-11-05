@@ -64,6 +64,9 @@ import { isNumber } from '../utills/isNumber';
  *        description: 모집 마감일
  *        format: date-time
  *        example: "2023-08-01T08:30:00Z"
+ *      likes:
+ *        type: array
+ *        description: 관심 등록한 사용자 리스트
  *      author:
  *        type: string
  *        description: 작성자 ID
@@ -220,10 +223,11 @@ export interface IEvent {
   closeDate: Date;
   author: Types.ObjectId | null;
   view: number;
-  totalLikes: number;
   description: boolean | null;
   isFree: boolean;
   price: number;
+  likes: Types.ObjectId[]; // 관심 등록한 사용자 리스트
+  totalLikes: number;
 }
 
 export interface IEventDocument extends IEvent, Document {}
@@ -247,6 +251,14 @@ export interface IEventModel extends Model<IEventDocument> {
   countEvent: (eventType: string | null, onOffLine: string | null, search: string | null) => Promise<number>;
   findRecommendEventList: (notInEventId: Types.ObjectId[]) => Promise<IEventDocument[]>;
   findRandomEventByEventType: (eventId: Types.ObjectId, eventType: string | null) => Promise<IEventDocument[]>;
+  addLike: (
+    eventId: Types.ObjectId,
+    userId: Types.ObjectId
+  ) => Promise<{ event: IEventDocument; isLikeExist: boolean }>;
+  deleteLike: (
+    eventId: Types.ObjectId,
+    userId: Types.ObjectId
+  ) => Promise<{ event: IEventDocument; isLikeExist: boolean }>;
 }
 
 const eventSchema = new Schema<IEventDocument>(
@@ -268,6 +280,7 @@ const eventSchema = new Schema<IEventDocument>(
     isClosed: { type: Boolean, default: false }, // 마감 여부
     views: { type: Number, default: 0 }, // 조회수
     totalLikes: { type: Number, default: 0 }, // 관심 등록 수
+    likes: [{ type: Types.ObjectId, ref: 'User' }], // 관심 등록한 사용자 리스트
     description: { type: String, default: null }, // 공모전 설명
     isFree: { type: Boolean, default: false }, // 무료 여부
     price: { type: Number, default: null }, // 금액
@@ -456,6 +469,58 @@ eventSchema.statics.findRandomEventByEventType = async function (eventId: Types.
     },
   ]);
   return event;
+};
+
+// 관심등록 추가
+// 디바운스 실패 경우를 위해 예외처리
+eventSchema.statics.addLike = async function (eventId, userId) {
+  const event: IEvent[] = await this.find({ _id: eventId, likes: { $in: [userId] } });
+  const isLikeExist = event.length > 0;
+  let result: IEvent;
+
+  if (!isLikeExist) {
+    result = await this.findByIdAndUpdate(
+      { _id: eventId },
+      {
+        $push: {
+          likes: {
+            _id: userId,
+          },
+        },
+        $inc: {
+          totalLikes: 1,
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+      }
+    );
+  } else {
+    result = event[event.length - 1];
+  }
+  return { event: result, isLikeExist };
+};
+
+eventSchema.statics.deleteLike = async function (eventId, userId) {
+  const events = await this.find({ _id: eventId });
+  let event: IEvent | null = events[events.length - 1];
+  const isLikeExist = event && event.likes.indexOf(userId) > -1;
+  if (isLikeExist) {
+    event = await this.findOneAndUpdate(
+      { _id: eventId },
+      {
+        $pull: { likes: userId },
+        $inc: {
+          totalLikes: -1,
+        },
+      },
+      {
+        new: true,
+      }
+    );
+  }
+  return { event, isLikeExist };
 };
 
 const Event = model<IEventDocument, IEventModel>('Event', eventSchema);
