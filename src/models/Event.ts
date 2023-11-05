@@ -371,9 +371,8 @@ eventSchema.statics.findEventCalendar = async function (
 ) {
   const query = makeFindEventQuery(eventType, null); // 조회 query 생성
   const firstDay = new Date(year, month - 1, 1);
-  const lastDay = new Date(year, month, 0);
+  const lastDay = new Date(year, month);
   query.startDate = { $gte: firstDay, $lte: lastDay };
-
   const aggregateSearch = [];
   if (search && typeof search === 'string') {
     aggregateSearch.push({

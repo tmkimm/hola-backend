@@ -14,15 +14,17 @@ export class EventService {
     protected adverisementModel: IAdvertisementModel
   ) {}
 
-  // 메인 화면에서 글 리스트를 조회한다.
+  // 리스트뷰 조회
   async findEventList(
     page: string | null,
     sort: string | null,
     eventType: string | null,
     search: string | null,
-    onOffLine: string | null
+    onOffLine: string | null,
+    userId: Types.ObjectId | null
   ) {
     let result: IEventDocument[] = await this.eventModel.findEventPagination(page, sort, eventType, search, onOffLine);
+    result = this.addPostVirtualField(result, userId);
     return result;
   }
 
@@ -34,26 +36,54 @@ export class EventService {
     return lastPage;
   }
 
-  // 메인 화면에서 글 리스트를 조회한다.
+  // 캘린더뷰 조회
   async findEventListInCalendar(
     year: string | null,
     month: string | null,
     eventType: string | null,
-    search: string | null
+    search: string | null,
+    userId: Types.ObjectId | null
   ) {
     if (!isNumber(year) || !isNumber(month))
       throw new CustomError('IllegalArgumentError', 400, 'Date format is incorrect');
-    let b: String = '123';
     let result: IEventDocument[] = await this.eventModel.findEventCalendar(
       Number(year),
       Number(month),
       eventType,
       search
     );
+    result = this.addPostVirtualField(result, userId);
     return result;
   }
 
-  // 메인 화면에서 글 리스트를 조회한다.
+  // mongoose virtual field 추가
+  // mongodb text search를 위해 aggregate 사용 시 virtual field가 조회되지 않음 > 수동 추가
+  // isLiked : 사용자의 관심 등록 여부
+  addPostVirtualField(events: IEventDocument[], userId: Types.ObjectId | null): IEventDocument[] {
+    let result = [];
+    // 글 상태
+    result = events.map((event: any) => {
+      let isLiked = false;
+
+      // add isLiked
+      if (userId != null && event.likes && event.likes.length > 0) {
+        // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
+        for (const likeUserId of event.likes) {
+          if (likeUserId.toString() == userId.toString()) {
+            isLiked = true;
+            break;
+          }
+        }
+      }
+      event.isLiked = isLiked;
+
+      return event;
+    });
+
+    return result;
+  }
+
+  // 공모전 상세 조회
   async findEvent(eventId: Types.ObjectId) {
     const event = await this.eventModel.findById(eventId);
     if (!event) throw new CustomError('NotFoundError', 404, 'Event not found');

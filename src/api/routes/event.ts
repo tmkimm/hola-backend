@@ -9,6 +9,7 @@ import { isAccessTokenValidWithAdmin } from '../middlewares/isAccessTokenValidWi
 import { isAccessTokenValid } from '../middlewares/isAccessTokenValid';
 import { isEventIdValid } from '../middlewares/isEventIdValid';
 import { IUser } from '../../models/User';
+import { getUserIdByAccessToken } from '../middlewares/getUserIdByAccessToken';
 
 const route = Router();
 
@@ -80,10 +81,12 @@ export default (app: Router) => {
   // #endregion
   route.get(
     '/',
+    getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { page, sort, eventType, search, onOffLine } = req.query;
+      const { _id: userId } = req.user as IUser;
       const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
-      const events = await EventServiceInstance.findEventList(page, sort, eventType, search, onOffLine);
+      const events = await EventServiceInstance.findEventList(page, sort, eventType, search, onOffLine, userId);
       return res.status(200).json(events);
     })
   );
@@ -196,11 +199,13 @@ export default (app: Router) => {
   // #endregion
   route.get(
     '/calendar/:year/:month',
+    getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { year, month } = req.params;
       const { eventType, search } = req.query;
+      const { _id: userId } = req.user as IUser;
       const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
-      const events = await EventServiceInstance.findEventListInCalendar(year, month, eventType, search);
+      const events = await EventServiceInstance.findEventListInCalendar(year, month, eventType, search, userId);
       return res.status(200).json(events);
     })
   );
