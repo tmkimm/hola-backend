@@ -60,6 +60,35 @@ export default (app: Router) => {
     })
   );
 
+  // #region 진행중인 배너 광고 조회
+  /**
+   * @swagger
+   * paths:
+   *   /advertisements/banner:
+   *    get:
+   *      tags:
+   *        - advertisements
+   *      summary: 진행중인 배너 광고 조회
+   *      description: '배너를 조회한다.'
+   *      parameters:
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                $ref: '#/components/schemas/Advertisement'
+   */
+  // #endregion
+  route.get(
+    '/banner',
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const AdvertisementServiceInstance = new AdvertisementService(AdvertisementModel);
+      const advertisement = await AdvertisementServiceInstance.findActiveBanner();
+      return res.status(200).json(advertisement);
+    })
+  );
+
   // #region 광고 상세 보기
   /**
    * @swagger

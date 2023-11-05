@@ -96,6 +96,7 @@ export interface IAdvertisementModel extends Model<IAdvertisementDocument> {
   findActiveADListInEvent: () => Promise<IAdvertisementDocument[]>;
   deleteAdvertisement: (id: Types.ObjectId) => void;
   modifyAdvertisement: (id: Types.ObjectId, advertisement: IAdvertisementDocument) => Promise<IAdvertisementDocument[]>;
+  findActiveBanner: () => Promise<IAdvertisementDocument[]>;
 }
 
 const advertisementSchema = new Schema<IAdvertisementDocument>(
@@ -157,6 +158,14 @@ advertisementSchema.statics.findActiveADListInEvent = async function () {
     },
   ]);
   return adEvent;
+};
+
+// 진행중인 배너 광고 조회
+advertisementSchema.statics.findActiveBanner = async function () {
+  const result = await this.find({ advertisementType: 'banner', advertisementStatus: 'active' })
+    .sort('+bannerSequence')
+    .select('link linkOpenType imageUrl mainCopy subCopy bannerSequence');
+  return result;
 };
 
 advertisementSchema.statics.modifyAdvertisement = async function (id, advertisement) {

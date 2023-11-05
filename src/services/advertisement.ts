@@ -5,6 +5,12 @@ import { IAdvertisementDocument, IAdvertisementModel } from '../models/Advertise
 export class AdvertisementService {
   constructor(protected advertisementModel: IAdvertisementModel) {}
 
+  // 진행중인 배너 광고 조회
+  async findActiveBanner() {
+    const advertisement = await this.advertisementModel.findActiveBanner();
+    return advertisement;
+  }
+
   // 광고 상세 조회
   async findAdvertisement(advertisementId: Types.ObjectId) {
     const advertisement = await this.advertisementModel.findAdvertisement(advertisementId);
