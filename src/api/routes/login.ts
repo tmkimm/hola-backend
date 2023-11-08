@@ -77,7 +77,7 @@ export default (app: Router) => {
    *   /login:
    *    post:
    *      tags:
-   *        - login
+   *        - 로그인
    *      summary: 로그인(Oauth 2.0)
    *      description: '소셜 로그인(google, gitgub, kakao)'
    *      requestBody:
@@ -114,8 +114,9 @@ export default (app: Router) => {
       // 로그인 시 각 소셜 로그인 Oauth 서버를 통해 올바른 토큰인지 확인한다.(idToken)
       const { idToken } = req.user as IUser;
       const AuthServiceInstance = new AuthService(UserModel);
-      const { _id, nickName, image, likeLanguages, accessToken, refreshToken } =
-        await AuthServiceInstance.SignIn(idToken);
+      const { _id, nickName, image, likeLanguages, accessToken, refreshToken } = await AuthServiceInstance.SignIn(
+        idToken
+      );
       res.cookie('R_AUTH', refreshToken, {
         sameSite: 'none',
         httpOnly: true,
@@ -139,7 +140,7 @@ export default (app: Router) => {
    *   /login/signup:
    *    post:
    *      tags:
-   *        - login
+   *        - 로그인
    *      summary: 회원 가입
    *      description: '로그인 시 회원 정보가 Insert되므로 회원 가입 시 정보를 수정한다. 회원 가입 완료 시 Refresh Token과 Access Token이 발급된다.'
    *      requestBody:

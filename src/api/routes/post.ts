@@ -32,7 +32,7 @@ export default (app: Router) => {
    *   /posts/top:
    *    get:
    *      tags:
-   *        - posts
+   *        - 팀원 모집
    *      summary: 이번주 인기글
    *      description: 메인 페이지에서 이번주 인기글을 조회한다.(조회수 기준 정렬)
    *      parameters:
@@ -53,7 +53,7 @@ export default (app: Router) => {
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
       const posts = await PostServiceInstance.findTopPost();
       return res.status(200).json(posts);
-    }),
+    })
   );
 
   // #region 글 리스트 조회(페이징)
@@ -63,7 +63,7 @@ export default (app: Router) => {
    *   /posts/pagination:
    *    get:
    *      tags:
-   *        - posts
+   *        - 팀원 모집
    *      summary: 글 리스트 조회(페이징)
    *      description: 메인 페이지에서 글 리스트를 조회한다.
    *      parameters:
@@ -168,11 +168,11 @@ export default (app: Router) => {
         position,
         search,
         userId,
-        onOffLine,
+        onOffLine
       );
 
       return res.status(200).json(posts);
-    }),
+    })
   );
 
   /**
@@ -181,7 +181,7 @@ export default (app: Router) => {
    *   /posts/last-page:
    *    get:
    *      tags:
-   *        - posts
+   *        - 팀원 모집
    *      summary: 총 페이지 수 구하기
    *      description: 마지막 페이지를 구한다.
    *      parameters:
@@ -259,13 +259,13 @@ export default (app: Router) => {
         type,
         position,
         search,
-        onOffLine,
+        onOffLine
       );
 
       return res.status(200).json({
         lastPage,
       });
-    }),
+    })
   );
 
   // #region 글 상세에서 관련 글 추천
@@ -275,7 +275,7 @@ export default (app: Router) => {
    *   /posts/{id}/recommend:
    *    get:
    *      tags:
-   *        - posts
+   *        - 팀원 모집
    *      summary: 글 상세에서 관련 글 추천
    *      description: '사용자가 읽고 있는 글과 관련된 글을 추천한다. 같은 기술 스택인 글 / 조회수 순으로 정렬 / 사용자가 작성한 글을 제외하기 위해 access token 사용'
    *      parameters:
@@ -317,7 +317,7 @@ export default (app: Router) => {
       // const post = await PostServiceInstance.findPopularPosts(Types.ObjectId(postId), userId);  // 무조건 인기글 순으로 조회
 
       return res.status(200).json(post);
-    }),
+    })
   );
 
   // #region 글 상세 보기
@@ -327,7 +327,7 @@ export default (app: Router) => {
    *   /posts/{id}:
    *    get:
    *      tags:
-   *        - posts
+   *        - 팀원 모집
    *      summary: 글 상세 보기
    *      description: '글 상세 정보를 조회한다. 읽은 목록 추가를 위해 access token을 사용한다.'
    *      parameters:
@@ -369,7 +369,7 @@ export default (app: Router) => {
       const post = await PostServiceInstance.findPostDetail(Types.ObjectId(postId), userId);
 
       return res.status(200).json(post);
-    }),
+    })
   );
 
   // #region 글 등록
@@ -379,7 +379,7 @@ export default (app: Router) => {
    *   /posts:
    *    post:
    *      tags:
-   *        - posts
+   *        - 팀원 모집
    *      summary: 글 등록
    *      description: '신규 글을 등록한다.'
    *      parameters:
@@ -435,7 +435,7 @@ export default (app: Router) => {
           error,
         });
       }
-    }),
+    })
   );
 
   // #region 글 수정
@@ -445,7 +445,7 @@ export default (app: Router) => {
    *   /posts/{id}:
    *    patch:
    *      tags:
-   *        - posts
+   *        - 팀원 모집
    *      summary: 글 수정
    *      description: 글을 수정한다.
    *      parameters:
@@ -497,7 +497,7 @@ export default (app: Router) => {
       const post = await PostServiceInstance.modifyPost(Types.ObjectId(id), tokenUserId, tokenType, postDTO);
 
       return res.status(200).json(post);
-    }),
+    })
   );
 
   // #region 글 삭제
@@ -507,7 +507,7 @@ export default (app: Router) => {
    *   /posts/{id}:
    *    delete:
    *      tags:
-   *        - posts
+   *        - 팀원 모집
    *      summary: 글 삭제
    *      description: 글을 삭제한다.
    *      parameters:
@@ -538,7 +538,7 @@ export default (app: Router) => {
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
       await PostServiceInstance.deletePost(Types.ObjectId(id), tokenUserId, tokenType);
       return res.status(204).json();
-    }),
+    })
   );
 
   /**
@@ -554,7 +554,7 @@ export default (app: Router) => {
    *   /posts/likes:
    *    post:
    *      tags:
-   *        - likes
+   *        - 모집글 관심등록
    *      summary: 좋아요 등록
    *      description: 좋아요 등록
    *      parameters:
@@ -605,7 +605,7 @@ export default (app: Router) => {
       const post = await PostServiceInstance.addLike(Types.ObjectId(postId), userId);
 
       return res.status(201).json({ likeUsers: post.likes });
-    }),
+    })
   );
 
   /**
@@ -614,7 +614,7 @@ export default (app: Router) => {
    *   /posts/likes/{id}:
    *    delete:
    *      tags:
-   *        - likes
+   *        - 모집글 관심등록
    *      summary: 좋아요 삭제
    *      description: 좋아요 삭제
    *      parameters:
@@ -650,7 +650,7 @@ export default (app: Router) => {
       const PostServiceInstance = new PostService(PostModel, UserModel, NotificationModel);
       const post = await PostServiceInstance.deleteLike(Types.ObjectId(postId), userId);
       return res.status(201).json({ likeUsers: post.likes });
-    }),
+    })
   );
 
   /**
@@ -659,7 +659,7 @@ export default (app: Router) => {
    *   /posts/{id}/isLiked:
    *    get:
    *      tags:
-   *        - likes
+   *        - 모집글 관심등록
    *      summary: 사용자의 글 관심 등록 여부
    *      description: '사용자가 글에 관심 등록을 눌렀는지 여부를 조회한다. 사용자 정보는 access token을 이용해 확인한다.'
    *      parameters:
@@ -703,7 +703,7 @@ export default (app: Router) => {
       return res.status(200).json({
         isLiked,
       });
-    }),
+    })
   );
 
   /**
@@ -712,7 +712,7 @@ export default (app: Router) => {
    *   /posts/{id}/likes:
    *    get:
    *      tags:
-   *        - likes
+   *        - 모집글 관심등록
    *      summary: 글의 관심 등록한 사용자 리스트 조회
    *      description: '사용자가 글에 관심 등록한 사용자 리스트를 조회한다.'
    *      parameters:
@@ -747,6 +747,6 @@ export default (app: Router) => {
       return res.status(200).json({
         likeUsers,
       });
-    }),
+    })
   );
 };

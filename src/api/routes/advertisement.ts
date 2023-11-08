@@ -26,7 +26,7 @@ export default (app: Router) => {
    *   /advertisements/event-log:
    *    post:
    *      tags:
-   *        - advertisements
+   *        - 광고
    *      summary: 광고 이벤트 추적 로깅
    *      description: '광고가 노출되었을때 이벤트를 추적한다.'
    *      requestBody:
@@ -67,7 +67,7 @@ export default (app: Router) => {
    *   /advertisements/banner:
    *    get:
    *      tags:
-   *        - advertisements
+   *        - 광고
    *      summary: 진행중인 배너 광고 조회
    *      description: '배너를 조회한다.'
    *      parameters:
@@ -96,7 +96,7 @@ export default (app: Router) => {
    *   /advertisements/{id}:
    *    get:
    *      tags:
-   *        - advertisements
+   *        - 광고
    *      summary: 광고 상세 보기
    *      description: '광고 상세 정보를 조회한다.'
    *      parameters:
@@ -142,7 +142,7 @@ export default (app: Router) => {
    *   /advertisements:
    *    post:
    *      tags:
-   *        - advertisements
+   *        - 광고
    *      summary: 광고 등록
    *      description: '신규 광고를 등록한다.'
    *      parameters:
@@ -204,7 +204,7 @@ export default (app: Router) => {
    *   /advertisements/{id}:
    *    patch:
    *      tags:
-   *        - advertisements
+   *        - 광고
    *      summary: 광고 수정
    *      description: 광고를 수정한다.
    *      parameters:
@@ -264,7 +264,7 @@ export default (app: Router) => {
    *   /advertisements/{id}:
    *    delete:
    *      tags:
-   *        - advertisements
+   *        - 광고
    *      summary: 광고 삭제
    *      description: 광고를 삭제한다.
    *      parameters:

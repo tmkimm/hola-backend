@@ -22,7 +22,7 @@ export default (app: Router) => {
    *   /admin/login:
    *    post:
    *      tags:
-   *        - admin
+   *        - 어드민
    *      summary: Admin 로그인
    *      description: admin 계정으로 로그인한다.
    *      requestBody:
@@ -76,8 +76,9 @@ export default (app: Router) => {
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { idToken } = req.user as IUser;
       const AuthServiceInstance = new AuthService(UserModel);
-      const { _id, nickName, image, likeLanguages, accessToken, refreshToken } =
-        await AuthServiceInstance.SignIn(idToken);
+      const { _id, nickName, image, likeLanguages, accessToken, refreshToken } = await AuthServiceInstance.SignIn(
+        idToken
+      );
       res.cookie('R_AUTH', refreshToken, {
         sameSite: 'none',
         httpOnly: true,

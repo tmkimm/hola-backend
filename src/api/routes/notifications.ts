@@ -17,7 +17,7 @@ export default (app: Router) => {
    *   /notifications:
    *    get:
    *      tags:
-   *        - notifications
+   *        - 알림
    *      summary: 내 알림 조회
    *      description: '내 알림을 조회한다.'
    *      responses:
@@ -50,7 +50,7 @@ export default (app: Router) => {
    *   /notifications:
    *    patch:
    *      tags:
-   *        - notifications
+   *        - 알림
    *      summary: 알림 읽음 처리
    *      description: '알림을 읽음 처리한다.'
    *      parameters:

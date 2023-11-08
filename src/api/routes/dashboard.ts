@@ -20,7 +20,7 @@ export default (app: Router) => {
    *   /dashboard/users/daily:
    *    get:
    *      tags:
-   *        - dashboard
+   *        - 대시보드(어드민)
    *      summary: 사용자 데일리 액션
    *      description: 총 회원 수, 오늘 가입자, 오늘 탈퇴자 조회
    *      parameters:
@@ -64,7 +64,7 @@ export default (app: Router) => {
    *   /dashboard/users/history:
    *    get:
    *      tags:
-   *        - dashboard
+   *        - 대시보드(어드민)
    *      summary: 일자별 회원 가입 현황
    *      description: 조회 기간에 해당되는 가입자 정보 집계
    *      parameters:
@@ -129,7 +129,7 @@ export default (app: Router) => {
    *   /dashboard/posts/daily:
    *    get:
    *      tags:
-   *        - dashboard
+   *        - 대시보드(어드민)
    *      summary: 게시글 데일리 액션
    *      description: 총오늘 전체 글 조회 수, 등록된 글, 글 마감 수, 글 삭제 수 조회
    *      parameters:
@@ -176,7 +176,7 @@ export default (app: Router) => {
    *   /dashboard/posts/history:
    *    get:
    *      tags:
-   *        - dashboard
+   *        - 대시보드(어드민)
    *      summary: 일자별 게시글 현황
    *      description: 조회 기간에 해당되는 게시글 정보 집계(일자, 등록된 글, 마감된 글, 삭제된 글)
    *      parameters:
@@ -245,7 +245,7 @@ export default (app: Router) => {
    *   /dashboard/posts/filter-rank:
    *    get:
    *      tags:
-   *        - dashboard
+   *        - 대시보드(어드민)
    *      summary: 가장 많이 조회해 본 언어 필터
    *      description: 조회 기간에 해당되는 언어 필터링 순위
    *      parameters:

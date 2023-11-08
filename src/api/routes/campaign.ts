@@ -25,7 +25,7 @@ export default (app: Router) => {
    *   /campaigns:
    *    get:
    *      tags:
-   *        - campaigns
+   *        - 캠페인 관리(어드민)
    *      summary: 캠페인 리스트 조회(Pagination)
    *      description: 캠페인 리스트를 조회한다.
    *      parameters:
@@ -71,7 +71,7 @@ export default (app: Router) => {
    *   /campaigns/{id}:
    *    get:
    *      tags:
-   *        - campaigns
+   *        - 캠페인 관리(어드민)
    *      summary: 캠페인 상세 보기
    *      description: '캠페인 상세 정보를 조회한다.'
    *      parameters:
@@ -117,7 +117,7 @@ export default (app: Router) => {
    *   /campaigns/{id}/advertisement:
    *    get:
    *      tags:
-   *        - campaigns
+   *        - 캠페인 관리(어드민)
    *      summary: 캠페인의 광고 리스트 보기
    *      description: '캠페인의 등록된 광고 리스트를 조회한다.'
    *      parameters:
@@ -161,7 +161,7 @@ export default (app: Router) => {
    *   /campaigns/{id}/result:
    *    get:
    *      tags:
-   *        - campaigns
+   *        - 캠페인 관리(어드민)
    *      summary: 캠페인의 광고 성과 집계
    *      description: '광고 성과를 조회한다.'
    *      parameters:
@@ -205,7 +205,7 @@ export default (app: Router) => {
    *   /campaigns:
    *    post:
    *      tags:
-   *        - campaigns
+   *        - 캠페인 관리(어드민)
    *      summary: 캠페인 등록
    *      description: '신규 캠페인를 등록한다.'
    *      parameters:
@@ -267,7 +267,7 @@ export default (app: Router) => {
    *   /campaigns/{id}:
    *    patch:
    *      tags:
-   *        - campaigns
+   *        - 캠페인 관리(어드민)
    *      summary: 캠페인 수정
    *      description: 캠페인를 수정한다.
    *      parameters:
@@ -324,7 +324,7 @@ export default (app: Router) => {
    *   /campaigns/{id}:
    *    delete:
    *      tags:
-   *        - campaigns
+   *        - 캠페인 관리(어드민)
    *      summary: 캠페인 삭제
    *      description: 캠페인를 삭제한다.
    *      parameters:

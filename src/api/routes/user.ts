@@ -40,7 +40,7 @@ export default (app: Router) => {
    *   /users:
    *    get:
    *      tags:
-   *        - users
+   *        - 사용자
    *      summary: 사용자 조회
    *      description: 닉네임으로 사용자 정보를 조회한다.
    *      parameters:
@@ -85,7 +85,7 @@ export default (app: Router) => {
    *   /users/{id}:
    *    get:
    *      tags:
-   *        - users
+   *        - 사용자
    *      summary: 사용자 상세 정보 조회
    *      description: '사용자의 상세 정보를 조회한다.'
    *      parameters:
@@ -128,7 +128,7 @@ export default (app: Router) => {
    *   /users/{id}:
    *    patch:
    *      tags:
-   *        - users
+   *        - 사용자
    *      summary: 사용자 정보 수정
    *      description: 사용자 정보를 수정한다.
    *      parameters:
@@ -236,7 +236,7 @@ export default (app: Router) => {
    *   /users/{id}/exists:
    *    get:
    *      tags:
-   *        - users
+   *        - 사용자
    *      summary: 사용자 닉네임 중복 체크
    *      description: 사용자 닉네임 중복 체크
    *      parameters:
@@ -287,7 +287,7 @@ export default (app: Router) => {
    *   /users/{id}:
    *    delete:
    *      tags:
-   *        - users
+   *        - 사용자
    *      summary: 회원 탈퇴
    *      description: 사용자 정보 삭제
    *      parameters:
@@ -333,7 +333,7 @@ export default (app: Router) => {
    *   /users/likes/{id}:
    *    get:
    *      tags:
-   *        - users
+   *        - 사용자
    *      summary: 사용자 관심 등록 리스트 조회
    *      description: '관심 등록한 글들을 조회한다.'
    *      parameters:
@@ -379,7 +379,7 @@ export default (app: Router) => {
    *   /users/read-list/{id}:
    *    get:
    *      tags:
-   *        - users
+   *        - 사용자
    *      summary: 사용자 읽은 목록  조회
    *      description: '읽은 글들을 조회한다.'
    *      parameters:
@@ -419,7 +419,7 @@ export default (app: Router) => {
    *   /users/myPosts/{id}:
    *    get:
    *      tags:
-   *        - users
+   *        - 사용자
    *      summary: 사용자 작성 글 목록 조회
    *      description: '내가 작성한 글들을 조회한다.'
    *      parameters:

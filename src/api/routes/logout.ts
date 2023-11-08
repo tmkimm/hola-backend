@@ -11,7 +11,7 @@ export default (app: Router) => {
    *   /logout:
    *    post:
    *      tags:
-   *        - login
+   *        - 로그인
    *      summary: 로그아웃
    *      description: '로그아웃 처리되며 Refresh Token이 삭제된다.'
    *      responses:

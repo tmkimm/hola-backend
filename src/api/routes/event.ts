@@ -29,7 +29,7 @@ export default (app: Router) => {
    *   /events:
    *    get:
    *      tags:
-   *        - events
+   *        - 공모전
    *      summary: 공모전 리스트 조회(Pagination)
    *      description: 공모전 리스트를 조회한다.
    *      parameters:
@@ -98,7 +98,7 @@ export default (app: Router) => {
    *   /events/last-page:
    *    get:
    *      tags:
-   *        - events
+   *        - 공모전
    *      summary: 공모전 리스트 조회 - 마지막 페이지 조회
    *      description: Pagination에서 마지막 페이지를 조회한다.
    *      parameters:
@@ -154,7 +154,7 @@ export default (app: Router) => {
    *   /events/calendar/{year}/{month}:
    *    get:
    *      tags:
-   *        - events
+   *        - 공모전
    *      summary: 공모전 캘린더뷰 조회
    *      description: 공모전 캘린더뷰를 조회한다.
    *      parameters:
@@ -217,7 +217,7 @@ export default (app: Router) => {
    *   /events/recommend:
    *    get:
    *      tags:
-   *        - events
+   *        - 공모전
    *      summary: 추천 공모전 조회(AD)
    *      description: 추천 공모전을 조회한다.
    *      responses:
@@ -247,7 +247,7 @@ export default (app: Router) => {
    *   /events/pre-sign-url:
    *    get:
    *      tags:
-   *        - events
+   *        - 공모전
    *      summary: 공모전 이미지 S3 Pre-Signed URL 발급
    *      description: 공모전 이미지 S3 Pre-Signed URL 발급
    *      parameters:
@@ -291,7 +291,7 @@ export default (app: Router) => {
    *   /events/{id}:
    *    get:
    *      tags:
-   *        - events
+   *        - 공모전
    *      summary: 공모전 상세 보기
    *      description: '공모전 상세 정보를 조회한다.'
    *      parameters:
@@ -330,7 +330,7 @@ export default (app: Router) => {
    *   /events/{id}/recommend:
    *    get:
    *      tags:
-   *        - events
+   *        - 공모전
    *      summary: 공모전 상세에서 관련 공모전 추천
    *      description: '현재 읽고 있는 공모전 유형과 같은 글을 추천한다.'
    *      parameters:
@@ -377,7 +377,7 @@ export default (app: Router) => {
    *   /events:
    *    post:
    *      tags:
-   *        - events
+   *        - 공모전
    *      summary: 공모전 등록
    *      description: '신규 공모전를 등록한다.'
    *      parameters:
@@ -444,7 +444,7 @@ export default (app: Router) => {
    *   /events/{id}:
    *    patch:
    *      tags:
-   *        - events
+   *        - 공모전
    *      summary: 공모전 수정
    *      description: 공모전를 수정한다.
    *      parameters:
@@ -503,7 +503,7 @@ export default (app: Router) => {
    *   /events/{id}:
    *    delete:
    *      tags:
-   *        - events
+   *        - 공모전
    *      summary: 공모전 삭제
    *      description: 공모전를 삭제한다.
    *      parameters:
@@ -555,7 +555,7 @@ export default (app: Router) => {
    *   /events/likes:
    *    post:
    *      tags:
-   *        - likes
+   *        - 공모전 관심등록
    *      summary: 좋아요 등록
    *      description: 좋아요 등록
    *      parameters:
@@ -614,7 +614,7 @@ export default (app: Router) => {
    *   /events/likes/{id}:
    *    delete:
    *      tags:
-   *        - likes
+   *        - 공모전 관심등록
    *      summary: 공모전 좋아요 삭제
    *      description: 좋아요 삭제
    *      parameters:
