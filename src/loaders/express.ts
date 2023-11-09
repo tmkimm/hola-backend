@@ -15,6 +15,7 @@ export default (app: express.Application) => {
 
   const whitelist: StaticOrigin = [
     'http://localhost:3000',
+    'http://localhost:5173',
     'http://holaworld.io',
     'https://holaworld.io',
     'http://www.holaworld.io',
