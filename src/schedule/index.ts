@@ -1,3 +1,7 @@
+import { eventAutoClosing } from './event';
+import { postAutoClosing } from './post';
+
 export default () => {
-  //  autoClosing(); // 자동 마감
+  //postAutoClosing(); // 자동 마감
+  eventAutoClosing();
 };

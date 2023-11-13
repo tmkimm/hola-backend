@@ -203,4 +203,7 @@ export class EventService {
     }
     return event;
   }
+  async updateClosedAfterEndDate() {
+    await this.eventModel.updateClosedAfterEndDate();
+  }
 }

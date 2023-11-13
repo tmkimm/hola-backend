@@ -281,6 +281,7 @@ export interface IEventModel extends Model<IEventDocument> {
     eventId: Types.ObjectId,
     userId: Types.ObjectId
   ) => Promise<{ event: IEventDocument; isLikeExist: boolean }>;
+  updateClosedAfterEndDate(): void;
 }
 
 const eventSchema = new Schema<IEventDocument>(
@@ -546,5 +547,10 @@ eventSchema.statics.deleteLike = async function (eventId, userId) {
   return { event, isLikeExist };
 };
 
+// 신청기간이 지난글 자동 마감
+eventSchema.statics.updateClosedAfterEndDate = async function () {
+  const today = new Date();
+  await this.updateMany({ $and: [{ isClosed: false }, { applicationEndDate: { $lte: today } }] }, { isClosed: true });
+};
 const Event = model<IEventDocument, IEventModel>('Event', eventSchema);
 export { Event };
