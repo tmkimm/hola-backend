@@ -59,6 +59,16 @@ import { isNumber } from '../utills/isNumber';
  *        description: 종료일
  *        format: date-time
  *        example: "2023-08-15T08:30:00Z"
+ *      applicationStartDate:
+ *        type: string
+ *        description: 신청시작일
+ *        format: date-time
+ *        example: "2023-08-15T08:30:00Z"
+ *      applicationEndDate:
+ *        type: string
+ *        description: 신청종료일
+ *        format: date-time
+ *        example: "2023-08-15T08:30:00Z"
  *      closeDate:
  *        type: string
  *        description: 모집 마감일
@@ -199,6 +209,16 @@ import { isNumber } from '../utills/isNumber';
  *        description: 종료일
  *        format: date-time
  *        example: "2023-08-15T08:30:00Z"
+ *      applicationStartDate:
+ *        type: string
+ *        description: 신청시작일
+ *        format: date-time
+ *        example: "2023-08-15T08:30:00Z"
+ *      applicationEndDate:
+ *        type: string
+ *        description: 신청종료일
+ *        format: date-time
+ *        example: "2023-08-15T08:30:00Z"
  *      closeDate:
  *        type: string
  *        description: 모집 마감일
@@ -220,6 +240,8 @@ export interface IEvent {
   isClosed: boolean;
   startDate: Date;
   endDate: Date;
+  applicationStartDate: Date;
+  applicationEndDate: Date;
   closeDate: Date;
   author: Types.ObjectId | null;
   view: number;
@@ -274,6 +296,8 @@ const eventSchema = new Schema<IEventDocument>(
     smallImageUrl: { type: String, required: true }, // 이미지 URL(Small)
     startDate: { type: Date, required: true }, //  시작일
     endDate: { type: Date, required: true }, //  종료일
+    applicationStartDate: { type: Date, required: true }, //  신청시작일
+    applicationEndDate: { type: Date, required: true }, //  신청종료일
     closeDate: { type: Date, required: true }, //  모집 마감일(자동 마감용도)
     author: { type: Types.ObjectId, ref: 'User', required: false }, // 작성자
     isDeleted: { type: Boolean, default: false }, // 삭제 여부
