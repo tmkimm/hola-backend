@@ -265,7 +265,7 @@ export default (app: Router) => {
    * @swagger
    * paths:
    *   /campaigns/{id}:
-   *    patch:
+   *    put:
    *      tags:
    *        - 캠페인 관리(어드민)
    *      summary: 캠페인 수정
@@ -304,7 +304,7 @@ export default (app: Router) => {
    *          $ref: '#/components/responses/UnauthorizedError'
    */
   // #endregion
-  route.patch(
+  route.put(
     '/:id',
     isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
