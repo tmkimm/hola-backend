@@ -144,7 +144,7 @@ export default (app: Router) => {
    */
   // #endregion
   route.get(
-    '/:id/advertisement',
+    '/:id/advertisements',
     isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const campaignId = req.params.id;
