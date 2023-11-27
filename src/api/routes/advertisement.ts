@@ -202,7 +202,7 @@ export default (app: Router) => {
    * @swagger
    * paths:
    *   /advertisements/{id}:
-   *    patch:
+   *    put:
    *      tags:
    *        - 광고
    *      summary: 광고 수정
@@ -241,7 +241,7 @@ export default (app: Router) => {
    *          $ref: '#/components/responses/UnauthorizedError'
    */
   // #endregion
-  route.patch(
+  route.put(
     '/:id',
     isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {

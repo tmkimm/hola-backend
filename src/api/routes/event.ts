@@ -442,7 +442,7 @@ export default (app: Router) => {
    * @swagger
    * paths:
    *   /events/{id}:
-   *    patch:
+   *    put:
    *      tags:
    *        - 공모전
    *      summary: 공모전 수정
@@ -481,7 +481,7 @@ export default (app: Router) => {
    *          $ref: '#/components/responses/UnauthorizedError'
    */
   // #endregion
-  route.patch(
+  route.put(
     '/:id',
     isAccessTokenValidWithAdmin,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
