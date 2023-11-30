@@ -15,8 +15,18 @@ const checkEvent = [
   body('organization').isString().withMessage('"organization" Invaild datatype(String)').optional({ nullable: true }),
   body('link').isString().withMessage('"link" Invaild datatype(String)').optional({ nullable: true }),
   body('imageUrl').isString().withMessage('"imageUrl" Invaild datatype(String)').optional({ nullable: true }),
-  body('startDate').isDate().withMessage('"startDate" Invaild datatype(Date)').optional({ nullable: true }),
-  body('endDate').isDate().withMessage('"endDate" Invaild datatype(Date)').optional({ nullable: true }),
+  body('startDate')
+    .custom((value, { req }) => {
+      return !isNaN(new Date(value).getTime());
+    })
+    .withMessage('"startDate" Invaild datatype(Date)')
+    .optional({ nullable: true }),
+  body('endDate')
+    .custom((value, { req }) => {
+      return !isNaN(new Date(value).getTime());
+    })
+    .withMessage('"endDate" Invaild datatype(Date)')
+    .optional({ nullable: true }),
   body('eventType')
     .custom((value, { req }) => {
       return eventList.indexOf(value) > -1;

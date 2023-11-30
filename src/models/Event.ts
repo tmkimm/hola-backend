@@ -299,7 +299,7 @@ const eventSchema = new Schema<IEventDocument>(
     endDate: { type: Date, required: true }, //  종료일
     applicationStartDate: { type: Date, required: true }, //  신청시작일
     applicationEndDate: { type: Date, required: true }, //  신청종료일
-    closeDate: { type: Date, required: true }, //  모집 마감일(자동 마감용도)
+    closeDate: { type: Date, required: false }, //  모집 마감일(자동 마감용도)
     author: { type: Types.ObjectId, ref: 'User', required: false }, // 작성자
     isDeleted: { type: Boolean, default: false }, // 삭제 여부
     isClosed: { type: Boolean, default: false }, // 마감 여부
