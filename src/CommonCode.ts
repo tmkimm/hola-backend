@@ -51,7 +51,7 @@ const expectedPeriodCode: CommonCodeType = {
 };
 
 // 포지션
-const positionsCode: string[] = ['ALL', 'FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM', 'PD'];
+const positionsCode: string[] = ['ALL', 'FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM', 'PD', 'MK'];
 
 // 경력
 const workExperienceCode: CommonCodeType = {
