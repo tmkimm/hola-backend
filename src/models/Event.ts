@@ -360,7 +360,7 @@ eventSchema.statics.findEventPagination = async function (
     });
     sortQuery.push('-createdAt');
   } else {
-    sortQuery.push('createdAt');
+    sortQuery.push('-createdAt');
   }
   const query = makeFindEventQuery(eventType, onOffLine); // 조회 query 생성
   // Pagenation
