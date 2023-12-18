@@ -123,7 +123,7 @@ const advertisementSchema = new Schema<IAdvertisementDocument>(
 
 // 광고 상세 조회
 advertisementSchema.statics.findAdvertisement = async function (id) {
-  return await this.findById(id);
+  return await this.findById(id).populate('eventId', 'title').lean();
 };
 
 // 진행중인 공모전 광고 조회

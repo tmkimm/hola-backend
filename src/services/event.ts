@@ -56,6 +56,12 @@ export class EventService {
     return result;
   }
 
+  // 진행중인 모든 공모전 조회(SelectBox 전용)
+  async findEventTitleForSelectBox() {
+    let result: IEventDocument[] = await this.eventModel.findEventForSelectBox(80);
+    return result;
+  }
+
   // mongoose virtual field 추가
   // mongodb text search를 위해 aggregate 사용 시 virtual field가 조회되지 않음 > 수동 추가
   // isLiked : 사용자의 관심 등록 여부
