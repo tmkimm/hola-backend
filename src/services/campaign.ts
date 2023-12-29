@@ -48,12 +48,14 @@ export class CampaignService {
 
   // 광고 결과 집계
   async findCampaignResult(campaignId: Types.ObjectId) {
+    const campaign = await this.findCampaign(campaignId);
     const adList = await this.advertisementModel.findAdvertisementInCampaign(campaignId);
     const adIdList = adList.map((ad: any) => {
       return Types.ObjectId(ad._id);
     });
+    // 로그 집계
     const aggregate = await this.advertisementLogModel.findADResult(adIdList);
-    const result = aggregate.map((ad: any) => {
+    const logAggregate = aggregate.map((ad: any) => {
       return {
         _id: ad._id.advertisementId,
         logType: ad._id.logType,
@@ -61,7 +63,35 @@ export class CampaignService {
         advertisementType: ad.advertisements.advertisementType,
       };
     });
+    // 광고 성과 형식으로 그룹핑
+    let result: any = [];
+    logAggregate.forEach((element: any) => {
+      let index = result.findIndex((v: any) => (v.advertisementType === element.advertisementType ? true : false));
+      if (index === -1) {
+        result.push({
+          advertisementType: element.advertisementType,
+          advertisementId: element._id,
+          [element.logType]: element.count,
+        });
+      } else {
+        result[index] = {
+          ...result[index],
+          [element.logType]: element.count,
+        };
+      }
+    });
 
+    // 전환비용, 클릭률 세팅
+    result = result.map((v: any) => {
+      if (!v.reach || !v.impression) return v;
+      const reachRate = ((v.reach / v.impression) * 100).toFixed(2) + '%';
+      const reachPrice = (campaign.conversionCost * v.reach).toFixed(0);
+      return {
+        ...v,
+        reachRate,
+        reachPrice,
+      };
+    });
     return result;
   }
 }

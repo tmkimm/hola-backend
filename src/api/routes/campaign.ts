@@ -184,7 +184,32 @@ export default (app: Router) => {
    *          content:
    *            application/json:
    *              schema:
-   *                $ref: '#/components/schemas/AdvertisementResult'
+   *                type: object
+   *                properties:
+   *                  advertisementType:
+   *                    type: string
+   *                    description: 광고 유형(banner, event)
+   *                    example: 'banner'
+   *                  advertisementId:
+   *                    type: string
+   *                    description: 광고 ID
+   *                    example: '6513fd110c19093e9896c9a2'
+   *                  impression:
+   *                    type: number
+   *                    description: 노출 수
+   *                    example: 10000
+   *                  reach:
+   *                    type: number
+   *                    description: 클릭 수
+   *                    example: 2000
+   *                  reachRate:
+   *                    type: string
+   *                    description: 클릭률(%)
+   *                    example: 20%
+   *                  reachPrice:
+   *                    type: number
+   *                    description: 클릭 비용(클릭 수 * 전환당 단가)
+   *                    example: 1200000
    */
   // #endregion
   route.get(
