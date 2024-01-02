@@ -53,7 +53,7 @@ exports.expectedPeriodCode = expectedPeriodCode;
 var positionsCode = ['ALL', 'FE', 'BE', 'DE', 'IOS', 'AND', 'DEVOPS', 'PM', 'PD'];
 // 경력
 var workExperienceCode = {
-    n: '학생',
+    0: '0년',
     '1': '1년',
     '2': '2년',
     '3': '3년',

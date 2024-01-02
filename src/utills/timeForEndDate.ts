@@ -8,7 +8,7 @@ export function timeForEndDate(endDate: Date): string {
     const betweenTime: number = Math.floor((endDate.getTime() - today.getTime()) / 1000 / 60);
     const betweenTimeHour = Math.floor(betweenTime / 60);
     if(betweenTimeHour < 24) 
-        return `마감 당일`;
+        return `오늘 마감`;
     
     const betweenTimeDay = Math.ceil(betweenTime / 60 / 24);
     if (betweenTimeDay < 365) {

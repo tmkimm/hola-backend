@@ -244,7 +244,7 @@ postSchema.statics.findPostPagination = function (page, sort, language, period, 
                         aggregate.push({
                             $match: {
                                 score: {
-                                    $gte: 2
+                                    $gte: 0.5
                                 }
                             }
                         });
@@ -282,9 +282,24 @@ postSchema.statics.countPost = function (language, period, isClosed, type, posit
                     aggregate = __spreadArray(__spreadArray([], aggregateSearch, true), [
                         { $match: query },
                         {
-                            $count: "postCount"
-                        }
+                            $project: {
+                                title: 1,
+                                score: { $meta: "searchScore" }
+                            },
+                        },
                     ], false);
+                    if (search && typeof search === 'string') {
+                        aggregate.push({
+                            $match: {
+                                score: {
+                                    $gte: 0.5
+                                }
+                            }
+                        });
+                    }
+                    aggregate.push({
+                        $count: "postCount"
+                    });
                     return [4 /*yield*/, this.aggregate(aggregate)];
                 case 1:
                     result = _a.sent();

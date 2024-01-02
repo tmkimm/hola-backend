@@ -10,7 +10,7 @@ function timeForEndDate(endDate) {
     var betweenTime = Math.floor((endDate.getTime() - today.getTime()) / 1000 / 60);
     var betweenTimeHour = Math.floor(betweenTime / 60);
     if (betweenTimeHour < 24)
-        return "\uB9C8\uAC10 \uB2F9\uC77C";
+        return "\uC624\uB298 \uB9C8\uAC10";
     var betweenTimeDay = Math.ceil(betweenTime / 60 / 24);
     if (betweenTimeDay < 365) {
         return "\uB9C8\uAC10 ".concat(betweenTimeDay, "\uC77C\uC804");
