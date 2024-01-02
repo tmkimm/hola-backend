@@ -23,7 +23,7 @@
     "@types/node": "^16.11.7",
     "@types/node-schedule": "^2.1.0",
     "@types/sanitize-html": "^2.5.0",
-    "aws-sdk": "^2.1480.0",
+    "aws-sdk": "^2.905.0",
     "axios": "^0.21.1",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.5",

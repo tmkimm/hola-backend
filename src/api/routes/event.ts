@@ -210,6 +210,37 @@ export default (app: Router) => {
     })
   );
 
+  // #region 진행중인 모든 공모전 조회(SelectBox 전용)
+  /**
+   * @swagger
+   * paths:
+   *   /events/bulk:
+   *    get:
+   *      tags:
+   *        - 공모전
+   *      summary: 진행중인 모든 공모전 조회(SelectBox 전용)
+   *      description: 진행중인 모든 공모전 조회한다.(80개)
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/Event'
+   */
+  // #endregion
+  route.get(
+    '/bulk',
+    getUserIdByAccessToken,
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
+      const events = await EventServiceInstance.findEventTitleForSelectBox();
+      return res.status(200).json(events);
+    })
+  );
+
   // #region 추천 공모전
   /**
    * @swagger

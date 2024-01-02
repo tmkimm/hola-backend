@@ -270,6 +270,7 @@ export interface IEventModel extends Model<IEventDocument> {
     eventType: string | null,
     search: string | null
   ) => Promise<IEventDocument[]>;
+  findEventForSelectBox: (limit: number) => Promise<IEventDocument[]>;
   countEvent: (eventType: string | null, onOffLine: string | null, search: string | null) => Promise<number>;
   findRecommendEventList: (notInEventId: Types.ObjectId[]) => Promise<IEventDocument[]>;
   findRandomEventByEventType: (eventId: Types.ObjectId, eventType: string | null) => Promise<IEventDocument[]>;
@@ -453,6 +454,13 @@ eventSchema.statics.countEvent = async function (eventType, onOffLine, search) {
   const result: any = await this.aggregate(aggregate);
   if (result && result.length > 0) return result[0].eventCount;
   else return 0;
+};
+
+// 최신, 트레딩 조회
+eventSchema.statics.findEventForSelectBox = async function (limit: number) {
+  const query = makeFindEventQuery(null, null); // 조회 query 생성
+  const events = await this.find(query).select('_id title').sort('-createdAt').limit(limit);
+  return events;
 };
 
 // 추천 이벤트 조회

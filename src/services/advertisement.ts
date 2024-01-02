@@ -13,9 +13,16 @@ export class AdvertisementService {
 
   // 광고 상세 조회
   async findAdvertisement(advertisementId: Types.ObjectId) {
-    const advertisement = await this.advertisementModel.findAdvertisement(advertisementId);
+    const advertisement: any = await this.advertisementModel.findAdvertisement(advertisementId);
     if (!advertisement) throw new CustomError('NotFoundError', 404, 'Advertisement not found');
-    return advertisement;
+    if (
+      advertisement.advertisementType === `event` &&
+      advertisement.eventId &&
+      advertisement.eventId._id &&
+      advertisement.eventId.title
+    )
+      return { ...advertisement, eventId: advertisement.eventId._id, eventTitle: advertisement.eventId.title };
+    else return advertisement;
   }
 
   // 광고 등록
