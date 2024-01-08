@@ -484,22 +484,7 @@ eventSchema.statics.findRandomEventByEventType = async function (eventId: Types.
   const query = makeFindEventQuery(eventType, null); // 조회 query 생성
   query._id = { $ne: eventId }; // 현재 읽고 있는 글 제외
 
-  const event = await this.aggregate([
-    { $match: query },
-    { $sample: { size: 6 } },
-    {
-      $project: {
-        _id: 1,
-        title: 1,
-        eventType: 1,
-        imageUrl: 1,
-        smallImageUrl: 1,
-        startDate: 1,
-        endDate: 1,
-        views: 1,
-      },
-    },
-  ]);
+  const event = await this.aggregate([{ $match: query }, { $sample: { size: 6 } }]);
   return event;
 };
 
