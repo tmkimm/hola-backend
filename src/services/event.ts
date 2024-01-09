@@ -90,8 +90,22 @@ export class EventService {
   }
 
   // 공모전 상세 조회
-  async findEvent(eventId: Types.ObjectId) {
-    const event = await this.eventModel.findById(eventId);
+  async findEvent(eventId: Types.ObjectId, userId: Types.ObjectId) {
+    const event: any = await this.eventModel.findById(eventId).lean();
+    // 관심 등록 여부 추가
+    let isLiked = false;
+    // add isLiked
+    if (userId != null && event.likes && event.likes.length > 0) {
+      // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
+      for (const likeUserId of event.likes) {
+        if (likeUserId.toString() == userId.toString()) {
+          isLiked = true;
+          break;
+        }
+      }
+    }
+    event.isLiked = isLiked;
+
     if (!event) throw new CustomError('NotFoundError', 404, 'Event not found');
     return event;
   }

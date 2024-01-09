@@ -346,10 +346,12 @@ export default (app: Router) => {
   // #endregion
   route.get(
     '/:id',
+    getUserIdByAccessToken,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const eventId = req.params.id;
+      const { _id: userId } = req.user as IUser;
       const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
-      const event = await EventServiceInstance.findEvent(eventId);
+      const event = await EventServiceInstance.findEvent(eventId, userId);
       return res.status(200).json(event);
     })
   );
