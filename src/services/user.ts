@@ -8,6 +8,8 @@ import { IPostModel } from '../models/Post';
 import { ReadPosts } from '../models/ReadPosts';
 import { SignOutUser } from '../models/SignOutUser';
 import { IUserDocument, IUserModel } from '../models/User';
+import { LikeEvents } from '../models/LikeEvents';
+import { isNumber } from '../utills/isNumber';
 
 export class UserService {
   constructor(
@@ -179,5 +181,130 @@ export class UserService {
   async addReadLists(postId: Types.ObjectId, userId: Types.ObjectId) {
     const user = await this.userModel.addReadList(postId, userId);
     return user;
+  }
+
+  // 사용자가 관심 등록한 글 리스트를 조회한다.
+  async findUserLikeEvents(id: Types.ObjectId) {
+    const likeEvents = await LikeEvents.aggregate([
+      { $match: { userId: id } },
+      {
+        $lookup: {
+          from: 'events',
+          localField: 'eventId',
+          foreignField: '_id',
+          pipeline: [
+            {
+              $project: {
+                title: 1,
+                views: 1,
+                likes: 1,
+                content: 1,
+                organization: 1,
+                onlineOrOffline: 1,
+                imageUrl: 1,
+                smallImageUrl: 1,
+                isDeleted: 1,
+                isClosed: 1,
+                startDate: 1,
+                endDate: 1,
+                applicationStartDate: 1,
+                applicationEndDate: 1,
+                author: 1,
+                price: 1,
+                place: 1,
+              },
+            },
+          ],
+          as: 'eventId',
+        },
+      },
+      {
+        $unwind: '$eventId',
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'eventId.author',
+          foreignField: '_id',
+          pipeline: [{ $project: { _id: 1, nickName: 1, image: 1 } }],
+          as: 'eventId.author',
+        },
+      },
+    ]).sort({
+      'eventId.createdAt': -1,
+    });
+    const result = likeEvents
+      .filter((i) => {
+        return i.eventId && i.eventId !== null;
+      })
+      .map((i) => {
+        return i.eventId;
+      });
+    return result;
+  }
+
+  // 사용자가 관심 등록한 글 리스트를 조회한다.
+  async findUserLikeEventByCalendar(id: Types.ObjectId, year: string | null, month: string | null) {
+    if (!isNumber(year) || !isNumber(month))
+      throw new CustomError('IllegalArgumentError', 400, 'Date format is incorrect');
+    const firstDay = new Date(Number(year), Number(month) - 1, 1);
+    const lastDay = new Date(Number(year), Number(month));
+    const likeEvents = await LikeEvents.aggregate([
+      { $match: { userId: id } },
+      {
+        $lookup: {
+          from: 'events',
+          localField: 'eventId',
+          foreignField: '_id',
+          pipeline: [
+            {
+              $project: {
+                title: 1,
+                views: 1,
+                likes: 1,
+                content: 1,
+                organization: 1,
+                onlineOrOffline: 1,
+                imageUrl: 1,
+                smallImageUrl: 1,
+                isDeleted: 1,
+                isClosed: 1,
+                startDate: 1,
+                endDate: 1,
+                applicationStartDate: 1,
+                applicationEndDate: 1,
+                author: 1,
+                price: 1,
+                place: 1,
+              },
+            },
+          ],
+          as: 'eventId',
+        },
+      },
+      {
+        $unwind: '$eventId',
+      },
+      { $match: { 'eventId.startDate': { $gte: firstDay, $lte: lastDay } } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'eventId.author',
+          foreignField: '_id',
+          pipeline: [{ $project: { _id: 1, nickName: 1, image: 1 } }],
+          as: 'eventId.author',
+        },
+      },
+    ]).sort({
+      'eventId.createdAt': -1,
+    });
+    const result = likeEvents
+      .filter((i) => {
+        return i.eventId && i.eventId !== null;
+      })
+      .map((i) => {
+        return i.eventId;
+      });
+    return result;
   }
 }

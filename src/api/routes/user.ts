@@ -4,10 +4,12 @@ import { asyncErrorWrapper } from '../../asyncErrorWrapper';
 import { Notification as NotificationModel } from '../../models/Notification';
 import { IPostDocument, Post as PostModel } from '../../models/Post';
 import { IUser, User as UserModel } from '../../models/User';
-import { UserService } from '../../services/index';
+import { EventService, UserService } from '../../services/index';
 import { PostService } from '../../services/post';
 import { isString } from '../../utills/isStringEmpty';
 import { isAccessTokenValid, isUserIdValid, nickNameDuplicationCheck } from '../middlewares/index';
+import { Advertisement as AdvertisementModel } from '../../models/Advertisement';
+import { Event as EventModel, IEventDocument } from '../../models/Event';
 
 const route = Router();
 
@@ -451,5 +453,115 @@ export default (app: Router) => {
       const user = await UserServiceInstance.findMyPosts(Types.ObjectId(id));
       return res.status(200).json(user);
     })
+  );
+
+  /**
+   * @swagger
+   * paths:
+   *   /users/{id}/like-events:
+   *    get:
+   *      tags:
+   *        - 사용자
+   *      summary: 관심 등록 공모전 리스트 조회
+   *      description: '관심 등록 공모전 리스트를 조회한다.'
+   *      parameters:
+   *        - name: id
+   *          in: path
+   *          description: 사용자 Id
+   *          required: true
+   *          example: '61fa3f1fea134800135696b4'
+   *          schema:
+   *            type: string
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: object
+   *                properties:
+   *                  events:
+   *                    type: array
+   *                    items:
+   *                      $ref: '#/components/schemas/Event'
+   *        404:
+   *          description: User not found
+   */
+  route.get('/:id/like-events', isUserIdValid, async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
+    const user = await UserServiceInstance.findUserLikeEvents(Types.ObjectId(id));
+
+    if (!user) {
+      return res.status(200).json(null);
+    }
+
+    const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
+    const result = EventServiceInstance.addPostVirtualField(user as unknown as IEventDocument[], id);
+    return res.status(200).json(result);
+  });
+
+  /**
+   * @swagger
+   * paths:
+   *   /users/{id}/like-events/calendar/{year}/{month}:
+   *    get:
+   *      tags:
+   *        - 사용자
+   *      summary: 관심 등록 공모전 리스트 조회
+   *      description: '관심 등록 공모전 리스트를 조회한다.'
+   *      parameters:
+   *        - name: id
+   *          in: path
+   *          description: 사용자 Id
+   *          required: true
+   *          example: '61fa3f1fea134800135696b4'
+   *          schema:
+   *            type: string
+   *        - name: year
+   *          in: path
+   *          description: 년도
+   *          required: true
+   *          schema:
+   *            type: number
+   *          example: 2023
+   *        - name: month
+   *          in: path
+   *          description: 달
+   *          required: true
+   *          schema:
+   *            type: string
+   *          example: 09
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: object
+   *                properties:
+   *                  events:
+   *                    type: array
+   *                    items:
+   *                      $ref: '#/components/schemas/Event'
+   *        404:
+   *          description: User not found
+   */
+  route.get(
+    '/:id/like-events/calendar/:year/:month',
+    isUserIdValid,
+    async (req: Request, res: Response, next: NextFunction) => {
+      const { id, year, month } = req.params;
+      const UserServiceInstance = new UserService(PostModel, UserModel, NotificationModel);
+      const user = await UserServiceInstance.findUserLikeEventByCalendar(Types.ObjectId(id), year, month);
+
+      if (!user) {
+        return res.status(200).json(null);
+      }
+
+      const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
+      const result = EventServiceInstance.addPostVirtualField(user as unknown as IEventDocument[], id);
+      return res.status(200).json(result);
+    }
   );
 };

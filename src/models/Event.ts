@@ -244,7 +244,7 @@ export interface IEvent {
   applicationEndDate: Date;
   closeDate: Date;
   author: Types.ObjectId | null;
-  view: number;
+  views: number;
   description: boolean | null;
   isFree: boolean;
   price: number;
