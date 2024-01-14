@@ -268,7 +268,8 @@ export interface IEventModel extends Model<IEventDocument> {
     year: number,
     month: number,
     eventType: string | null,
-    search: string | null
+    search: string | null,
+    onOffLine: string | null
   ) => Promise<IEventDocument[]>;
   findEventForSelectBox: (limit: number) => Promise<IEventDocument[]>;
   countEvent: (eventType: string | null, onOffLine: string | null, search: string | null) => Promise<number>;
@@ -393,9 +394,10 @@ eventSchema.statics.findEventCalendar = async function (
   year: number,
   month: number,
   eventType: string | null,
-  search: string | null
+  search: string | null,
+  onOffLine: string | null
 ) {
-  const query = makeFindEventQuery(eventType, null); // 조회 query 생성
+  const query = makeFindEventQuery(eventType, onOffLine); // 조회 query 생성
   const firstDay = new Date(year, month - 1, 1);
   const lastDay = new Date(year, month);
   query.startDate = { $gte: firstDay, $lte: lastDay };

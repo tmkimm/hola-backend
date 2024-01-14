@@ -42,7 +42,8 @@ export class EventService {
     month: string | null,
     eventType: string | null,
     search: string | null,
-    userId: Types.ObjectId | null
+    userId: Types.ObjectId | null,
+    onOffLine: string | null
   ) {
     if (!isNumber(year) || !isNumber(month))
       throw new CustomError('IllegalArgumentError', 400, 'Date format is incorrect');
@@ -50,7 +51,8 @@ export class EventService {
       Number(year),
       Number(month),
       eventType,
-      search
+      search,
+      onOffLine
     );
     result = this.addPostVirtualField(result, userId);
     return result;
