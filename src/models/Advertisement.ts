@@ -97,6 +97,7 @@ export interface IAdvertisementModel extends Model<IAdvertisementDocument> {
   deleteAdvertisement: (id: Types.ObjectId) => void;
   modifyAdvertisement: (id: Types.ObjectId, advertisement: IAdvertisementDocument) => Promise<IAdvertisementDocument[]>;
   findActiveBanner: () => Promise<IAdvertisementDocument[]>;
+  updateClosedAfterEndDate: () => void;
 }
 
 const advertisementSchema = new Schema<IAdvertisementDocument>(
@@ -183,6 +184,15 @@ advertisementSchema.statics.deleteAdvertisement = async function (id) {
 advertisementSchema.statics.findAdvertisementInCampaign = async function (campaignId: Types.ObjectId) {
   const result = await this.find({ campaignId }).select(`advertisementType startDate endDate advertisementStatus`);
   return result;
+};
+
+// 광고 진행 기간이 지난글 자동 마감
+advertisementSchema.statics.updateClosedAfterEndDate = async function () {
+  const today = new Date();
+  await this.updateMany(
+    { $and: [{ advertisementStatus: 'active' }, { endDate: { $lte: today } }] },
+    { advertisementStatus: 'close' }
+  );
 };
 
 const Advertisement = model<IAdvertisementDocument, IAdvertisementModel>('Advertisement', advertisementSchema);

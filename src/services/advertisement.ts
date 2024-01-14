@@ -41,4 +41,9 @@ export class AdvertisementService {
   async deleteAdvertisement(id: Types.ObjectId) {
     await this.advertisementModel.deleteAdvertisement(id);
   }
+
+  // 광고 자동 마감
+  async updateClosedAfterEndDate() {
+    await this.advertisementModel.updateClosedAfterEndDate();
+  }
 }

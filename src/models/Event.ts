@@ -335,7 +335,6 @@ const makeFindEventQuery = (eventType: string | null, onOffLine: string | null) 
 
   if (typeof onOffLine === 'string' && onOffLine && onOffLine != 'ALL') query.onlineOrOffline = onOffLine;
 
-  query.isClosed = { $eq: false };
   query.isDeleted = { $eq: false };
 
   // 공모전 구분(conference, hackathon, contest, bootcamp, others)
