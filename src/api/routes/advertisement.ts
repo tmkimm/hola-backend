@@ -7,6 +7,7 @@ import { AdvertisementService } from '../../services/advertisement';
 import CustomError from '../../CustomError';
 import { AdvertisementLogService } from '../../services/advertisementLog';
 import { isAccessTokenValidWithAdmin } from '../middlewares/isAccessTokenValidWithAdmin';
+import { checkADTypeDuplication } from '../middlewares/checkADTypeDuplication';
 
 const route = Router();
 
@@ -175,6 +176,7 @@ export default (app: Router) => {
   route.post(
     '/',
     isAccessTokenValidWithAdmin,
+    checkADTypeDuplication,
     asyncErrorWrapper(async function (req: Request, res: Response, next: NextFunction) {
       try {
         const advertisementDTO = req.body;

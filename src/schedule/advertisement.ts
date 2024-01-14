@@ -17,7 +17,6 @@ async function adAutoClosing() {
     const job = await schedule.scheduleJob(rule, async function () {
       const AdvertisementServiceInstance = new AdvertisementService(AdvertisementModel);
       AdvertisementServiceInstance.updateClosedAfterEndDate();
-      console.log('updateClosedAfterEndDate!!');
     });
   }
 }

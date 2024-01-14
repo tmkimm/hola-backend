@@ -92,7 +92,9 @@ export interface IAdvertisementDocument extends IAdvertisement, Document {}
 
 export interface IAdvertisementModel extends Model<IAdvertisementDocument> {
   findAdvertisement: (id: Types.ObjectId) => Promise<IAdvertisementDocument>;
+  findAdvertisementByEventId: (eventId: Types.ObjectId) => Promise<IAdvertisementDocument[]>;
   findAdvertisementInCampaign: (campaignId: Types.ObjectId) => Promise<IAdvertisementDocument[]>;
+  findAdvertisementByType: (campaignId: Types.ObjectId, advertisementType: string) => Promise<IAdvertisementDocument[]>;
   findActiveADListInEvent: () => Promise<IAdvertisementDocument[]>;
   deleteAdvertisement: (id: Types.ObjectId) => void;
   modifyAdvertisement: (id: Types.ObjectId, advertisement: IAdvertisementDocument) => Promise<IAdvertisementDocument[]>;
@@ -125,6 +127,14 @@ const advertisementSchema = new Schema<IAdvertisementDocument>(
 // 광고 상세 조회
 advertisementSchema.statics.findAdvertisement = async function (id) {
   return await this.findById(id).populate('eventId', 'title').lean();
+};
+
+advertisementSchema.statics.findAdvertisementByEventId = async function (eventId) {
+  return await this.find({ eventId });
+};
+
+advertisementSchema.statics.findAdvertisementByType = async function (campaignId, advertisementType) {
+  return await this.find({ campaignId, advertisementType });
 };
 
 // 진행중인 공모전 광고 조회

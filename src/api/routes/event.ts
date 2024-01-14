@@ -10,6 +10,7 @@ import { isAccessTokenValid } from '../middlewares/isAccessTokenValid';
 import { isEventIdValid } from '../middlewares/isEventIdValid';
 import { IUser } from '../../models/User';
 import { getUserIdByAccessToken } from '../middlewares/getUserIdByAccessToken';
+import { checkADIsActive } from '../middlewares/checkADIsActive';
 
 const route = Router();
 
@@ -579,6 +580,7 @@ export default (app: Router) => {
   route.delete(
     '/:id',
     isAccessTokenValidWithAdmin,
+    checkADIsActive,
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
       //const { _id: tokenUserId, tokenType } = req.user as IUser;
