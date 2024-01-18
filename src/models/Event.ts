@@ -333,12 +333,12 @@ const makeFindEventQuery = (eventType: string | null, onOffLine: string | null) 
   // Query
   const query: any = {};
 
-  if (typeof onOffLine === 'string' && onOffLine && onOffLine != 'ALL') query.onlineOrOffline = onOffLine;
+  if (typeof onOffLine === 'string' && onOffLine && onOffLine.toUpperCase() != 'ALL') query.onlineOrOffline = onOffLine;
 
   query.isDeleted = { $eq: false };
 
   // 공모전 구분(conference, hackathon, contest, bootcamp, others)
-  if (typeof eventType === 'string' && eventType && eventType != 'ALL') {
+  if (typeof eventType === 'string' && eventType && eventType.toUpperCase() != 'ALL') {
     query.eventType = { $eq: eventType };
   }
   return query;
