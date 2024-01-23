@@ -275,6 +275,7 @@ export interface IEventModel extends Model<IEventDocument> {
   countEvent: (eventType: string | null, onOffLine: string | null, search: string | null) => Promise<number>;
   findRecommendEventList: (notInEventId: Types.ObjectId[]) => Promise<IEventDocument[]>;
   findRandomEventByEventType: (eventId: Types.ObjectId, eventType: string | null) => Promise<IEventDocument[]>;
+  increaseView: (eventId: Types.ObjectId) => void;
   addLike: (
     eventId: Types.ObjectId,
     userId: Types.ObjectId
@@ -329,12 +330,16 @@ eventSchema.statics.deleteEvent = async function (id) {
 };
 
 // 조회 query 생성
-const makeFindEventQuery = (eventType: string | null, onOffLine: string | null) => {
+// eventType : 공모전 구분(conference, hackathon, contest, bootcamp, others)
+// onOffLine : 진행방식(온라인/오프라인)
+// isClosed  : 마감여부(null : 전체 조회, false : 마감되지 않은 자료만 조회, true : 마감된 자료만 조회)
+const makeFindEventQuery = (eventType: string | null, onOffLine: string | null, isClosed: boolean | null) => {
   // Query
   const query: any = {};
 
   if (typeof onOffLine === 'string' && onOffLine && onOffLine != 'ALL') query.onlineOrOffline = onOffLine;
 
+  if (isClosed != null) query.isClosed = { $eq: isClosed };
   query.isDeleted = { $eq: false };
 
   // 공모전 구분(conference, hackathon, contest, bootcamp, others)
@@ -363,7 +368,7 @@ eventSchema.statics.findEventPagination = async function (
   } else {
     sortQuery.push('-createdAt');
   }
-  const query = makeFindEventQuery(eventType, onOffLine); // 조회 query 생성
+  const query = makeFindEventQuery(eventType, onOffLine, null); // 조회 query 생성
   // Pagenation
   const itemsPerPage = 4 * 5; // 한 페이지에 표현할 수
   let pageToSkip = 0;
@@ -396,7 +401,7 @@ eventSchema.statics.findEventCalendar = async function (
   search: string | null,
   onOffLine: string | null
 ) {
-  const query = makeFindEventQuery(eventType, onOffLine); // 조회 query 생성
+  const query = makeFindEventQuery(eventType, onOffLine, null); // 조회 query 생성
   const firstDay = new Date(year, month - 1, 1);
   const lastDay = new Date(year, month);
   query.startDate = { $gte: firstDay, $lte: lastDay };
@@ -422,7 +427,7 @@ eventSchema.statics.findEventCalendar = async function (
 
 // 총 Page 수 계산
 eventSchema.statics.countEvent = async function (eventType, onOffLine, search) {
-  const query = makeFindEventQuery(eventType, onOffLine); // 조회 query 생성
+  const query = makeFindEventQuery(eventType, onOffLine, null); // 조회 query 생성
   const aggregateSearch = [];
   if (search && typeof search === 'string') {
     aggregateSearch.push({
@@ -457,9 +462,18 @@ eventSchema.statics.countEvent = async function (eventType, onOffLine, search) {
   else return 0;
 };
 
-// 최신, 트레딩 조회
+// 조회수 증가
+eventSchema.statics.increaseView = async function (eventId) {
+  await this.findByIdAndUpdate(eventId, {
+    $inc: {
+      views: 1,
+    },
+  });
+};
+
+// 이벤트 목록 select box
 eventSchema.statics.findEventForSelectBox = async function (limit: number) {
-  const query = makeFindEventQuery(null, null); // 조회 query 생성
+  const query = makeFindEventQuery(null, null, false); // 조회 query 생성
   const events = await this.find(query).select('_id title').sort('-createdAt').limit(limit);
   return events;
 };
@@ -467,7 +481,7 @@ eventSchema.statics.findEventForSelectBox = async function (limit: number) {
 // 추천 이벤트 조회
 // TODO startDate 조건 변경
 eventSchema.statics.findRecommendEventList = async function (notInEventId: Types.ObjectId[]) {
-  let query = makeFindEventQuery(null, null); // 조회 query 생성
+  let query = makeFindEventQuery(null, null, false); // 조회 query 생성
   query._id = { $nin: notInEventId };
   let limit = 10 - notInEventId.length;
   const today = new Date();
@@ -482,9 +496,9 @@ eventSchema.statics.findRecommendEventList = async function (notInEventId: Types
 
 // 랜덤 이벤트 조회(글 상세에서 추천)
 eventSchema.statics.findRandomEventByEventType = async function (eventId: Types.ObjectId, eventType: string | null) {
-  const query = makeFindEventQuery(eventType, null); // 조회 query 생성
+  const query = makeFindEventQuery(eventType, null, false); // 조회 query 생성
   query._id = { $ne: eventId }; // 현재 읽고 있는 글 제외
-
+  // TODO 기간 조건 추가
   const event = await this.aggregate([{ $match: query }, { $sample: { size: 6 } }]);
   return event;
 };

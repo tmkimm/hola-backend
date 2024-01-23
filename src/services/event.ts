@@ -109,6 +109,7 @@ export class EventService {
     event.isLiked = isLiked;
 
     if (!event) throw new CustomError('NotFoundError', 404, 'Event not found');
+    await this.increaseView(eventId); // 조회수 증가
     return event;
   }
 
@@ -157,6 +158,11 @@ export class EventService {
   async findRecommendEventListInDetail(eventId: Types.ObjectId, eventType: string | null) {
     const event = await this.eventModel.findRandomEventByEventType(eventId, eventType);
     return event;
+  }
+
+  // 조회수 증가
+  async increaseView(eventId: Types.ObjectId) {
+    await this.eventModel.increaseView(eventId); // 조회수 증가
   }
 
   // 공모전 등록

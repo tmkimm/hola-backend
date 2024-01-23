@@ -175,7 +175,7 @@ advertisementSchema.statics.findActiveADListInEvent = async function () {
 advertisementSchema.statics.findActiveBanner = async function () {
   const result = await this.find({ advertisementType: 'banner', advertisementStatus: 'active' })
     .sort('+bannerSequence')
-    .select('link linkOpenType imageUrl mainCopy subCopy bannerSequence');
+    .select('link linkOpenType imageUrl mainCopy subCopy bannerSequence startDate endDate');
   return result;
 };
 
