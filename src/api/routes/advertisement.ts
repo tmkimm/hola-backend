@@ -131,7 +131,7 @@ export default (app: Router) => {
     asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
       const advertisementId = req.params.id;
       const AdvertisementServiceInstance = new AdvertisementService(AdvertisementModel);
-      const advertisement = await AdvertisementServiceInstance.findAdvertisement(advertisementId);
+      const advertisement = await AdvertisementServiceInstance.findAdvertisement(Types.ObjectId(advertisementId));
       return res.status(200).json(advertisement);
     })
   );

@@ -366,7 +366,7 @@ export default (app: Router) => {
       const eventId = req.params.id;
       const { _id: userId } = req.user as IUser;
       const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
-      const event = await EventServiceInstance.findEvent(eventId, userId);
+      const event = await EventServiceInstance.findEvent(Types.ObjectId(eventId), userId);
       return res.status(200).json(event);
     })
   );
@@ -413,7 +413,7 @@ export default (app: Router) => {
       const eventId = req.params.id;
       const { eventType } = req.query;
       const EventServiceInstance = new EventService(EventModel, AdvertisementModel);
-      const event = await EventServiceInstance.findRecommendEventListInDetail(eventId, eventType);
+      const event = await EventServiceInstance.findRecommendEventListInDetail(Types.ObjectId(eventId), eventType);
       return res.status(200).json(event);
     })
   );
