@@ -487,7 +487,7 @@ eventSchema.statics.findRecommendEventList = async function (notInEventId: Types
   const today = new Date();
   query.startDate = { $gte: today.setDate(today.getDate() - 180) };
   const events = await this.find(query)
-    .select('_id title eventType imageUrl smallImageUrl startDate endDate views')
+    .select('_id title eventType imageUrl smallImageUrl startDate endDate views place organization')
     .sort('-views')
     .limit(limit)
     .lean();

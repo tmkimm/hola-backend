@@ -158,6 +158,8 @@ advertisementSchema.statics.findActiveADListInEvent = async function () {
               startDate: 1,
               endDate: 1,
               views: 1,
+              place: 1,
+              organization: 1,
             },
           },
         ],
