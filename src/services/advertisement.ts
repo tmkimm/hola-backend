@@ -7,10 +7,15 @@ export class AdvertisementService {
 
   // 진행중인 배너 광고 조회
   async findActiveBanner() {
-    const advertisement = await this.advertisementModel.findActiveBanner();
+    const advertisement = await this.advertisementModel.findActiveBanner('banner');
     return advertisement;
   }
 
+  // 진행중인 공모전 광고 조회
+  async findActiveEventBanner() {
+    const advertisement = await this.advertisementModel.findActiveBanner('eventBanner');
+    return advertisement;
+  }
   // 광고 상세 조회
   async findAdvertisement(advertisementId: Types.ObjectId) {
     const advertisement: any = await this.advertisementModel.findAdvertisement(advertisementId);

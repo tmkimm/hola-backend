@@ -18,7 +18,7 @@ import { Model, Schema, Types, model } from 'mongoose';
  *        example: '611dbf22739c10ccdbffad39'
  *      advertisementType:
  *        type: string
- *        description: 광고유형(banner 메인 배너, event 공모전, modalBanner 모달 상세 배너)
+ *        description: 광고유형(banner 메인 배너, event 공모전, , eventBanner 공모전 배너, modalBanner 모달 상세 배너)
  *        example: banner
  *      startDate:
  *        type: string
@@ -51,6 +51,10 @@ import { Model, Schema, Types, model } from 'mongoose';
  *        type: string
  *        description: 이미지 URL(배너광고)
  *        example: 'https://holaworld.io/images/logo/hola_logo_y.png'
+ *      smallImageUrl:
+ *        type: string
+ *        description: 모바일용 이미지 URL(배너광고)
+ *        example: 'https://holaworld.io/images/logo/hola_logo_y.png'
  *      mainCopy:
  *        type: string
  *        description: 메인 카피 (배너광고)
@@ -81,6 +85,7 @@ export interface IAdvertisement {
   link: string;
   linkOpenType: string;
   imageUrl: string;
+  smallImageUrl: string;
   mainCopy: string;
   subCopy: string;
   bannerSequence: number;
@@ -98,14 +103,14 @@ export interface IAdvertisementModel extends Model<IAdvertisementDocument> {
   findActiveADListInEvent: () => Promise<IAdvertisementDocument[]>;
   deleteAdvertisement: (id: Types.ObjectId) => void;
   modifyAdvertisement: (id: Types.ObjectId, advertisement: IAdvertisementDocument) => Promise<IAdvertisementDocument[]>;
-  findActiveBanner: () => Promise<IAdvertisementDocument[]>;
+  findActiveBanner: (bannerType: 'banner' | 'eventBanner') => Promise<IAdvertisementDocument[]>;
   updateClosedAfterEndDate: () => void;
 }
 
 const advertisementSchema = new Schema<IAdvertisementDocument>(
   {
     campaignId: { type: Types.ObjectId, ref: 'Campaign', required: true }, // 캠페인 Id
-    advertisementType: { type: String, required: true }, // 광고유형(banner 메인배너, event 공모전, modalBanner 모달 상세 배너)
+    advertisementType: { type: String, required: true }, // 광고유형(banner 메인배너, event 공모전, eventBanner 공모전 배너, modalBanner 모달 상세 배너)
     startDate: { type: Date, required: true }, //  시작일
     endDate: { type: Date, required: false }, //  종료일
     realEndDate: { type: Date, required: false }, //  실제 종료일(종료 처리된 날짜)
@@ -113,6 +118,7 @@ const advertisementSchema = new Schema<IAdvertisementDocument>(
     link: { type: String, required: true }, // 링크
     linkOpenType: { type: String, defulat: 'blank' }, // 링크 오픈 유형(blank 새탭, self 현재탭)
     imageUrl: { type: String, required: false }, // 이미지 URL(배너광고)
+    smallImageUrl: { type: String, required: false }, // 모바일 이미지 URL(배너광고)
     mainCopy: { type: String, required: false }, // 메인 카피 (배너광고)
     subCopy: { type: String, required: false }, // 서브 카피(배너광고)
     bannerSequence: { type: Number, default: 999 }, // 배너 순번(배너광고)
@@ -174,10 +180,10 @@ advertisementSchema.statics.findActiveADListInEvent = async function () {
 };
 
 // 진행중인 배너 광고 조회
-advertisementSchema.statics.findActiveBanner = async function () {
-  const result = await this.find({ advertisementType: 'banner', advertisementStatus: 'active' })
+advertisementSchema.statics.findActiveBanner = async function (bannerType: 'banner' | 'eventBanner') {
+  const result = await this.find({ advertisementType: bannerType, advertisementStatus: 'active' })
     .sort('+bannerSequence')
-    .select('link linkOpenType imageUrl mainCopy subCopy bannerSequence startDate endDate');
+    .select('link linkOpenType imageUrl smallImageUrl mainCopy subCopy bannerSequence startDate endDate');
   return result;
 };
 

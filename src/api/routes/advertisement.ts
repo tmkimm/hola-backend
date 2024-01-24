@@ -90,6 +90,35 @@ export default (app: Router) => {
     })
   );
 
+  // #region 진행중인 공모전 배너 조회
+  /**
+   * @swagger
+   * paths:
+   *   /advertisements/eventBanner:
+   *    get:
+   *      tags:
+   *        - 광고
+   *      summary: 진행중인 공모전 배너 조회
+   *      description: '공모전 배너를 조회한다.'
+   *      parameters:
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                $ref: '#/components/schemas/Advertisement'
+   */
+  // #endregion
+  route.get(
+    '/eventBanner',
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const AdvertisementServiceInstance = new AdvertisementService(AdvertisementModel);
+      const advertisement = await AdvertisementServiceInstance.findActiveEventBanner();
+      return res.status(200).json(advertisement);
+    })
+  );
+
   // #region 광고 상세 보기
   /**
    * @swagger
