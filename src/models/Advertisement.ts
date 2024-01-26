@@ -18,7 +18,7 @@ import { Model, Schema, Types, model } from 'mongoose';
  *        example: '611dbf22739c10ccdbffad39'
  *      advertisementType:
  *        type: string
- *        description: 광고유형(banner 메인 배너, event 공모전, , eventBanner 공모전 배너, modalBanner 모달 상세 배너)
+ *        description: 광고유형(banner 메인 배너, event 공모전, eventBanner 공모전 배너, modalBanner 모달 상세 배너, postBlock 모집 블럭)
  *        example: banner
  *      startDate:
  *        type: string
@@ -110,11 +110,11 @@ export interface IAdvertisementModel extends Model<IAdvertisementDocument> {
 const advertisementSchema = new Schema<IAdvertisementDocument>(
   {
     campaignId: { type: Types.ObjectId, ref: 'Campaign', required: true }, // 캠페인 Id
-    advertisementType: { type: String, required: true }, // 광고유형(banner 메인배너, event 공모전, eventBanner 공모전 배너, modalBanner 모달 상세 배너)
+    advertisementType: { type: String, required: true }, // 광고유형(banner 메인 배너, event 공모전, eventBanner 공모전 배너, modalBanner 모달 상세 배너, postBlock 모집 블럭)
     startDate: { type: Date, required: true }, //  시작일
     endDate: { type: Date, required: false }, //  종료일
     realEndDate: { type: Date, required: false }, //  실제 종료일(종료 처리된 날짜)
-    advertisementStatus: { type: String, default: 'before' }, // 상태(before 진행전, active 진행중, close종료)
+    advertisementStatus: { type: String, default: 'active' }, // 상태(before 진행전, active 진행중, close종료)
     link: { type: String, required: true }, // 링크
     linkOpenType: { type: String, defulat: 'blank' }, // 링크 오픈 유형(blank 새탭, self 현재탭)
     imageUrl: { type: String, required: false }, // 이미지 URL(배너광고)

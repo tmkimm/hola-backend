@@ -20,7 +20,7 @@ export default (app: Router) => {
    */
   app.use('/advertisements', route);
 
-  // #region POST - 광고 등록
+  // #region POST - 이벤트 추적
   /**
    * @swagger
    * paths:
