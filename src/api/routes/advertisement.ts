@@ -20,6 +20,50 @@ export default (app: Router) => {
    */
   app.use('/advertisements', route);
 
+  // #region 광고 이미지 S3 Pre-Signed URL 발급
+  /**
+   * @swagger
+   * paths:
+   *   /advertisements/pre-sign-url:
+   *    get:
+   *      tags:
+   *        - 광고
+   *      summary: 광고 이미지 S3 Pre-Signed URL 발급
+   *      description: 광고 이미지 S3 Pre-Signed URL 발급
+   *      parameters:
+   *        - name: fileName
+   *          in: query
+   *          description: 파일명
+   *          required: true
+   *          example: '2839_284_42.jpg'
+   *          schema:
+   *            type: string
+   *      responses:
+   *        200:
+   *          description: successful operation
+   *          content:
+   *            application/json:
+   *              schema:
+   *                type: object
+   *                properties:
+   *                  preSignUrl:
+   *                    type: string
+   *                    description: Pre-signed url
+   */
+  // #endregion
+  route.get(
+    '/pre-sign-url',
+    asyncErrorWrapper(async (req: Request, res: Response, next: NextFunction) => {
+      const { fileName } = req.query;
+      const AdvertisementServiceInstance = new AdvertisementService(AdvertisementModel);
+      const signedUrlPut = await AdvertisementServiceInstance.getPreSignUrl(fileName);
+
+      return res.status(200).json({
+        preSignUrl: signedUrlPut,
+      });
+    })
+  );
+
   // #region POST - 이벤트 추적
   /**
    * @swagger

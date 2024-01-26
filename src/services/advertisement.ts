@@ -1,6 +1,8 @@
 import { Types } from 'mongoose';
 import CustomError from '../CustomError';
 import { IAdvertisementDocument, IAdvertisementModel } from '../models/Advertisement';
+import AWS from 'aws-sdk';
+import config from '../config';
 
 export class AdvertisementService {
   constructor(protected advertisementModel: IAdvertisementModel) {}
@@ -50,5 +52,27 @@ export class AdvertisementService {
   // 광고 자동 마감
   async updateClosedAfterEndDate() {
     await this.advertisementModel.updateClosedAfterEndDate();
+  }
+
+  // S3 Pre-Sign Url을 발급한다.
+  async getPreSignUrl(fileName: string) {
+    if (!fileName) {
+      throw new CustomError('NotFoundError', 404, '"fileName" does not exist');
+    }
+
+    const s3 = new AWS.S3({
+      accessKeyId: config.S3AccessKeyId,
+      secretAccessKey: config.S3SecretAccessKey,
+      region: config.S3BucketRegion,
+    });
+
+    const params = {
+      Bucket: config.S3BucketName,
+      Key: `ad/${fileName}`,
+      Expires: 60 * 10, // seconds
+    };
+
+    const signedUrlPut = await s3.getSignedUrlPromise('putObject', params);
+    return signedUrlPut;
   }
 }
