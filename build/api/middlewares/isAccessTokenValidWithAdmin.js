@@ -39,48 +39,47 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postAutoClosing = void 0;
-var node_schedule_1 = __importDefault(require("node-schedule"));
-var Notification_1 = require("../models/Notification");
-var Post_1 = require("../models/Post");
-var User_1 = require("../models/User");
-var index_1 = require("../services/index");
-/*
-  글에 관련된 Schedule을 정의한다.
-*/
-// 자동 마감
-function postAutoClosing() {
+exports.isAccessTokenValidWithAdmin = void 0;
+var CustomError_1 = __importDefault(require("../../CustomError"));
+var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
+var User_1 = require("../../models/User");
+var jwt_1 = require("../../utills/jwt");
+// Access Token이 유효한지 확인한다.
+var isAccessTokenValidWithAdmin = (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var rule, job;
+        var token, decodedUser, user;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (!(process.env.NODE_ENV === 'production')) return [3 /*break*/, 2];
-                    rule = new node_schedule_1.default.RecurrenceRule();
-                    rule.hour = 0;
-                    rule.tz = 'Asia/Seoul';
-                    return [4 /*yield*/, node_schedule_1.default.scheduleJob(rule, function () {
-                            return __awaiter(this, void 0, void 0, function () {
-                                var PostServiceInstance;
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0:
-                                            PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                                            return [4 /*yield*/, PostServiceInstance.autoClosing()];
-                                        case 1:
-                                            _a.sent();
-                                            return [2 /*return*/];
-                                    }
-                                });
-                            });
-                        })];
+                    if (!(req.headers.authorization && req.headers.authorization.startsWith('Bearer'))) return [3 /*break*/, 3];
+                    token = req.headers.authorization.split(' ')[1];
+                    return [4 /*yield*/, (0, jwt_1.verifyJWT)(token)];
                 case 1:
-                    job = _a.sent();
-                    _a.label = 2;
-                case 2: return [2 /*return*/];
+                    decodedUser = _a.sent();
+                    if (!(0, jwt_1.isValidAccessToken)(decodedUser))
+                        throw new CustomError_1.default('JsonWebTokenError', 401, 'Invaild Token');
+                    if (!decodedUser.idToken || decodedUser.idToken !== 'admin')
+                        throw new CustomError_1.default('UnAuthorizedError', 401, 'UnAuthorizedError');
+                    return [4 /*yield*/, User_1.User.findByIdToken(decodedUser.idToken)];
+                case 2:
+                    user = _a.sent();
+                    if (!user) {
+                        throw new CustomError_1.default('JsonWebTokenError', 401, 'User not found');
+                    }
+                    else {
+                        req.user = {
+                            _id: user._id,
+                            nickName: user.nickName,
+                            tokenType: user.tokenType,
+                        };
+                    }
+                    next();
+                    return [3 /*break*/, 4];
+                case 3: throw new CustomError_1.default('JsonWebTokenError', 401, 'Token not found');
+                case 4: return [2 /*return*/];
             }
         });
     });
-}
-exports.postAutoClosing = postAutoClosing;
-//# sourceMappingURL=post.js.map
+});
+exports.isAccessTokenValidWithAdmin = isAccessTokenValidWithAdmin;
+//# sourceMappingURL=isAccessTokenValidWithAdmin.js.map

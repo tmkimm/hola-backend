@@ -35,12 +35,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mongoose_1 = require("mongoose");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var Advertisement_1 = require("../../models/Advertisement");
+var AdvertisementLog_1 = require("../../models/AdvertisementLog");
 var advertisement_1 = require("../../services/advertisement");
+var CustomError_1 = __importDefault(require("../../CustomError"));
+var advertisementLog_1 = require("../../services/advertisementLog");
+var isAccessTokenValidWithAdmin_1 = require("../middlewares/isAccessTokenValidWithAdmin");
+var checkADTypeDuplication_1 = require("../middlewares/checkADTypeDuplication");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**
@@ -50,6 +58,166 @@ exports.default = (function (app) {
             description: 광고에 관련된 API
      */
     app.use('/advertisements', route);
+    // #region 광고 이미지 S3 Pre-Signed URL 발급
+    /**
+     * @swagger
+     * paths:
+     *   /advertisements/pre-sign-url:
+     *    get:
+     *      tags:
+     *        - 광고
+     *      summary: 광고 이미지 S3 Pre-Signed URL 발급
+     *      description: 광고 이미지 S3 Pre-Signed URL 발급
+     *      parameters:
+     *        - name: fileName
+     *          in: query
+     *          description: 파일명
+     *          required: true
+     *          example: '2839_284_42.jpg'
+     *          schema:
+     *            type: string
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: object
+     *                properties:
+     *                  preSignUrl:
+     *                    type: string
+     *                    description: Pre-signed url
+     */
+    // #endregion
+    route.get('/pre-sign-url', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var fileName, AdvertisementServiceInstance, signedUrlPut;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    fileName = req.query.fileName;
+                    AdvertisementServiceInstance = new advertisement_1.AdvertisementService(Advertisement_1.Advertisement);
+                    return [4 /*yield*/, AdvertisementServiceInstance.getPreSignUrl(fileName)];
+                case 1:
+                    signedUrlPut = _a.sent();
+                    return [2 /*return*/, res.status(200).json({
+                            preSignUrl: signedUrlPut,
+                        })];
+            }
+        });
+    }); }));
+    // #region POST - 이벤트 추적
+    /**
+     * @swagger
+     * paths:
+     *   /advertisements/event-log:
+     *    post:
+     *      tags:
+     *        - 광고
+     *      summary: 광고 이벤트 추적 로깅
+     *      description: '광고가 노출되었을때 이벤트를 추적한다.'
+     *      requestBody:
+     *        content:
+     *          application/json:
+     *            schema:
+     *              type: object
+     *              properties:
+     *                advertisementId:
+     *                  type: string
+     *                  description: Advertisement ID
+     *                  example: 6513fd110c19093e9896c9a2
+     *                logType:
+     *                  type: string
+     *                  description: 로그유형(impression 노출, reach 도달)
+     *                  example: impression
+     *      responses:
+     *        204:
+     *          description: successful operation
+     */
+    // #endregion
+    route.post('/event-log', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, advertisementId, logType, AdvertisementLogServiceInstance;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = req.body, advertisementId = _a.advertisementId, logType = _a.logType;
+                        AdvertisementLogServiceInstance = new advertisementLog_1.AdvertisementLogService(AdvertisementLog_1.AdvertisementLog);
+                        if (!advertisementId)
+                            throw new CustomError_1.default('NotFoundError', 400, '"advertisementId" not found');
+                        return [4 /*yield*/, AdvertisementLogServiceInstance.createEventLog(mongoose_1.Types.ObjectId(advertisementId), logType)];
+                    case 1:
+                        _b.sent();
+                        return [2 /*return*/, res.status(204).json()];
+                }
+            });
+        });
+    }));
+    // #region 진행중인 배너 광고 조회
+    /**
+     * @swagger
+     * paths:
+     *   /advertisements/banner:
+     *    get:
+     *      tags:
+     *        - 광고
+     *      summary: 진행중인 배너 광고 조회
+     *      description: '배너를 조회한다.'
+     *      parameters:
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                $ref: '#/components/schemas/Advertisement'
+     */
+    // #endregion
+    route.get('/banner', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var AdvertisementServiceInstance, advertisement;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    AdvertisementServiceInstance = new advertisement_1.AdvertisementService(Advertisement_1.Advertisement);
+                    return [4 /*yield*/, AdvertisementServiceInstance.findActiveBanner()];
+                case 1:
+                    advertisement = _a.sent();
+                    return [2 /*return*/, res.status(200).json(advertisement)];
+            }
+        });
+    }); }));
+    // #region 진행중인 공모전 배너 조회
+    /**
+     * @swagger
+     * paths:
+     *   /advertisements/eventBanner:
+     *    get:
+     *      tags:
+     *        - 광고
+     *      summary: 진행중인 공모전 배너 조회
+     *      description: '공모전 배너를 조회한다.'
+     *      parameters:
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                $ref: '#/components/schemas/Advertisement'
+     */
+    // #endregion
+    route.get('/eventBanner', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var AdvertisementServiceInstance, advertisement;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    AdvertisementServiceInstance = new advertisement_1.AdvertisementService(Advertisement_1.Advertisement);
+                    return [4 /*yield*/, AdvertisementServiceInstance.findActiveEventBanner()];
+                case 1:
+                    advertisement = _a.sent();
+                    return [2 /*return*/, res.status(200).json(advertisement)];
+            }
+        });
+    }); }));
     // #region 광고 상세 보기
     /**
      * @swagger
@@ -57,10 +225,16 @@ exports.default = (function (app) {
      *   /advertisements/{id}:
      *    get:
      *      tags:
-     *        - advertisements
+     *        - 광고
      *      summary: 광고 상세 보기
      *      description: '광고 상세 정보를 조회한다.'
      *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *        - name: id
      *          in: path
      *          description: 광고 Id
@@ -79,14 +253,14 @@ exports.default = (function (app) {
      *          description: Advertisement not found
      */
     // #endregion
-    route.get('/:id', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/:id', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var advertisementId, AdvertisementServiceInstance, advertisement;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     advertisementId = req.params.id;
                     AdvertisementServiceInstance = new advertisement_1.AdvertisementService(Advertisement_1.Advertisement);
-                    return [4 /*yield*/, AdvertisementServiceInstance.findAdvertisement(advertisementId)];
+                    return [4 /*yield*/, AdvertisementServiceInstance.findAdvertisement(mongoose_1.Types.ObjectId(advertisementId))];
                 case 1:
                     advertisement = _a.sent();
                     return [2 /*return*/, res.status(200).json(advertisement)];
@@ -100,9 +274,16 @@ exports.default = (function (app) {
      *   /advertisements:
      *    post:
      *      tags:
-     *        - advertisements
+     *        - 광고
      *      summary: 광고 등록
      *      description: '신규 광고를 등록한다.'
+     *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *      requestBody:
      *        content:
      *          application/json:
@@ -123,7 +304,7 @@ exports.default = (function (app) {
      *          $ref: '#/components/responses/UnauthorizedError'
      */
     // #endregion
-    route.post('/', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) {
+    route.post('/', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, checkADTypeDuplication_1.checkADTypeDuplication, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var advertisementDTO, AdvertisementServiceInstance, advertisement, error_1;
             return __generator(this, function (_a) {
@@ -159,12 +340,18 @@ exports.default = (function (app) {
      * @swagger
      * paths:
      *   /advertisements/{id}:
-     *    patch:
+     *    put:
      *      tags:
-     *        - advertisements
+     *        - 광고
      *      summary: 광고 수정
      *      description: 광고를 수정한다.
      *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *        - name: id
      *          in: path
      *          description: 광고 Id
@@ -192,7 +379,7 @@ exports.default = (function (app) {
      *          $ref: '#/components/responses/UnauthorizedError'
      */
     // #endregion
-    route.patch('/:id', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.put('/:id', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, advertisementDTO, AdvertisementServiceInstance, advertisement;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -214,10 +401,16 @@ exports.default = (function (app) {
      *   /advertisements/{id}:
      *    delete:
      *      tags:
-     *        - advertisements
+     *        - 광고
      *      summary: 광고 삭제
      *      description: 광고를 삭제한다.
      *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *        - name: id
      *          in: path
      *          description: 광고 Id
@@ -234,7 +427,7 @@ exports.default = (function (app) {
      *          description: Advertisement not found
      */
     // #endregion
-    route.delete('/:id', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.delete('/:id', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, AdvertisementServiceInstance;
         return __generator(this, function (_a) {
             switch (_a.label) {

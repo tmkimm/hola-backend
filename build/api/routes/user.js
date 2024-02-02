@@ -46,6 +46,8 @@ var index_1 = require("../../services/index");
 var post_1 = require("../../services/post");
 var isStringEmpty_1 = require("../../utills/isStringEmpty");
 var index_2 = require("../middlewares/index");
+var Advertisement_1 = require("../../models/Advertisement");
+var Event_1 = require("../../models/Event");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**
@@ -78,7 +80,7 @@ exports.default = (function (app) {
      *   /users:
      *    get:
      *      tags:
-     *        - users
+     *        - 사용자
      *      summary: 사용자 조회
      *      description: 닉네임으로 사용자 정보를 조회한다.
      *      parameters:
@@ -126,7 +128,7 @@ exports.default = (function (app) {
      *   /users/{id}:
      *    get:
      *      tags:
-     *        - users
+     *        - 사용자
      *      summary: 사용자 상세 정보 조회
      *      description: '사용자의 상세 정보를 조회한다.'
      *      parameters:
@@ -170,7 +172,7 @@ exports.default = (function (app) {
      *   /users/{id}:
      *    patch:
      *      tags:
-     *        - users
+     *        - 사용자
      *      summary: 사용자 정보 수정
      *      description: 사용자 정보를 수정한다.
      *      parameters:
@@ -272,7 +274,7 @@ exports.default = (function (app) {
      *   /users/{id}/exists:
      *    get:
      *      tags:
-     *        - users
+     *        - 사용자
      *      summary: 사용자 닉네임 중복 체크
      *      description: 사용자 닉네임 중복 체크
      *      parameters:
@@ -320,7 +322,7 @@ exports.default = (function (app) {
      *   /users/{id}:
      *    delete:
      *      tags:
-     *        - users
+     *        - 사용자
      *      summary: 회원 탈퇴
      *      description: 사용자 정보 삭제
      *      parameters:
@@ -367,7 +369,7 @@ exports.default = (function (app) {
      *   /users/likes/{id}:
      *    get:
      *      tags:
-     *        - users
+     *        - 사용자
      *      summary: 사용자 관심 등록 리스트 조회
      *      description: '관심 등록한 글들을 조회한다.'
      *      parameters:
@@ -418,7 +420,7 @@ exports.default = (function (app) {
      *   /users/read-list/{id}:
      *    get:
      *      tags:
-     *        - users
+     *        - 사용자
      *      summary: 사용자 읽은 목록  조회
      *      description: '읽은 글들을 조회한다.'
      *      parameters:
@@ -461,7 +463,7 @@ exports.default = (function (app) {
      *   /users/myPosts/{id}:
      *    get:
      *      tags:
-     *        - users
+     *        - 사용자
      *      summary: 사용자 작성 글 목록 조회
      *      description: '내가 작성한 글들을 조회한다.'
      *      parameters:
@@ -498,5 +500,121 @@ exports.default = (function (app) {
             }
         });
     }); }));
+    /**
+     * @swagger
+     * paths:
+     *   /users/{id}/like-events:
+     *    get:
+     *      tags:
+     *        - 사용자
+     *      summary: 관심 등록 공모전 리스트 조회
+     *      description: '관심 등록 공모전 리스트를 조회한다.'
+     *      parameters:
+     *        - name: id
+     *          in: path
+     *          description: 사용자 Id
+     *          required: true
+     *          example: '61fa3f1fea134800135696b4'
+     *          schema:
+     *            type: string
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: object
+     *                properties:
+     *                  events:
+     *                    type: array
+     *                    items:
+     *                      $ref: '#/components/schemas/Event'
+     *        404:
+     *          description: User not found
+     */
+    route.get('/:id/like-events', index_2.isUserIdValid, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var id, UserServiceInstance, user, EventServiceInstance, result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    id = req.params.id;
+                    UserServiceInstance = new index_1.UserService(Post_1.Post, User_1.User, Notification_1.Notification);
+                    return [4 /*yield*/, UserServiceInstance.findUserLikeEvents(mongoose_1.Types.ObjectId(id))];
+                case 1:
+                    user = _a.sent();
+                    if (!user) {
+                        return [2 /*return*/, res.status(200).json(null)];
+                    }
+                    EventServiceInstance = new index_1.EventService(Event_1.Event, Advertisement_1.Advertisement);
+                    result = EventServiceInstance.addPostVirtualField(user, id);
+                    return [2 /*return*/, res.status(200).json(result)];
+            }
+        });
+    }); });
+    /**
+     * @swagger
+     * paths:
+     *   /users/{id}/like-events/calendar/{year}/{month}:
+     *    get:
+     *      tags:
+     *        - 사용자
+     *      summary: 관심 등록 공모전 리스트 조회
+     *      description: '관심 등록 공모전 리스트를 조회한다.'
+     *      parameters:
+     *        - name: id
+     *          in: path
+     *          description: 사용자 Id
+     *          required: true
+     *          example: '61fa3f1fea134800135696b4'
+     *          schema:
+     *            type: string
+     *        - name: year
+     *          in: path
+     *          description: 년도
+     *          required: true
+     *          schema:
+     *            type: number
+     *          example: 2023
+     *        - name: month
+     *          in: path
+     *          description: 달
+     *          required: true
+     *          schema:
+     *            type: string
+     *          example: 09
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: object
+     *                properties:
+     *                  events:
+     *                    type: array
+     *                    items:
+     *                      $ref: '#/components/schemas/Event'
+     *        404:
+     *          description: User not found
+     */
+    route.get('/:id/like-events/calendar/:year/:month', index_2.isUserIdValid, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var _a, id, year, month, UserServiceInstance, user, EventServiceInstance, result;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    _a = req.params, id = _a.id, year = _a.year, month = _a.month;
+                    UserServiceInstance = new index_1.UserService(Post_1.Post, User_1.User, Notification_1.Notification);
+                    return [4 /*yield*/, UserServiceInstance.findUserLikeEventByCalendar(mongoose_1.Types.ObjectId(id), year, month)];
+                case 1:
+                    user = _b.sent();
+                    if (!user) {
+                        return [2 /*return*/, res.status(200).json(null)];
+                    }
+                    EventServiceInstance = new index_1.EventService(Event_1.Event, Advertisement_1.Advertisement);
+                    result = EventServiceInstance.addPostVirtualField(user, id);
+                    return [2 /*return*/, res.status(200).json(result)];
+            }
+        });
+    }); });
 });
 //# sourceMappingURL=user.js.map

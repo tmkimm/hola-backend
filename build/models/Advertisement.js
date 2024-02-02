@@ -44,13 +44,15 @@ var advertisementSchema = new mongoose_1.Schema({
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: false },
     realEndDate: { type: Date, required: false },
-    advertisementStatus: { type: String, default: 'before' },
+    advertisementStatus: { type: String, default: 'active' },
     link: { type: String, required: true },
     linkOpenType: { type: String, defulat: 'blank' },
     imageUrl: { type: String, required: false },
+    smallImageUrl: { type: String, required: false },
     mainCopy: { type: String, required: false },
     subCopy: { type: String, required: false },
     bannerSequence: { type: Number, default: 999 },
+    views: { type: Number, default: 0 },
     eventId: { type: mongoose_1.Types.ObjectId, ref: 'Event', required: false }, // 이벤트 Id(공모전 광고)
 }, {
     timestamps: true,
@@ -60,7 +62,27 @@ advertisementSchema.statics.findAdvertisement = function (id) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, this.findById(id)];
+                case 0: return [4 /*yield*/, this.findById(id).populate('eventId', 'title').lean()];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
+        });
+    });
+};
+advertisementSchema.statics.findAdvertisementByEventId = function (eventId) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, this.find({ eventId: eventId })];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
+        });
+    });
+};
+advertisementSchema.statics.findAdvertisementByType = function (campaignId, advertisementType) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, this.find({ campaignId: campaignId, advertisementType: advertisementType })];
                 case 1: return [2 /*return*/, _a.sent()];
             }
         });
@@ -91,6 +113,8 @@ advertisementSchema.statics.findActiveADListInEvent = function () {
                                             startDate: 1,
                                             endDate: 1,
                                             views: 1,
+                                            place: 1,
+                                            organization: 1,
                                         },
                                     },
                                 ],
@@ -104,6 +128,22 @@ advertisementSchema.statics.findActiveADListInEvent = function () {
                 case 1:
                     adEvent = _a.sent();
                     return [2 /*return*/, adEvent];
+            }
+        });
+    });
+};
+// 진행중인 배너 광고 조회
+advertisementSchema.statics.findActiveBanner = function (bannerType) {
+    return __awaiter(this, void 0, void 0, function () {
+        var result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, this.find({ advertisementType: bannerType, advertisementStatus: 'active' })
+                        .sort('+bannerSequence')
+                        .select('link linkOpenType imageUrl smallImageUrl mainCopy subCopy bannerSequence startDate endDate')];
+                case 1:
+                    result = _a.sent();
+                    return [2 /*return*/, result];
             }
         });
     });
@@ -145,6 +185,22 @@ advertisementSchema.statics.findAdvertisementInCampaign = function (campaignId) 
                 case 1:
                     result = _a.sent();
                     return [2 /*return*/, result];
+            }
+        });
+    });
+};
+// 광고 진행 기간이 지난글 자동 마감
+advertisementSchema.statics.updateClosedAfterEndDate = function () {
+    return __awaiter(this, void 0, void 0, function () {
+        var today;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    today = new Date();
+                    return [4 /*yield*/, this.updateMany({ $and: [{ advertisementStatus: 'active' }, { endDate: { $lte: today } }] }, { advertisementStatus: 'close' })];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
             }
         });
     });

@@ -39,17 +39,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postAutoClosing = void 0;
+exports.eventAutoClosing = void 0;
 var node_schedule_1 = __importDefault(require("node-schedule"));
-var Notification_1 = require("../models/Notification");
-var Post_1 = require("../models/Post");
-var User_1 = require("../models/User");
 var index_1 = require("../services/index");
+var Advertisement_1 = require("../models/Advertisement");
+var Event_1 = require("../models/Event");
 /*
   글에 관련된 Schedule을 정의한다.
 */
 // 자동 마감
-function postAutoClosing() {
+function eventAutoClosing() {
     return __awaiter(this, void 0, void 0, function () {
         var rule, job;
         return __generator(this, function (_a) {
@@ -61,12 +60,12 @@ function postAutoClosing() {
                     rule.tz = 'Asia/Seoul';
                     return [4 /*yield*/, node_schedule_1.default.scheduleJob(rule, function () {
                             return __awaiter(this, void 0, void 0, function () {
-                                var PostServiceInstance;
+                                var EventServiceInstance;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
-                                            PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                                            return [4 /*yield*/, PostServiceInstance.autoClosing()];
+                                            EventServiceInstance = new index_1.EventService(Event_1.Event, Advertisement_1.Advertisement);
+                                            return [4 /*yield*/, EventServiceInstance.updateClosedAfterEndDate()];
                                         case 1:
                                             _a.sent();
                                             return [2 /*return*/];
@@ -82,5 +81,5 @@ function postAutoClosing() {
         });
     });
 }
-exports.postAutoClosing = postAutoClosing;
-//# sourceMappingURL=post.js.map
+exports.eventAutoClosing = eventAutoClosing;
+//# sourceMappingURL=event.js.map

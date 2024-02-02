@@ -57,7 +57,7 @@ exports.default = (function (app) {
      *   /admin/login:
      *    post:
      *      tags:
-     *        - admin
+     *        - 어드민
      *      summary: Admin 로그인
      *      description: admin 계정으로 로그인한다.
      *      requestBody:

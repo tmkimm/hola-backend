@@ -39,48 +39,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postAutoClosing = void 0;
-var node_schedule_1 = __importDefault(require("node-schedule"));
-var Notification_1 = require("../models/Notification");
-var Post_1 = require("../models/Post");
-var User_1 = require("../models/User");
-var index_1 = require("../services/index");
-/*
-  글에 관련된 Schedule을 정의한다.
-*/
-// 자동 마감
-function postAutoClosing() {
-    return __awaiter(this, void 0, void 0, function () {
-        var rule, job;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (!(process.env.NODE_ENV === 'production')) return [3 /*break*/, 2];
-                    rule = new node_schedule_1.default.RecurrenceRule();
-                    rule.hour = 0;
-                    rule.tz = 'Asia/Seoul';
-                    return [4 /*yield*/, node_schedule_1.default.scheduleJob(rule, function () {
-                            return __awaiter(this, void 0, void 0, function () {
-                                var PostServiceInstance;
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0:
-                                            PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                                            return [4 /*yield*/, PostServiceInstance.autoClosing()];
-                                        case 1:
-                                            _a.sent();
-                                            return [2 /*return*/];
-                                    }
-                                });
-                            });
-                        })];
-                case 1:
-                    job = _a.sent();
-                    _a.label = 2;
-                case 2: return [2 /*return*/];
-            }
-        });
+exports.checkADTypeDuplication = void 0;
+var mongoose_1 = __importDefault(require("mongoose"));
+var CustomError_1 = __importDefault(require("../../CustomError"));
+var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
+var Advertisement_1 = require("../../models/Advertisement");
+// 광고 등록 시 캠페인에 같은 유형의 광고가 있는지 체크
+var checkADTypeDuplication = (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var campaignId, advertisementType, ObjectId, ad;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                if (!('campaignId' in req.body) || !('advertisementType' in req.body)) {
+                    throw new CustomError_1.default('ContentInvaildError', 400, 'ContentInvaildError');
+                }
+                campaignId = req.body.campaignId;
+                advertisementType = req.body.advertisementType;
+                ObjectId = mongoose_1.default.Types.ObjectId;
+                if (!ObjectId.isValid(campaignId))
+                    throw new CustomError_1.default('NotFoundError', 404, 'Campaign Id is Invalid');
+                return [4 /*yield*/, Advertisement_1.Advertisement.findAdvertisementByType(campaignId, advertisementType)];
+            case 1:
+                ad = _a.sent();
+                if (ad && ad.length > 0) {
+                    throw new CustomError_1.default('DuplicationADTypeError', 400, 'The campaign advertisement type already exists.');
+                }
+                next();
+                return [2 /*return*/];
+        }
     });
-}
-exports.postAutoClosing = postAutoClosing;
-//# sourceMappingURL=post.js.map
+}); });
+exports.checkADTypeDuplication = checkADTypeDuplication;
+//# sourceMappingURL=checkADTypeDuplication.js.map

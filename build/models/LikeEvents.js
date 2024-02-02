@@ -35,52 +35,42 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postAutoClosing = void 0;
-var node_schedule_1 = __importDefault(require("node-schedule"));
-var Notification_1 = require("../models/Notification");
-var Post_1 = require("../models/Post");
-var User_1 = require("../models/User");
-var index_1 = require("../services/index");
-/*
-  글에 관련된 Schedule을 정의한다.
-*/
-// 자동 마감
-function postAutoClosing() {
+exports.LikeEvents = void 0;
+var mongoose_1 = require("mongoose");
+var LikeEventsSchema = new mongoose_1.Schema({
+    userId: { type: mongoose_1.Types.ObjectId, ref: 'Event' },
+    eventId: { type: mongoose_1.Types.ObjectId, ref: 'Event' },
+}, {
+    timestamps: true,
+});
+LikeEventsSchema.statics.add = function (eventId, userId) {
     return __awaiter(this, void 0, void 0, function () {
-        var rule, job;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    if (!(process.env.NODE_ENV === 'production')) return [3 /*break*/, 2];
-                    rule = new node_schedule_1.default.RecurrenceRule();
-                    rule.hour = 0;
-                    rule.tz = 'Asia/Seoul';
-                    return [4 /*yield*/, node_schedule_1.default.scheduleJob(rule, function () {
-                            return __awaiter(this, void 0, void 0, function () {
-                                var PostServiceInstance;
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0:
-                                            PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                                            return [4 /*yield*/, PostServiceInstance.autoClosing()];
-                                        case 1:
-                                            _a.sent();
-                                            return [2 /*return*/];
-                                    }
-                                });
-                            });
-                        })];
+                case 0: return [4 /*yield*/, this.create({
+                        userId: userId,
+                        eventId: eventId,
+                    })];
                 case 1:
-                    job = _a.sent();
-                    _a.label = 2;
-                case 2: return [2 /*return*/];
+                    _a.sent();
+                    return [2 /*return*/];
             }
         });
     });
-}
-exports.postAutoClosing = postAutoClosing;
-//# sourceMappingURL=post.js.map
+};
+LikeEventsSchema.statics.delete = function (eventId, userId) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, this.deleteOne({ userId: userId, eventId: eventId })];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+};
+var LikeEvents = (0, mongoose_1.model)('LikeEvents', LikeEventsSchema);
+exports.LikeEvents = LikeEvents;
+//# sourceMappingURL=LikeEvents.js.map

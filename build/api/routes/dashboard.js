@@ -39,6 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var index_1 = require("../../services/index");
+var isAccessTokenValidWithAdmin_1 = require("../middlewares/isAccessTokenValidWithAdmin");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**
@@ -54,9 +55,16 @@ exports.default = (function (app) {
      *   /dashboard/users/daily:
      *    get:
      *      tags:
-     *        - dashboard
+     *        - 대시보드(어드민)
      *      summary: 사용자 데일리 액션
      *      description: 총 회원 수, 오늘 가입자, 오늘 탈퇴자 조회
+     *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *      responses:
      *        200:
      *          description: successful operation
@@ -75,7 +83,7 @@ exports.default = (function (app) {
      *                    type: integer
      *                    description: 오늘 탈퇴자 조회 수
      */
-    route.get('/users/daily', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/users/daily', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var DashboardServiceInstance, user;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -94,10 +102,16 @@ exports.default = (function (app) {
      *   /dashboard/users/history:
      *    get:
      *      tags:
-     *        - dashboard
+     *        - 대시보드(어드민)
      *      summary: 일자별 회원 가입 현황
      *      description: 조회 기간에 해당되는 가입자 정보 집계
      *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *        - name: startDate
      *          in: query
      *          description: 조회 시작일
@@ -136,7 +150,7 @@ exports.default = (function (app) {
      *                signIn: 8
      *                signOut: 3
      */
-    route.get('/users/history', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/users/history', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, startDate, endDate, DashboardServiceInstance, user;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -156,9 +170,16 @@ exports.default = (function (app) {
      *   /dashboard/posts/daily:
      *    get:
      *      tags:
-     *        - dashboard
+     *        - 대시보드(어드민)
      *      summary: 게시글 데일리 액션
      *      description: 총오늘 전체 글 조회 수, 등록된 글, 글 마감 수, 글 삭제 수 조회
+     *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *      responses:
      *        200:
      *          description: successful operation
@@ -180,7 +201,7 @@ exports.default = (function (app) {
      *                    type: integer
      *                    description: 삭제된 글
      */
-    route.get('/posts/daily', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/posts/daily', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var DashboardServiceInstance, post;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -199,10 +220,16 @@ exports.default = (function (app) {
      *   /dashboard/posts/history:
      *    get:
      *      tags:
-     *        - dashboard
+     *        - 대시보드(어드민)
      *      summary: 일자별 게시글 현황
      *      description: 조회 기간에 해당되는 게시글 정보 집계(일자, 등록된 글, 마감된 글, 삭제된 글)
      *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *        - name: startDate
      *          in: query
      *          description: 조회 시작일
@@ -245,7 +272,7 @@ exports.default = (function (app) {
      *                closed: 3
      *                deleted: 3
      */
-    route.get('/posts/history', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/posts/history', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, startDate, endDate, DashboardServiceInstance, user;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -265,10 +292,16 @@ exports.default = (function (app) {
      *   /dashboard/posts/filter-rank:
      *    get:
      *      tags:
-     *        - dashboard
+     *        - 대시보드(어드민)
      *      summary: 가장 많이 조회해 본 언어 필터
      *      description: 조회 기간에 해당되는 언어 필터링 순위
      *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *        - name: startDate
      *          in: query
      *          description: 조회 시작일
@@ -306,7 +339,7 @@ exports.default = (function (app) {
      *                count: 10
      */
     // 가장 많이 조회해 본 언어 필터
-    route.get('/posts/filter-rank', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/posts/filter-rank', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, startDate, endDate, DashboardServiceInstance, user;
         return __generator(this, function (_b) {
             switch (_b.label) {

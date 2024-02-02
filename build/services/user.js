@@ -46,6 +46,8 @@ var index_1 = __importDefault(require("../config/index"));
 var LikePosts_1 = require("../models/LikePosts");
 var ReadPosts_1 = require("../models/ReadPosts");
 var SignOutUser_1 = require("../models/SignOutUser");
+var LikeEvents_1 = require("../models/LikeEvents");
+var isNumber_1 = require("../utills/isNumber");
 var UserService = /** @class */ (function () {
     function UserService(postModel, userModel, notificationModel) {
         this.postModel = postModel;
@@ -289,6 +291,150 @@ var UserService = /** @class */ (function () {
                     case 1:
                         user = _a.sent();
                         return [2 /*return*/, user];
+                }
+            });
+        });
+    };
+    // 사용자가 관심 등록한 글 리스트를 조회한다.
+    UserService.prototype.findUserLikeEvents = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var likeEvents, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, LikeEvents_1.LikeEvents.aggregate([
+                            { $match: { userId: id } },
+                            {
+                                $lookup: {
+                                    from: 'events',
+                                    localField: 'eventId',
+                                    foreignField: '_id',
+                                    pipeline: [
+                                        {
+                                            $project: {
+                                                title: 1,
+                                                views: 1,
+                                                likes: 1,
+                                                content: 1,
+                                                organization: 1,
+                                                onlineOrOffline: 1,
+                                                imageUrl: 1,
+                                                smallImageUrl: 1,
+                                                isDeleted: 1,
+                                                isClosed: 1,
+                                                startDate: 1,
+                                                endDate: 1,
+                                                applicationStartDate: 1,
+                                                applicationEndDate: 1,
+                                                author: 1,
+                                                price: 1,
+                                                place: 1,
+                                                eventType: 1,
+                                            },
+                                        },
+                                    ],
+                                    as: 'eventId',
+                                },
+                            },
+                            {
+                                $unwind: '$eventId',
+                            },
+                            {
+                                $lookup: {
+                                    from: 'users',
+                                    localField: 'eventId.author',
+                                    foreignField: '_id',
+                                    pipeline: [{ $project: { _id: 1, nickName: 1, image: 1 } }],
+                                    as: 'eventId.author',
+                                },
+                            },
+                        ]).sort({
+                            'eventId.createdAt': -1,
+                        })];
+                    case 1:
+                        likeEvents = _a.sent();
+                        result = likeEvents
+                            .filter(function (i) {
+                            return i.eventId && i.eventId !== null;
+                        })
+                            .map(function (i) {
+                            return i.eventId;
+                        });
+                        return [2 /*return*/, result];
+                }
+            });
+        });
+    };
+    // 사용자가 관심 등록한 글 리스트를 조회한다.
+    UserService.prototype.findUserLikeEventByCalendar = function (id, year, month) {
+        return __awaiter(this, void 0, void 0, function () {
+            var firstDay, lastDay, likeEvents, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(0, isNumber_1.isNumber)(year) || !(0, isNumber_1.isNumber)(month))
+                            throw new CustomError_1.default('IllegalArgumentError', 400, 'Date format is incorrect');
+                        firstDay = new Date(Number(year), Number(month) - 1, 1);
+                        lastDay = new Date(Number(year), Number(month));
+                        return [4 /*yield*/, LikeEvents_1.LikeEvents.aggregate([
+                                { $match: { userId: id } },
+                                {
+                                    $lookup: {
+                                        from: 'events',
+                                        localField: 'eventId',
+                                        foreignField: '_id',
+                                        pipeline: [
+                                            {
+                                                $project: {
+                                                    title: 1,
+                                                    views: 1,
+                                                    likes: 1,
+                                                    content: 1,
+                                                    organization: 1,
+                                                    onlineOrOffline: 1,
+                                                    imageUrl: 1,
+                                                    smallImageUrl: 1,
+                                                    isDeleted: 1,
+                                                    isClosed: 1,
+                                                    startDate: 1,
+                                                    endDate: 1,
+                                                    applicationStartDate: 1,
+                                                    applicationEndDate: 1,
+                                                    author: 1,
+                                                    price: 1,
+                                                    place: 1,
+                                                    eventType: 1,
+                                                },
+                                            },
+                                        ],
+                                        as: 'eventId',
+                                    },
+                                },
+                                {
+                                    $unwind: '$eventId',
+                                },
+                                { $match: { 'eventId.startDate': { $gte: firstDay, $lte: lastDay } } },
+                                {
+                                    $lookup: {
+                                        from: 'users',
+                                        localField: 'eventId.author',
+                                        foreignField: '_id',
+                                        pipeline: [{ $project: { _id: 1, nickName: 1, image: 1 } }],
+                                        as: 'eventId.author',
+                                    },
+                                },
+                            ]).sort({
+                                'eventId.createdAt': -1,
+                            })];
+                    case 1:
+                        likeEvents = _a.sent();
+                        result = likeEvents
+                            .filter(function (i) {
+                            return i.eventId && i.eventId !== null;
+                        })
+                            .map(function (i) {
+                            return i.eventId;
+                        });
+                        return [2 /*return*/, result];
                 }
             });
         });

@@ -40,8 +40,10 @@ var express_1 = require("express");
 var mongoose_1 = require("mongoose");
 var asyncErrorWrapper_1 = require("../../asyncErrorWrapper");
 var Advertisement_1 = require("../../models/Advertisement");
+var AdvertisementLog_1 = require("../../models/AdvertisementLog");
 var Campaign_1 = require("../../models/Campaign");
 var campaign_1 = require("../../services/campaign");
+var isAccessTokenValidWithAdmin_1 = require("../middlewares/isAccessTokenValidWithAdmin");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**
@@ -58,10 +60,16 @@ exports.default = (function (app) {
      *   /campaigns:
      *    get:
      *      tags:
-     *        - campaigns
+     *        - 캠페인 관리(어드민)
      *      summary: 캠페인 리스트 조회(Pagination)
      *      description: 캠페인 리스트를 조회한다.
      *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *        - name: page
      *          in: query
      *          description: 현재 페이지(기본 1)
@@ -80,13 +88,13 @@ exports.default = (function (app) {
      *                  $ref: '#/components/schemas/Campaign'
      */
     // #endregion
-    route.get('/', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var page, CampaignServiceInstance, campaigns;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     page = req.query.page;
-                    CampaignServiceInstance = new campaign_1.CampaignService(Campaign_1.Campaign, Advertisement_1.Advertisement);
+                    CampaignServiceInstance = new campaign_1.CampaignService(Campaign_1.Campaign, Advertisement_1.Advertisement, AdvertisementLog_1.AdvertisementLog);
                     return [4 /*yield*/, CampaignServiceInstance.findCampaignList(page)];
                 case 1:
                     campaigns = _a.sent();
@@ -101,10 +109,16 @@ exports.default = (function (app) {
      *   /campaigns/{id}:
      *    get:
      *      tags:
-     *        - campaigns
+     *        - 캠페인 관리(어드민)
      *      summary: 캠페인 상세 보기
      *      description: '캠페인 상세 정보를 조회한다.'
      *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *        - name: id
      *          in: path
      *          description: 캠페인 Id
@@ -123,13 +137,13 @@ exports.default = (function (app) {
      *          description: Campaign not found
      */
     // #endregion
-    route.get('/:id', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/:id', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var campaignId, CampaignServiceInstance, campaign;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     campaignId = req.params.id;
-                    CampaignServiceInstance = new campaign_1.CampaignService(Campaign_1.Campaign, Advertisement_1.Advertisement);
+                    CampaignServiceInstance = new campaign_1.CampaignService(Campaign_1.Campaign, Advertisement_1.Advertisement, AdvertisementLog_1.AdvertisementLog);
                     return [4 /*yield*/, CampaignServiceInstance.findCampaign(campaignId)];
                 case 1:
                     campaign = _a.sent();
@@ -144,10 +158,16 @@ exports.default = (function (app) {
      *   /campaigns/{id}/advertisement:
      *    get:
      *      tags:
-     *        - campaigns
+     *        - 캠페인 관리(어드민)
      *      summary: 캠페인의 광고 리스트 보기
      *      description: '캠페인의 등록된 광고 리스트를 조회한다.'
      *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *        - name: id
      *          in: path
      *          description: 캠페인 Id
@@ -164,14 +184,86 @@ exports.default = (function (app) {
      *                $ref: '#/components/schemas/Advertisement'
      */
     // #endregion
-    route.get('/:id/advertisement', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.get('/:id/advertisements', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var campaignId, CampaignServiceInstance, campaign;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     campaignId = req.params.id;
-                    CampaignServiceInstance = new campaign_1.CampaignService(Campaign_1.Campaign, Advertisement_1.Advertisement);
+                    CampaignServiceInstance = new campaign_1.CampaignService(Campaign_1.Campaign, Advertisement_1.Advertisement, AdvertisementLog_1.AdvertisementLog);
                     return [4 /*yield*/, CampaignServiceInstance.findAdvertisementInCampaign(campaignId)];
+                case 1:
+                    campaign = _a.sent();
+                    return [2 /*return*/, res.status(200).json(campaign)];
+            }
+        });
+    }); }));
+    // #region 광고 성과 집계
+    /**
+     * @swagger
+     * paths:
+     *   /campaigns/{id}/result:
+     *    get:
+     *      tags:
+     *        - 캠페인 관리(어드민)
+     *      summary: 캠페인의 광고 성과 집계
+     *      description: '광고 성과를 조회한다.'
+     *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
+     *        - name: id
+     *          in: path
+     *          description: 캠페인 Id
+     *          required: true
+     *          example: '635a91e837ad67001412321a'
+     *          schema:
+     *            type: string
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: object
+     *                properties:
+     *                  advertisementType:
+     *                    type: string
+     *                    description: 광고 유형(banner, event)
+     *                    example: 'banner'
+     *                  advertisementId:
+     *                    type: string
+     *                    description: 광고 ID
+     *                    example: '6513fd110c19093e9896c9a2'
+     *                  impression:
+     *                    type: number
+     *                    description: 노출 수
+     *                    example: 10000
+     *                  reach:
+     *                    type: number
+     *                    description: 클릭 수
+     *                    example: 2000
+     *                  reachRate:
+     *                    type: string
+     *                    description: 클릭률(%)
+     *                    example: 20%
+     *                  reachPrice:
+     *                    type: number
+     *                    description: 클릭 비용(클릭 수 * 전환당 단가)
+     *                    example: 1200000
+     */
+    // #endregion
+    route.get('/:id/result', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var campaignId, CampaignServiceInstance, campaign;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    campaignId = req.params.id;
+                    CampaignServiceInstance = new campaign_1.CampaignService(Campaign_1.Campaign, Advertisement_1.Advertisement, AdvertisementLog_1.AdvertisementLog);
+                    return [4 /*yield*/, CampaignServiceInstance.findCampaignResult(campaignId)];
                 case 1:
                     campaign = _a.sent();
                     return [2 /*return*/, res.status(200).json(campaign)];
@@ -185,9 +277,16 @@ exports.default = (function (app) {
      *   /campaigns:
      *    post:
      *      tags:
-     *        - campaigns
+     *        - 캠페인 관리(어드민)
      *      summary: 캠페인 등록
      *      description: '신규 캠페인를 등록한다.'
+     *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *      requestBody:
      *        content:
      *          application/json:
@@ -208,7 +307,7 @@ exports.default = (function (app) {
      *          $ref: '#/components/responses/UnauthorizedError'
      */
     // #endregion
-    route.post('/', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) {
+    route.post('/', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var campaignDTO, CampaignServiceInstance, campaign, error_1;
             return __generator(this, function (_a) {
@@ -216,7 +315,7 @@ exports.default = (function (app) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
                         campaignDTO = req.body;
-                        CampaignServiceInstance = new campaign_1.CampaignService(Campaign_1.Campaign, Advertisement_1.Advertisement);
+                        CampaignServiceInstance = new campaign_1.CampaignService(Campaign_1.Campaign, Advertisement_1.Advertisement, AdvertisementLog_1.AdvertisementLog);
                         return [4 /*yield*/, CampaignServiceInstance.createCampaign(campaignDTO)];
                     case 1:
                         campaign = _a.sent();
@@ -244,12 +343,18 @@ exports.default = (function (app) {
      * @swagger
      * paths:
      *   /campaigns/{id}:
-     *    patch:
+     *    put:
      *      tags:
-     *        - campaigns
+     *        - 캠페인 관리(어드민)
      *      summary: 캠페인 수정
      *      description: 캠페인를 수정한다.
      *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *        - name: id
      *          in: path
      *          description: 캠페인 Id
@@ -277,14 +382,14 @@ exports.default = (function (app) {
      *          $ref: '#/components/responses/UnauthorizedError'
      */
     // #endregion
-    route.patch('/:id', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.put('/:id', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, campaignDTO, CampaignServiceInstance, campaign;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     id = req.params.id;
                     campaignDTO = req.body;
-                    CampaignServiceInstance = new campaign_1.CampaignService(Campaign_1.Campaign, Advertisement_1.Advertisement);
+                    CampaignServiceInstance = new campaign_1.CampaignService(Campaign_1.Campaign, Advertisement_1.Advertisement, AdvertisementLog_1.AdvertisementLog);
                     return [4 /*yield*/, CampaignServiceInstance.modifyCampaign(mongoose_1.Types.ObjectId(id), campaignDTO)];
                 case 1:
                     campaign = _a.sent();
@@ -299,10 +404,16 @@ exports.default = (function (app) {
      *   /campaigns/{id}:
      *    delete:
      *      tags:
-     *        - campaigns
+     *        - 캠페인 관리(어드민)
      *      summary: 캠페인 삭제
      *      description: 캠페인를 삭제한다.
      *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *        - name: id
      *          in: path
      *          description: 캠페인 Id
@@ -319,13 +430,13 @@ exports.default = (function (app) {
      *          description: Campaign not found
      */
     // #endregion
-    route.delete('/:id', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.delete('/:id', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, CampaignServiceInstance;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     id = req.params.id;
-                    CampaignServiceInstance = new campaign_1.CampaignService(Campaign_1.Campaign, Advertisement_1.Advertisement);
+                    CampaignServiceInstance = new campaign_1.CampaignService(Campaign_1.Campaign, Advertisement_1.Advertisement, AdvertisementLog_1.AdvertisementLog);
                     return [4 /*yield*/, CampaignServiceInstance.deleteCampaign(mongoose_1.Types.ObjectId(id))];
                 case 1:
                     _a.sent();

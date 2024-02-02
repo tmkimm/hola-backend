@@ -69,7 +69,7 @@ exports.default = (function (app) {
      *   /posts/comments/{id}:
      *    get:
      *      tags:
-     *        - comments
+     *        - 댓글(모집글)
      *      summary: 댓글 리스트 조회
      *      description: 글의 댓글 리스트를 조회한다.
      *      parameters:
@@ -113,7 +113,7 @@ exports.default = (function (app) {
      *   /posts/comments:
      *    post:
      *      tags:
-     *        - comments
+     *        - 댓글(모집글)
      *      summary: 댓글 등록
      *      description: '신규 댓글을 등록한다. 사용자 정보는 access token을 이용해 확인한다.'
      *      parameters:
@@ -176,7 +176,7 @@ exports.default = (function (app) {
      *   /posts/comments/{id}:
      *    patch:
      *      tags:
-     *        - comments
+     *        - 댓글(모집글)
      *      summary: 댓글 수정
      *      description: 댓글을 수정한다.
      *      parameters:
@@ -240,7 +240,7 @@ exports.default = (function (app) {
      *   /posts/comments/{id}:
      *    delete:
      *      tags:
-     *        - comments
+     *        - 댓글(모집글)
      *      summary: 댓글 삭제
      *      description: 댓글을 삭제한다.
      *      parameters:

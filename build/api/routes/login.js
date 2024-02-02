@@ -113,7 +113,7 @@ exports.default = (function (app) {
      *   /login:
      *    post:
      *      tags:
-     *        - login
+     *        - 로그인
      *      summary: 로그인(Oauth 2.0)
      *      description: '소셜 로그인(google, gitgub, kakao)'
      *      requestBody:
@@ -176,7 +176,7 @@ exports.default = (function (app) {
      *   /login/signup:
      *    post:
      *      tags:
-     *        - login
+     *        - 로그인
      *      summary: 회원 가입
      *      description: '로그인 시 회원 정보가 Insert되므로 회원 가입 시 정보를 수정한다. 회원 가입 완료 시 Refresh Token과 Access Token이 발급된다.'
      *      requestBody:

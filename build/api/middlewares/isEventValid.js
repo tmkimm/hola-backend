@@ -55,8 +55,20 @@ var checkEvent = [
     (0, express_validator_1.body)('organization').isString().withMessage('"organization" Invaild datatype(String)').optional({ nullable: true }),
     (0, express_validator_1.body)('link').isString().withMessage('"link" Invaild datatype(String)').optional({ nullable: true }),
     (0, express_validator_1.body)('imageUrl').isString().withMessage('"imageUrl" Invaild datatype(String)').optional({ nullable: true }),
-    (0, express_validator_1.body)('startDate').isDate().withMessage('"startDate" Invaild datatype(Date)').optional({ nullable: true }),
-    (0, express_validator_1.body)('endDate').isDate().withMessage('"endDate" Invaild datatype(Date)').optional({ nullable: true }),
+    (0, express_validator_1.body)('startDate')
+        .custom(function (value, _a) {
+        var req = _a.req;
+        return !isNaN(new Date(value).getTime());
+    })
+        .withMessage('"startDate" Invaild datatype(Date)')
+        .optional({ nullable: true }),
+    (0, express_validator_1.body)('endDate')
+        .custom(function (value, _a) {
+        var req = _a.req;
+        return !isNaN(new Date(value).getTime());
+    })
+        .withMessage('"endDate" Invaild datatype(Date)')
+        .optional({ nullable: true }),
     (0, express_validator_1.body)('eventType')
         .custom(function (value, _a) {
         var req = _a.req;

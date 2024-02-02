@@ -18,6 +18,7 @@ exports.default = (function (app) {
     var _a;
     var whitelist = [
         'http://localhost:3000',
+        'http://localhost:5173',
         'http://holaworld.io',
         'https://holaworld.io',
         'http://www.holaworld.io',

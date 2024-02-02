@@ -35,52 +35,55 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postAutoClosing = void 0;
-var node_schedule_1 = __importDefault(require("node-schedule"));
-var Notification_1 = require("../models/Notification");
-var Post_1 = require("../models/Post");
-var User_1 = require("../models/User");
-var index_1 = require("../services/index");
-/*
-  글에 관련된 Schedule을 정의한다.
-*/
-// 자동 마감
-function postAutoClosing() {
+exports.AdvertisementLog = void 0;
+var mongoose_1 = require("mongoose");
+var advertisementLogSchema = new mongoose_1.Schema({
+    advertisementId: { type: mongoose_1.Types.ObjectId, ref: 'Avertisement', required: true },
+    logType: { type: String, required: true },
+    logDate: { type: Date, required: true }, //  로그 생성일
+}, {
+    timestamps: true,
+});
+// 광고 성과 집계
+advertisementLogSchema.statics.findADResult = function (advertiesmentId) {
     return __awaiter(this, void 0, void 0, function () {
-        var rule, job;
+        var result;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    if (!(process.env.NODE_ENV === 'production')) return [3 /*break*/, 2];
-                    rule = new node_schedule_1.default.RecurrenceRule();
-                    rule.hour = 0;
-                    rule.tz = 'Asia/Seoul';
-                    return [4 /*yield*/, node_schedule_1.default.scheduleJob(rule, function () {
-                            return __awaiter(this, void 0, void 0, function () {
-                                var PostServiceInstance;
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0:
-                                            PostServiceInstance = new index_1.PostService(Post_1.Post, User_1.User, Notification_1.Notification);
-                                            return [4 /*yield*/, PostServiceInstance.autoClosing()];
-                                        case 1:
-                                            _a.sent();
-                                            return [2 /*return*/];
-                                    }
-                                });
-                            });
-                        })];
+                case 0: return [4 /*yield*/, this.aggregate([
+                        {
+                            $match: {
+                                advertisementId: { $in: advertiesmentId },
+                            },
+                        },
+                        {
+                            $group: {
+                                _id: {
+                                    advertisementId: '$advertisementId',
+                                    logType: '$logType',
+                                },
+                                count: { $sum: 1 },
+                            },
+                        },
+                        {
+                            $lookup: {
+                                from: 'advertisements',
+                                localField: '_id.advertisementId',
+                                foreignField: '_id',
+                                pipeline: [{ $project: { advertisementType: 1 } }],
+                                as: 'advertisements',
+                            },
+                        },
+                        { $unwind: '$advertisements' },
+                    ]).sort('advertisements.advertisementType _id.logType')];
                 case 1:
-                    job = _a.sent();
-                    _a.label = 2;
-                case 2: return [2 /*return*/];
+                    result = _a.sent();
+                    return [2 /*return*/, result];
             }
         });
     });
-}
-exports.postAutoClosing = postAutoClosing;
-//# sourceMappingURL=post.js.map
+};
+var AdvertisementLog = (0, mongoose_1.model)('AdvertisementLog', advertisementLogSchema);
+exports.AdvertisementLog = AdvertisementLog;
+//# sourceMappingURL=AdvertisementLog.js.map

@@ -98,7 +98,7 @@ export default (app: Router) => {
     asyncErrorWrapper(async function (req: Request, res: Response, next: NextFunction) {
       const { advertisementId, logType } = req.body;
       const AdvertisementLogServiceInstance = new AdvertisementLogService(AdvertisementLogModel);
-      if (!advertisementId) throw new CustomError('NotFoundError', 404, '"advertisementId" not found');
+      if (!advertisementId) throw new CustomError('NotFoundError', 400, '"advertisementId" not found');
 
       await AdvertisementLogServiceInstance.createEventLog(Types.ObjectId(advertisementId), logType);
       return res.status(204).json();

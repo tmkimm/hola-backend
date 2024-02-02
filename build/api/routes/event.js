@@ -43,6 +43,11 @@ var Advertisement_1 = require("../../models/Advertisement");
 var Event_1 = require("../../models/Event");
 var event_1 = require("./../../services/event");
 var isEventValid_1 = require("../middlewares/isEventValid");
+var isAccessTokenValidWithAdmin_1 = require("../middlewares/isAccessTokenValidWithAdmin");
+var isAccessTokenValid_1 = require("../middlewares/isAccessTokenValid");
+var isEventIdValid_1 = require("../middlewares/isEventIdValid");
+var getUserIdByAccessToken_1 = require("../middlewares/getUserIdByAccessToken");
+var checkADIsActive_1 = require("../middlewares/checkADIsActive");
 var route = (0, express_1.Router)();
 exports.default = (function (app) {
     /**
@@ -59,7 +64,7 @@ exports.default = (function (app) {
      *   /events:
      *    get:
      *      tags:
-     *        - events
+     *        - 공모전
      *      summary: 공모전 리스트 조회(Pagination)
      *      description: 공모전 리스트를 조회한다.
      *      parameters:
@@ -109,14 +114,15 @@ exports.default = (function (app) {
      *                  $ref: '#/components/schemas/Event'
      */
     // #endregion
-    route.get('/', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, page, sort, eventType, search, onOffLine, EventServiceInstance, events;
+    route.get('/', getUserIdByAccessToken_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var _a, page, sort, eventType, search, onOffLine, userId, EventServiceInstance, events;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = req.query, page = _a.page, sort = _a.sort, eventType = _a.eventType, search = _a.search, onOffLine = _a.onOffLine;
+                    userId = req.user._id;
                     EventServiceInstance = new event_1.EventService(Event_1.Event, Advertisement_1.Advertisement);
-                    return [4 /*yield*/, EventServiceInstance.findEventList(page, sort, eventType, search, onOffLine)];
+                    return [4 /*yield*/, EventServiceInstance.findEventList(page, sort, eventType, search, onOffLine, userId)];
                 case 1:
                     events = _b.sent();
                     return [2 /*return*/, res.status(200).json(events)];
@@ -130,7 +136,7 @@ exports.default = (function (app) {
      *   /events/last-page:
      *    get:
      *      tags:
-     *        - events
+     *        - 공모전
      *      summary: 공모전 리스트 조회 - 마지막 페이지 조회
      *      description: Pagination에서 마지막 페이지를 조회한다.
      *      parameters:
@@ -190,7 +196,7 @@ exports.default = (function (app) {
      *   /events/calendar/{year}/{month}:
      *    get:
      *      tags:
-     *        - events
+     *        - 공모전
      *      summary: 공모전 캘린더뷰 조회
      *      description: 공모전 캘린더뷰를 조회한다.
      *      parameters:
@@ -222,6 +228,13 @@ exports.default = (function (app) {
      *          schema:
      *            type: string
      *          example: '토이프로젝트'
+     *        - name: onOffLine
+     *          in: query
+     *          description: '진행방식(on:온라인, off:오프라인, onOff: 온/오프라인)'
+     *          required: false
+     *          schema:
+     *            type: string
+     *          example: 'on'
      *      responses:
      *        200:
      *          description: successful operation
@@ -233,17 +246,52 @@ exports.default = (function (app) {
      *                  $ref: '#/components/schemas/Event'
      */
     // #endregion
-    route.get('/calendar/:year/:month', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var _a, year, month, _b, eventType, search, EventServiceInstance, events;
+    route.get('/calendar/:year/:month', getUserIdByAccessToken_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var _a, year, month, _b, eventType, search, onOffLine, userId, EventServiceInstance, events;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
                     _a = req.params, year = _a.year, month = _a.month;
-                    _b = req.query, eventType = _b.eventType, search = _b.search;
+                    _b = req.query, eventType = _b.eventType, search = _b.search, onOffLine = _b.onOffLine;
+                    userId = req.user._id;
                     EventServiceInstance = new event_1.EventService(Event_1.Event, Advertisement_1.Advertisement);
-                    return [4 /*yield*/, EventServiceInstance.findEventListInCalendar(year, month, eventType, search)];
+                    return [4 /*yield*/, EventServiceInstance.findEventListInCalendar(year, month, eventType, search, userId, onOffLine)];
                 case 1:
                     events = _c.sent();
+                    return [2 /*return*/, res.status(200).json(events)];
+            }
+        });
+    }); }));
+    // #region 진행중인 모든 공모전 조회(SelectBox 전용)
+    /**
+     * @swagger
+     * paths:
+     *   /events/bulk:
+     *    get:
+     *      tags:
+     *        - 공모전
+     *      summary: 진행중인 모든 공모전 조회(SelectBox 전용)
+     *      description: 진행중인 모든 공모전 조회한다.(80개)
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: array
+     *                items:
+     *                  $ref: '#/components/schemas/Event'
+     */
+    // #endregion
+    route.get('/bulk', getUserIdByAccessToken_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var EventServiceInstance, events;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    EventServiceInstance = new event_1.EventService(Event_1.Event, Advertisement_1.Advertisement);
+                    return [4 /*yield*/, EventServiceInstance.findEventTitleForSelectBox()];
+                case 1:
+                    events = _a.sent();
                     return [2 /*return*/, res.status(200).json(events)];
             }
         });
@@ -255,7 +303,7 @@ exports.default = (function (app) {
      *   /events/recommend:
      *    get:
      *      tags:
-     *        - events
+     *        - 공모전
      *      summary: 추천 공모전 조회(AD)
      *      description: 추천 공모전을 조회한다.
      *      responses:
@@ -282,6 +330,53 @@ exports.default = (function (app) {
             }
         });
     }); }));
+    // #region 공모전 이미지 S3 Pre-Signed URL 발급
+    /**
+     * @swagger
+     * paths:
+     *   /events/pre-sign-url:
+     *    get:
+     *      tags:
+     *        - 공모전
+     *      summary: 공모전 이미지 S3 Pre-Signed URL 발급
+     *      description: 공모전 이미지 S3 Pre-Signed URL 발급
+     *      parameters:
+     *        - name: fileName
+     *          in: query
+     *          description: 파일명
+     *          required: true
+     *          example: '2839_284_42.jpg'
+     *          schema:
+     *            type: string
+     *      responses:
+     *        200:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: object
+     *                properties:
+     *                  preSignUrl:
+     *                    type: string
+     *                    description: Pre-signed url
+     */
+    // #endregion
+    route.get('/pre-sign-url', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var fileName, EventServiceInstance, signedUrlPut;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    fileName = req.query.fileName;
+                    EventServiceInstance = new event_1.EventService(Event_1.Event, Advertisement_1.Advertisement);
+                    return [4 /*yield*/, EventServiceInstance.getPreSignUrl(fileName)];
+                case 1:
+                    signedUrlPut = _a.sent();
+                    return [2 /*return*/, res.status(200).json({
+                            preSignUrl: signedUrlPut,
+                        })];
+            }
+        });
+    }); }));
     // #region 공모전 상세 보기
     /**
      * @swagger
@@ -289,7 +384,7 @@ exports.default = (function (app) {
      *   /events/{id}:
      *    get:
      *      tags:
-     *        - events
+     *        - 공모전
      *      summary: 공모전 상세 보기
      *      description: '공모전 상세 정보를 조회한다.'
      *      parameters:
@@ -311,14 +406,15 @@ exports.default = (function (app) {
      *          description: Event not found
      */
     // #endregion
-    route.get('/:id', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var eventId, EventServiceInstance, event;
+    route.get('/:id', getUserIdByAccessToken_1.getUserIdByAccessToken, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var eventId, userId, EventServiceInstance, event;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     eventId = req.params.id;
+                    userId = req.user._id;
                     EventServiceInstance = new event_1.EventService(Event_1.Event, Advertisement_1.Advertisement);
-                    return [4 /*yield*/, EventServiceInstance.findEvent(eventId)];
+                    return [4 /*yield*/, EventServiceInstance.findEvent(mongoose_1.Types.ObjectId(eventId), userId)];
                 case 1:
                     event = _a.sent();
                     return [2 /*return*/, res.status(200).json(event)];
@@ -332,7 +428,7 @@ exports.default = (function (app) {
      *   /events/{id}/recommend:
      *    get:
      *      tags:
-     *        - events
+     *        - 공모전
      *      summary: 공모전 상세에서 관련 공모전 추천
      *      description: '현재 읽고 있는 공모전 유형과 같은 글을 추천한다.'
      *      parameters:
@@ -369,7 +465,7 @@ exports.default = (function (app) {
                     eventId = req.params.id;
                     eventType = req.query.eventType;
                     EventServiceInstance = new event_1.EventService(Event_1.Event, Advertisement_1.Advertisement);
-                    return [4 /*yield*/, EventServiceInstance.findRecommendEventListInDetail(eventId, eventType)];
+                    return [4 /*yield*/, EventServiceInstance.findRecommendEventListInDetail(mongoose_1.Types.ObjectId(eventId), eventType)];
                 case 1:
                     event = _a.sent();
                     return [2 /*return*/, res.status(200).json(event)];
@@ -383,9 +479,16 @@ exports.default = (function (app) {
      *   /events:
      *    post:
      *      tags:
-     *        - events
+     *        - 공모전
      *      summary: 공모전 등록
      *      description: '신규 공모전를 등록한다.'
+     *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *      requestBody:
      *        content:
      *          application/json:
@@ -406,7 +509,7 @@ exports.default = (function (app) {
      *          $ref: '#/components/responses/UnauthorizedError'
      */
     // #endregion
-    route.post('/', isEventValid_1.checkEvent, isEventValid_1.isEventValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) {
+    route.post('/', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, isEventValid_1.checkEvent, isEventValid_1.isEventValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var eventDTO, EventServiceInstance, event_2, error_1;
             return __generator(this, function (_a) {
@@ -442,12 +545,18 @@ exports.default = (function (app) {
      * @swagger
      * paths:
      *   /events/{id}:
-     *    patch:
+     *    put:
      *      tags:
-     *        - events
+     *        - 공모전
      *      summary: 공모전 수정
      *      description: 공모전를 수정한다.
      *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *        - name: id
      *          in: path
      *          description: 공모전 Id
@@ -475,7 +584,7 @@ exports.default = (function (app) {
      *          $ref: '#/components/responses/UnauthorizedError'
      */
     // #endregion
-    route.patch('/:id', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.put('/:id', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, eventDTO, EventServiceInstance, event;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -497,10 +606,16 @@ exports.default = (function (app) {
      *   /events/{id}:
      *    delete:
      *      tags:
-     *        - events
+     *        - 공모전
      *      summary: 공모전 삭제
      *      description: 공모전를 삭제한다.
      *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: false
+     *          schema:
+     *            type: string
      *        - name: id
      *          in: path
      *          description: 공모전 Id
@@ -517,7 +632,7 @@ exports.default = (function (app) {
      *          description: Event not found
      */
     // #endregion
-    route.delete('/:id', (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    route.delete('/:id', isAccessTokenValidWithAdmin_1.isAccessTokenValidWithAdmin, checkADIsActive_1.checkADIsActive, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
         var id, EventServiceInstance;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -528,6 +643,119 @@ exports.default = (function (app) {
                 case 1:
                     _a.sent();
                     return [2 /*return*/, res.status(204).json()];
+            }
+        });
+    }); }));
+    /**
+     * @swagger
+     * tags:
+          - name: likes
+            description: 공모전 관심 등록
+     */
+    // #region 좋아요 등록
+    /**
+     * @swagger
+     * paths:
+     *   /events/likes:
+     *    post:
+     *      tags:
+     *        - 공모전 관심등록
+     *      summary: 좋아요 등록
+     *      description: 좋아요 등록
+     *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: true
+     *          schema:
+     *            type: string
+     *      requestBody:
+     *        content:
+     *          application/json:
+     *            schema:
+     *              type: object
+     *              properties:
+     *                eventId:
+     *                  type: string
+     *                  description : '글 ID'
+     *                  example: '61063af4ed4b420bbcfa0b4c'
+     *      responses:
+     *        201:
+     *          description: successful operation
+     *          content:
+     *            application/json:
+     *              schema:
+     *                type: object
+     *                properties:
+     *                  likeUsers:
+     *                    type: array
+     *                    description: 사용자 리스트
+     *                    items:
+     *                      type: string
+     *        400:
+     *          description: Invaild post data
+     *        401:
+     *          $ref: '#/components/responses/UnauthorizedError'
+     */
+    // #endregion
+    route.post('/likes', isAccessTokenValid_1.isAccessTokenValid, isEventIdValid_1.isEventIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var eventId, userId, EventServiceInstance, event;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    eventId = req.body.eventId;
+                    userId = req.user._id;
+                    EventServiceInstance = new event_1.EventService(Event_1.Event, Advertisement_1.Advertisement);
+                    return [4 /*yield*/, EventServiceInstance.addLike(mongoose_1.Types.ObjectId(eventId), userId)];
+                case 1:
+                    event = _a.sent();
+                    return [2 /*return*/, res.status(201).json({ likeUsers: event.likes })];
+            }
+        });
+    }); }));
+    /**
+     * @swagger
+     * paths:
+     *   /events/likes/{id}:
+     *    delete:
+     *      tags:
+     *        - 공모전 관심등록
+     *      summary: 공모전 좋아요 삭제
+     *      description: 좋아요 삭제
+     *      parameters:
+     *        - name: accessToken
+     *          in: header
+     *          description: access token
+     *          required: true
+     *          schema:
+     *            type: string
+     *        - name: id
+     *          in: path
+     *          description: 글 Id
+     *          required: true
+     *          example: '60213d1c3126991a7cd1d287'
+     *          schema:
+     *            type: string
+     *      responses:
+     *        204:
+     *          description: successful operation
+     *        401:
+     *          $ref: '#/components/responses/UnauthorizedError'
+     *        404:
+     *          description: Event not found
+     */
+    route.delete('/likes/:id', isAccessTokenValid_1.isAccessTokenValid, isEventIdValid_1.isEventIdValid, (0, asyncErrorWrapper_1.asyncErrorWrapper)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+        var eventId, userId, EventServiceInstance, event;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    eventId = req.params.id;
+                    userId = req.user._id;
+                    EventServiceInstance = new event_1.EventService(Event_1.Event, Advertisement_1.Advertisement);
+                    return [4 /*yield*/, EventServiceInstance.deleteLike(mongoose_1.Types.ObjectId(eventId), userId)];
+                case 1:
+                    event = _a.sent();
+                    return [2 /*return*/, res.status(201).json({ likeUsers: event.likes })];
             }
         });
     }); }));

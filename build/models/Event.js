@@ -60,12 +60,15 @@ var eventSchema = new mongoose_1.Schema({
     smallImageUrl: { type: String, required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
-    closeDate: { type: Date, required: true },
+    applicationStartDate: { type: Date, required: true },
+    applicationEndDate: { type: Date, required: true },
+    closeDate: { type: Date, required: false },
     author: { type: mongoose_1.Types.ObjectId, ref: 'User', required: false },
     isDeleted: { type: Boolean, default: false },
     isClosed: { type: Boolean, default: false },
     views: { type: Number, default: 0 },
     totalLikes: { type: Number, default: 0 },
+    likes: [{ type: mongoose_1.Types.ObjectId, ref: 'User' }],
     description: { type: String, default: null },
     isFree: { type: Boolean, default: false },
     price: { type: Number, default: null }, // 금액
@@ -100,15 +103,19 @@ eventSchema.statics.deleteEvent = function (id) {
     });
 };
 // 조회 query 생성
-var makeFindEventQuery = function (eventType, onOffLine) {
+// eventType : 공모전 구분(conference, hackathon, contest, bootcamp, others)
+// onOffLine : 진행방식(온라인/오프라인)
+// isClosed  : 마감여부(null : 전체 조회, false : 마감되지 않은 자료만 조회, true : 마감된 자료만 조회)
+var makeFindEventQuery = function (eventType, onOffLine, isClosed) {
     // Query
     var query = {};
-    if (typeof onOffLine === 'string' && onOffLine && onOffLine != 'ALL')
+    if (typeof onOffLine === 'string' && onOffLine && onOffLine.toUpperCase() != 'ALL')
         query.onlineOrOffline = onOffLine;
-    query.isClosed = { $eq: false };
+    if (isClosed != null)
+        query.isClosed = { $eq: isClosed };
     query.isDeleted = { $eq: false };
     // 공모전 구분(conference, hackathon, contest, bootcamp, others)
-    if (typeof eventType === 'string' && eventType && eventType != 'ALL') {
+    if (typeof eventType === 'string' && eventType && eventType.toUpperCase() != 'ALL') {
         query.eventType = { $eq: eventType };
     }
     return query;
@@ -130,9 +137,9 @@ eventSchema.statics.findEventPagination = function (page, sort, eventType, searc
                         sortQuery.push('-createdAt');
                     }
                     else {
-                        sortQuery.push('createdAt');
+                        sortQuery.push('-createdAt');
                     }
-                    query = makeFindEventQuery(eventType, onOffLine);
+                    query = makeFindEventQuery(eventType, onOffLine, null);
                     itemsPerPage = 4 * 5;
                     pageToSkip = 0;
                     if ((0, isNumber_1.isNumber)(page) && Number(page) > 0)
@@ -161,15 +168,15 @@ eventSchema.statics.findEventPagination = function (page, sort, eventType, searc
     });
 };
 // 공모전 캘린더뷰 조회
-eventSchema.statics.findEventCalendar = function (year, month, eventType, search) {
+eventSchema.statics.findEventCalendar = function (year, month, eventType, search, onOffLine) {
     return __awaiter(this, void 0, void 0, function () {
         var query, firstDay, lastDay, aggregateSearch, aggregate, events;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    query = makeFindEventQuery(eventType, null);
+                    query = makeFindEventQuery(eventType, onOffLine, null);
                     firstDay = new Date(year, month - 1, 1);
-                    lastDay = new Date(year, month, 0);
+                    lastDay = new Date(year, month);
                     query.startDate = { $gte: firstDay, $lte: lastDay };
                     aggregateSearch = [];
                     if (search && typeof search === 'string') {
@@ -201,7 +208,7 @@ eventSchema.statics.countEvent = function (eventType, onOffLine, search) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    query = makeFindEventQuery(eventType, onOffLine);
+                    query = makeFindEventQuery(eventType, onOffLine, null);
                     aggregateSearch = [];
                     if (search && typeof search === 'string') {
                         aggregateSearch.push({
@@ -240,6 +247,39 @@ eventSchema.statics.countEvent = function (eventType, onOffLine, search) {
         });
     });
 };
+// 조회수 증가
+eventSchema.statics.increaseView = function (eventId) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, this.findByIdAndUpdate(eventId, {
+                        $inc: {
+                            views: 1,
+                        },
+                    })];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+};
+// 이벤트 목록 select box
+eventSchema.statics.findEventForSelectBox = function (limit) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query, events;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = makeFindEventQuery(null, null, false);
+                    return [4 /*yield*/, this.find(query).select('_id title').sort('-createdAt').limit(limit)];
+                case 1:
+                    events = _a.sent();
+                    return [2 /*return*/, events];
+            }
+        });
+    });
+};
 // 추천 이벤트 조회
 // TODO startDate 조건 변경
 eventSchema.statics.findRecommendEventList = function (notInEventId) {
@@ -248,13 +288,13 @@ eventSchema.statics.findRecommendEventList = function (notInEventId) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    query = makeFindEventQuery(null, null);
+                    query = makeFindEventQuery(null, null, false);
                     query._id = { $nin: notInEventId };
                     limit = 10 - notInEventId.length;
                     today = new Date();
                     query.startDate = { $gte: today.setDate(today.getDate() - 180) };
                     return [4 /*yield*/, this.find(query)
-                            .select('_id title eventType imageUrl smallImageUrl startDate endDate views')
+                            .select('_id title eventType imageUrl smallImageUrl startDate endDate views place organization')
                             .sort('-views')
                             .limit(limit)
                             .lean()];
@@ -272,27 +312,91 @@ eventSchema.statics.findRandomEventByEventType = function (eventId, eventType) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    query = makeFindEventQuery(eventType, null);
+                    query = makeFindEventQuery(eventType, null, false);
                     query._id = { $ne: eventId }; // 현재 읽고 있는 글 제외
-                    return [4 /*yield*/, this.aggregate([
-                            { $match: query },
-                            { $sample: { size: 6 } },
-                            {
-                                $project: {
-                                    _id: 1,
-                                    title: 1,
-                                    eventType: 1,
-                                    imageUrl: 1,
-                                    smallImageUrl: 1,
-                                    startDate: 1,
-                                    endDate: 1,
-                                    views: 1,
-                                },
-                            },
-                        ])];
+                    return [4 /*yield*/, this.aggregate([{ $match: query }, { $sample: { size: 6 } }])];
                 case 1:
                     event = _a.sent();
                     return [2 /*return*/, event];
+            }
+        });
+    });
+};
+// 관심등록 추가
+// 디바운스 실패 경우를 위해 예외처리
+eventSchema.statics.addLike = function (eventId, userId) {
+    return __awaiter(this, void 0, void 0, function () {
+        var event, isLikeExist, result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, this.find({ _id: eventId, likes: { $in: [userId] } })];
+                case 1:
+                    event = _a.sent();
+                    isLikeExist = event.length > 0;
+                    if (!!isLikeExist) return [3 /*break*/, 3];
+                    return [4 /*yield*/, this.findByIdAndUpdate({ _id: eventId }, {
+                            $push: {
+                                likes: {
+                                    _id: userId,
+                                },
+                            },
+                            $inc: {
+                                totalLikes: 1,
+                            },
+                        }, {
+                            new: true,
+                            upsert: true,
+                        })];
+                case 2:
+                    result = _a.sent();
+                    return [3 /*break*/, 4];
+                case 3:
+                    result = event[event.length - 1];
+                    _a.label = 4;
+                case 4: return [2 /*return*/, { event: result, isLikeExist: isLikeExist }];
+            }
+        });
+    });
+};
+eventSchema.statics.deleteLike = function (eventId, userId) {
+    return __awaiter(this, void 0, void 0, function () {
+        var events, event, isLikeExist;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, this.find({ _id: eventId })];
+                case 1:
+                    events = _a.sent();
+                    event = events[events.length - 1];
+                    isLikeExist = event && event.likes.indexOf(userId) > -1;
+                    if (!isLikeExist) return [3 /*break*/, 3];
+                    return [4 /*yield*/, this.findOneAndUpdate({ _id: eventId }, {
+                            $pull: { likes: userId },
+                            $inc: {
+                                totalLikes: -1,
+                            },
+                        }, {
+                            new: true,
+                        })];
+                case 2:
+                    event = _a.sent();
+                    _a.label = 3;
+                case 3: return [2 /*return*/, { event: event, isLikeExist: isLikeExist }];
+            }
+        });
+    });
+};
+// 신청기간이 지난글 자동 마감
+eventSchema.statics.updateClosedAfterEndDate = function () {
+    return __awaiter(this, void 0, void 0, function () {
+        var today;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    today = new Date();
+                    return [4 /*yield*/, this.updateMany({ $and: [{ isClosed: false }, { applicationEndDate: { $lte: today } }] }, { isClosed: true })];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
             }
         });
     });

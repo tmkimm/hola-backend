@@ -143,10 +143,10 @@ export class EventService {
       if (!event.isAd || event.isAd !== true) event.isAd = false;
 
       event.badge = [];
-      if (event.endDate > today) {
+      if (event.applicationEndDate > today) {
         event.badge.push({
           type: 'deadline',
-          name: `${timeForEndDate(event.endDate)}`,
+          name: `${timeForEndDate(event.applicationEndDate)}`,
         });
       }
       return event;

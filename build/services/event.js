@@ -43,13 +43,16 @@ exports.EventService = void 0;
 var CustomError_1 = __importDefault(require("../CustomError"));
 var timeForEndDate_1 = require("../utills/timeForEndDate");
 var isNumber_1 = require("./../utills/isNumber");
+var aws_sdk_1 = __importDefault(require("aws-sdk"));
+var config_1 = __importDefault(require("../config"));
+var LikeEvents_1 = require("../models/LikeEvents");
 var EventService = /** @class */ (function () {
     function EventService(eventModel, adverisementModel) {
         this.eventModel = eventModel;
         this.adverisementModel = adverisementModel;
     }
-    // 메인 화면에서 글 리스트를 조회한다.
-    EventService.prototype.findEventList = function (page, sort, eventType, search, onOffLine) {
+    // 리스트뷰 조회
+    EventService.prototype.findEventList = function (page, sort, eventType, search, onOffLine, userId) {
         return __awaiter(this, void 0, void 0, function () {
             var result;
             return __generator(this, function (_a) {
@@ -57,6 +60,7 @@ var EventService = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.eventModel.findEventPagination(page, sort, eventType, search, onOffLine)];
                     case 1:
                         result = _a.sent();
+                        result = this.addPostVirtualField(result, userId);
                         return [2 /*return*/, result];
                 }
             });
@@ -79,17 +83,31 @@ var EventService = /** @class */ (function () {
             });
         });
     };
-    // 메인 화면에서 글 리스트를 조회한다.
-    EventService.prototype.findEventListInCalendar = function (year, month, eventType, search) {
+    // 캘린더뷰 조회
+    EventService.prototype.findEventListInCalendar = function (year, month, eventType, search, userId, onOffLine) {
         return __awaiter(this, void 0, void 0, function () {
-            var b, result;
+            var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         if (!(0, isNumber_1.isNumber)(year) || !(0, isNumber_1.isNumber)(month))
                             throw new CustomError_1.default('IllegalArgumentError', 400, 'Date format is incorrect');
-                        b = '123';
-                        return [4 /*yield*/, this.eventModel.findEventCalendar(Number(year), Number(month), eventType, search)];
+                        return [4 /*yield*/, this.eventModel.findEventCalendar(Number(year), Number(month), eventType, search, onOffLine)];
+                    case 1:
+                        result = _a.sent();
+                        result = this.addPostVirtualField(result, userId);
+                        return [2 /*return*/, result];
+                }
+            });
+        });
+    };
+    // 진행중인 모든 공모전 조회(SelectBox 전용)
+    EventService.prototype.findEventTitleForSelectBox = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.eventModel.findEventForSelectBox(80)];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result];
@@ -97,17 +115,57 @@ var EventService = /** @class */ (function () {
             });
         });
     };
-    // 메인 화면에서 글 리스트를 조회한다.
-    EventService.prototype.findEvent = function (eventId) {
+    // mongoose virtual field 추가
+    // mongodb text search를 위해 aggregate 사용 시 virtual field가 조회되지 않음 > 수동 추가
+    // isLiked : 사용자의 관심 등록 여부
+    EventService.prototype.addPostVirtualField = function (events, userId) {
+        var result = [];
+        // 글 상태
+        result = events.map(function (event) {
+            var isLiked = false;
+            // add isLiked
+            if (userId != null && event.likes && event.likes.length > 0) {
+                // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
+                for (var _i = 0, _a = event.likes; _i < _a.length; _i++) {
+                    var likeUserId = _a[_i];
+                    if (likeUserId.toString() == userId.toString()) {
+                        isLiked = true;
+                        break;
+                    }
+                }
+            }
+            event.isLiked = isLiked;
+            return event;
+        });
+        return result;
+    };
+    // 공모전 상세 조회
+    EventService.prototype.findEvent = function (eventId, userId) {
         return __awaiter(this, void 0, void 0, function () {
-            var event;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.eventModel.findById(eventId)];
+            var event, isLiked, _i, _a, likeUserId;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, this.eventModel.findById(eventId).lean()];
                     case 1:
-                        event = _a.sent();
+                        event = _b.sent();
+                        isLiked = false;
+                        // add isLiked
+                        if (userId != null && event.likes && event.likes.length > 0) {
+                            // ObjectId 특성 상 IndexOf를 사용할 수 없어 loop로 비교(리팩토링 필요)
+                            for (_i = 0, _a = event.likes; _i < _a.length; _i++) {
+                                likeUserId = _a[_i];
+                                if (likeUserId.toString() == userId.toString()) {
+                                    isLiked = true;
+                                    break;
+                                }
+                            }
+                        }
+                        event.isLiked = isLiked;
                         if (!event)
                             throw new CustomError_1.default('NotFoundError', 404, 'Event not found');
+                        return [4 /*yield*/, this.increaseView(eventId)];
+                    case 2:
+                        _b.sent(); // 조회수 증가
                         return [2 /*return*/, event];
                 }
             });
@@ -169,6 +227,19 @@ var EventService = /** @class */ (function () {
             });
         });
     };
+    // 조회수 증가
+    EventService.prototype.increaseView = function (eventId) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.eventModel.increaseView(eventId)];
+                    case 1:
+                        _a.sent(); // 조회수 증가
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     // 공모전 등록
     EventService.prototype.createEvent = function (event) {
         return __awaiter(this, void 0, void 0, function () {
@@ -214,6 +285,84 @@ var EventService = /** @class */ (function () {
                         // TODO 공모전 권한 관리
                         // if (id.toString() !== tokenEventId.toString())
                         //   throw new CustomError('NotAuthenticatedError', 401, 'Event does not match');
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    // S3 Pre-Sign Url을 발급한다.
+    EventService.prototype.getPreSignUrl = function (fileName) {
+        return __awaiter(this, void 0, void 0, function () {
+            var s3, params, signedUrlPut;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!fileName) {
+                            throw new CustomError_1.default('NotFoundError', 404, '"fileName" does not exist');
+                        }
+                        s3 = new aws_sdk_1.default.S3({
+                            accessKeyId: config_1.default.S3AccessKeyId,
+                            secretAccessKey: config_1.default.S3SecretAccessKey,
+                            region: config_1.default.S3BucketRegion,
+                        });
+                        params = {
+                            Bucket: config_1.default.S3BucketName,
+                            Key: "event-original/".concat(fileName),
+                            Expires: 60 * 10, // seconds
+                        };
+                        return [4 /*yield*/, s3.getSignedUrlPromise('putObject', params)];
+                    case 1:
+                        signedUrlPut = _a.sent();
+                        return [2 /*return*/, signedUrlPut];
+                }
+            });
+        });
+    };
+    // 관심 등록 추가
+    EventService.prototype.addLike = function (postId, userId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, event, isLikeExist;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, this.eventModel.addLike(postId, userId)];
+                    case 1:
+                        _a = _b.sent(), event = _a.event, isLikeExist = _a.isLikeExist;
+                        if (!!isLikeExist) return [3 /*break*/, 3];
+                        return [4 /*yield*/, LikeEvents_1.LikeEvents.add(postId, userId)];
+                    case 2:
+                        _b.sent();
+                        _b.label = 3;
+                    case 3: return [2 /*return*/, event];
+                }
+            });
+        });
+    };
+    // 관심 등록 취소(삭제)
+    EventService.prototype.deleteLike = function (postId, userId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, event, isLikeExist;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, this.eventModel.deleteLike(postId, userId)];
+                    case 1:
+                        _a = _b.sent(), event = _a.event, isLikeExist = _a.isLikeExist;
+                        if (!isLikeExist) return [3 /*break*/, 3];
+                        return [4 /*yield*/, LikeEvents_1.LikeEvents.delete(postId, userId)];
+                    case 2:
+                        _b.sent();
+                        _b.label = 3;
+                    case 3: return [2 /*return*/, event];
+                }
+            });
+        });
+    };
+    EventService.prototype.updateClosedAfterEndDate = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.eventModel.updateClosedAfterEndDate()];
+                    case 1:
                         _a.sent();
                         return [2 /*return*/];
                 }

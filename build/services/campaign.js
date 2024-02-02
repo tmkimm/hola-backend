@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -40,11 +51,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CampaignService = void 0;
+var mongoose_1 = require("mongoose");
 var CustomError_1 = __importDefault(require("../CustomError"));
 var CampaignService = /** @class */ (function () {
-    function CampaignService(campaignModel, advertisementModel) {
+    function CampaignService(campaignModel, advertisementModel, advertisementLogModel) {
         this.campaignModel = campaignModel;
         this.advertisementModel = advertisementModel;
+        this.advertisementLogModel = advertisementLogModel;
     }
     // 캠페인 리스트 조회
     CampaignService.prototype.findCampaignList = function (page) {
@@ -124,6 +137,61 @@ var CampaignService = /** @class */ (function () {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.advertisementModel.findAdvertisementInCampaign(campaignId)];
                     case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    // 광고 결과 집계
+    CampaignService.prototype.findCampaignResult = function (campaignId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var campaign, adList, adIdList, aggregate, logAggregate, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.findCampaign(campaignId)];
+                    case 1:
+                        campaign = _a.sent();
+                        return [4 /*yield*/, this.advertisementModel.findAdvertisementInCampaign(campaignId)];
+                    case 2:
+                        adList = _a.sent();
+                        adIdList = adList.map(function (ad) {
+                            return mongoose_1.Types.ObjectId(ad._id);
+                        });
+                        return [4 /*yield*/, this.advertisementLogModel.findADResult(adIdList)];
+                    case 3:
+                        aggregate = _a.sent();
+                        logAggregate = aggregate.map(function (ad) {
+                            return {
+                                _id: ad._id.advertisementId,
+                                logType: ad._id.logType,
+                                count: ad.count,
+                                advertisementType: ad.advertisements.advertisementType,
+                            };
+                        });
+                        result = [];
+                        logAggregate.forEach(function (element) {
+                            var _a, _b;
+                            var index = result.findIndex(function (v) { return (v.advertisementType === element.advertisementType ? true : false); });
+                            if (index === -1) {
+                                result.push((_a = {
+                                        advertisementType: element.advertisementType,
+                                        advertisementId: element._id
+                                    },
+                                    _a[element.logType] = element.count,
+                                    _a));
+                            }
+                            else {
+                                result[index] = __assign(__assign({}, result[index]), (_b = {}, _b[element.logType] = element.count, _b));
+                            }
+                        });
+                        // 전환비용, 클릭률 세팅
+                        result = result.map(function (v) {
+                            if (!v.reach || !v.impression)
+                                return v;
+                            var reachRate = ((v.reach / v.impression) * 100).toFixed(2) + '%';
+                            var reachPrice = (campaign.conversionCost * v.reach).toFixed(0);
+                            return __assign(__assign({}, v), { reachRate: reachRate, reachPrice: reachPrice });
+                        });
+                        return [2 /*return*/, result];
                 }
             });
         });
