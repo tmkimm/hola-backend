@@ -180,6 +180,9 @@ export class EventService {
     // TODO 공모전 권한 관리
     // if (id.toString() !== tokenEventId.toString())
     //   throw new CustomError('NotAuthenticatedError', 401, 'Event does not match');
+    if (event.imageUrl) {
+      event.smallImageUrl = event.imageUrl.replace('event-original', 'event-thumbnail'); // 이미지 등록 시 Lambda에서 thumbnail 이미지 생성
+    }
     const eventRecord = await this.eventModel.modifyEvent(id, event);
     return eventRecord;
   }
