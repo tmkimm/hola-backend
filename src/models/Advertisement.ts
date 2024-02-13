@@ -184,7 +184,7 @@ advertisementSchema.statics.findActiveADListInEvent = async function () {
 // 진행중인 배너 광고 조회
 advertisementSchema.statics.findActiveBanner = async function (bannerType: 'banner' | 'eventBanner') {
   const result = await this.find({ advertisementType: bannerType, advertisementStatus: 'active' })
-    .sort('+bannerSequence')
+    .sort({ bannerSequence: 1 })
     .select('link linkOpenType imageUrl smallImageUrl mainCopy subCopy bannerSequence startDate endDate');
   return result;
 };
